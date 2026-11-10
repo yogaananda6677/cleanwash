@@ -15,12 +15,17 @@ use App\Models\Pelanggan;
 use App\Models\Pengantaran;
 use App\Models\Transaksi;
 use App\Models\Voucher;
+use App\Services\ProduksiService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
+    public function __construct(
+        private readonly ProduksiService $produksiService
+    ) {}
+
     public function index(Request $request): Response
     {
         $user = $request->user();
@@ -33,7 +38,7 @@ class DashboardController extends Controller
                 'total_pelanggan' => Pelanggan::count(),
                 'total_layanan_aktif' => JenisLayanan::where('is_active', true)->count(),
                 'total_voucher_tersedia' => Voucher::where('status_penggunaan', VoucherStatus::TERSEDIA)
-                    ->whereDate('masa_berlaku', '>=', now()->toDateString())
+                    ->whereDate('masa_berlaku', '>=', now('Asia/Jakarta')->toDateString())
                     ->count(),
                 'transaksi_aktif' => Transaksi::where('status_transaksi', StatusTransaksi::AKTIF)->count(),
                 'transaksi_belum_lunas' => Transaksi::whereIn('status_pembayaran', [
@@ -41,6 +46,8 @@ class DashboardController extends Controller
                     StatusPembayaran::DP,
                     StatusPembayaran::BELUM_LUNAS,
                 ])->where('status_transaksi', '!=', StatusTransaksi::DIBATALKAN)->count(),
+                'insiden_menunggu_konfirmasi' => LaporanKerusakanKehilangan::whereNull('id_petugas')->count(),
+                'transaksi_selesai_siap_ambil' => Transaksi::where('status_transaksi', StatusTransaksi::SELESAI)->count(),
             ],
             UserRole::PEGAWAI => [
                 'role' => UserRole::PEGAWAI->value,
@@ -48,6 +55,7 @@ class DashboardController extends Controller
                 'laporan_insiden_saya' => $actorId !== null
                     ? LaporanKerusakanKehilangan::where('id_pegawai_pelapor', $actorId)->count()
                     : 0,
+                ...$this->produksiService->getPegawaiDashboardMetrics(),
             ],
             UserRole::PENGANTAR => [
                 'role' => UserRole::PENGANTAR->value,

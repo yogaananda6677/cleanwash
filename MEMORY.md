@@ -12,10 +12,10 @@ Dokumen ini adalah memori status arsitektur proyek **CleanWash** untuk manusia d
 | --- | --- |
 | **Product** | CleanWash — Sistem Informasi Manajemen Operasional Laundry |
 | **SRS Reference** | [UTS.pdf](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/Outputtts/UTS.pdf) & [2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx) |
-| **Current Phase** | Phase 2 — Operasional Produksi, Penimbangan Ulang, Penyesuaian & Kompensasi Insiden |
-| **Current Status** | `IN_PROGRESS` (`P2-05` selesai & siap review; lanjut `P2-06` oleh `fullstack-developer` + `product-manager`) |
+| **Current Phase** | Phase 3 — Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening |
+| **Current Status** | `NOT_STARTED` (Phase 2 Resmi `DONE` per PM Gate; siap memulai `P3-01`) |
 | **Last Updated** | 2026-11-10 |
-| **Updated By** | Frontend Developer (`cw-frontend-dev`) — Task `P2-05` |
+| **Updated By** | Product Manager & Primary Agent (`Phase 2 Closing Gate Sign-Off`) |
 
 ---
 
@@ -65,8 +65,8 @@ Status yang diizinkan: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 | --- | --- | --- | --- | --- | --- |
 | **Phase 0 (Docs)** | PRD, AGENTS.md, 4 Subagent, Napkin & Context Ledger | `DONE` | 2026-11-10 | 2026-11-10 | [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#001` |
 | **Phase 1** | Fondasi Sistem, Master Data & Penerimaan Transaksi (DP & Voucher) | `DONE` | 2026-11-10 | 2026-11-10 | [PHASE_1_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_1_CONTRACTS.md), [PHASE_1_CLOSING_EVIDENCE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_1_CLOSING_EVIDENCE.md), & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#002`–`#009` |
-| **Phase 2** | Operasional Produksi, Timbang Ulang, Ubah/Batal & Kompensasi Insiden | `IN_PROGRESS` | 2026-11-10 | — | [PHASE_2_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_2_CONTRACTS.md) & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#010`–`#013` |
-| **Phase 3** | Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening | `NOT_STARTED` | — | — | Menunggu Phase 2 `DONE` |
+| **Phase 2** | Operasional Produksi, Timbang Ulang, Ubah/Batal & Kompensasi Insiden | `DONE` | 2026-11-10 | 2026-11-10 | [PHASE_2_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_2_CONTRACTS.md), [PHASE_2_CLOSING_EVIDENCE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_2_CLOSING_EVIDENCE.md), & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#010`–`#016` |
+| **Phase 3** | Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening | `NOT_STARTED` | — | — | Siap memulai `P3-01` (Phase 2 resmi `DONE`) |
 
 ---
 
@@ -87,7 +87,7 @@ Status yang diizinkan: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - [x] `P2-03` (`backend-developer`): `ubahLayanan()` (`KK-02`) dan `batalkanTransaksi()` (`KK-08`) + unit/feature tests.
 - [x] `P2-04` (`backend-developer`): `KompensasiService` untuk `LaporanKerusakanKehilangan` per `DetailPakaian` (`KK-04`, `KK-05`) + tests.
 - [x] `P2-05` (`frontend-developer`): UI Antrean Produksi `Pegawai` (progres tahapan dinamis, timbang ulang, lapor insiden) & UI Ubah/Batal di sisi `Petugas`.
-- [ ] `P2-06` (`fullstack-developer` + `product-manager`): Integrasi notifikasi/indikator lintas aktor, E2E tests Phase 2, audit 6 Gerbang, & Phase 2 Sign-off.
+- [x] `P2-06` (`fullstack-developer` + `product-manager`): Integrasi notifikasi/indikator lintas aktor, E2E tests Phase 2, audit 6 Gerbang, & Phase 2 Sign-off ([PHASE_2_CLOSING_EVIDENCE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_2_CLOSING_EVIDENCE.md)).
 
 ### Phase 3 — Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening
 - [ ] `P3-01` (`product-manager`): Matriks UAT lengkap 14 Use Case & 9 Kondisi Khusus + spesifikasi Dashboard/Audit view.

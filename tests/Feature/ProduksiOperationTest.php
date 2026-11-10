@@ -253,7 +253,7 @@ class ProduksiOperationTest extends TestCase
         $response
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('Produksi/Index', shouldExist: false)
+                ->component('Produksi/Index')
                 ->where('filters.search', '')
                 ->where('filters.tahap_status', '')
                 ->where('filters.status_transaksi', 'AKTIF')
@@ -271,7 +271,7 @@ class ProduksiOperationTest extends TestCase
             ->get('/produksi?search=Andi&tahap_status=DICUCI')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('Produksi/Index', shouldExist: false)
+                ->component('Produksi/Index')
                 ->where('filters.search', 'Andi')
                 ->where('filters.tahap_status', 'DICUCI')
                 ->where('filters.status_transaksi', 'AKTIF')

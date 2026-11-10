@@ -1,10 +1,13 @@
 import { Head, Link } from '@inertiajs/react';
 import {
+    JenisInsidenBadge,
     PayLaterBadge,
     PaymentStatusBadge,
     PaymentTypeBadge,
     ProductionStageBadge,
     SpeedTierBadge,
+    StatusBadge,
+    StatusKonfirmasiBadge,
     TransactionStatusBadge,
 } from '@/Components/StatusBadge';
 import {
@@ -29,6 +32,7 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
         transaksi.riwayat_status_produksi.map((item) => item.tahap_status),
     );
 
+    const isDibatalkan = transaksi.status_transaksi === 'DIBATALKAN';
     const voucherApplied =
         transaksi.voucher !== null ||
         parseDecimalToCents(transaksi.nilai_voucher_snapshot) > 0;
@@ -38,6 +42,12 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
         parseDecimalToCents(transaksi.biaya_pembatalan) > 0;
     const hasSisaTagihan =
         parseDecimalToCents(transaksi.sisa_tagihan) > 0;
+    const hasKelebihanBayarTunai =
+        parseDecimalToCents(transaksi.kelebihan_bayar_tunai) > 0;
+    const hasKelebihanGantiRugi =
+        parseDecimalToCents(transaksi.total_kelebihan_ganti_rugi) > 0;
+    const hasTotalPengembalian =
+        parseDecimalToCents(transaksi.total_pengembalian_pelanggan) > 0;
 
     return (
         <div className="min-h-screen bg-slate-100 px-4 py-6 text-slate-900 sm:px-6 print:min-h-0 print:bg-white print:p-0">
@@ -128,6 +138,31 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                             </div>
                         </div>
                     </header>
+
+                    {/* Ringkasan Pembatalan Transaksi (KK-08) */}
+                    {isDibatalkan && (
+                        <section className="mt-5 rounded-xl border border-rose-300 bg-rose-50/70 px-4 py-3 text-xs">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <h2 className="font-bold uppercase tracking-wider text-rose-900">
+                                        Status Pembatalan Transaksi
+                                    </h2>
+                                    <TransactionStatusBadge
+                                        status={transaksi.status_transaksi}
+                                    />
+                                </div>
+                                <span className="font-bold tabular-nums text-rose-900">
+                                    Biaya Pembatalan:{' '}
+                                    {formatRupiah(transaksi.biaya_pembatalan)}
+                                </span>
+                            </div>
+                            <p className="mt-1.5 text-rose-950">
+                                {hasBiayaPembatalan
+                                    ? `Transaksi dibatalkan setelah proses pencucian dimulai (KK-08) dengan biaya proses sebesar ${formatRupiah(transaksi.biaya_pembatalan)}.`
+                                    : 'Transaksi dibatalkan pada tahap DITERIMA sebelum proses pencucian dimulai (bebas biaya pembatalan Rp 0).'}
+                            </p>
+                        </section>
+                    )}
 
                     {/* Identitas Pelanggan & Metadata Penerimaan */}
                     <section className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 print:grid-cols-2">
@@ -223,6 +258,15 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                                         { withTime: true },
                                                     )}
                                                 </span>
+                                                {latestStage.pegawai && (
+                                                    <span className="text-[10px] font-medium text-slate-600">
+                                                        Pelaksana:{' '}
+                                                        {
+                                                            latestStage.pegawai
+                                                                .nama_pegawai
+                                                        }
+                                                    </span>
+                                                )}
                                             </div>
                                         ) : (
                                             <span className="text-slate-500">
@@ -391,6 +435,190 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                         </table>
                     </section>
 
+                    {/* Riwayat Status Produksi + Pelaksana Pegawai */}
+                    {transaksi.riwayat_status_produksi.length > 0 && (
+                        <section className="mt-5 overflow-hidden rounded-xl border border-slate-200">
+                            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2.5">
+                                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                                    Riwayat Status Produksi
+                                </h2>
+                                <span className="text-[11px] font-medium text-slate-500">
+                                    {transaksi.riwayat_status_produksi.length}{' '}
+                                    tahap tercatat
+                                </span>
+                            </div>
+                            <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
+                                <thead className="bg-white text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                                    <tr>
+                                        <th className="px-4 py-2">Tahap</th>
+                                        <th className="px-4 py-2">
+                                            Waktu Update
+                                        </th>
+                                        <th className="px-4 py-2">
+                                            Pegawai Pelaksana
+                                        </th>
+                                        <th className="px-4 py-2">Catatan</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {transaksi.riwayat_status_produksi.map(
+                                        (riwayat) => (
+                                            <tr
+                                                key={riwayat.id_status_produksi}
+                                            >
+                                                <td className="whitespace-nowrap px-4 py-2">
+                                                    <ProductionStageBadge
+                                                        stage={
+                                                            riwayat.tahap_status
+                                                        }
+                                                    />
+                                                </td>
+                                                <td className="whitespace-nowrap px-4 py-2 text-slate-700">
+                                                    {formatTanggal(
+                                                        riwayat.waktu_update,
+                                                        { withTime: true },
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-2 font-medium text-slate-800">
+                                                    {riwayat.pegawai
+                                                        ? riwayat.pegawai
+                                                              .nama_pegawai
+                                                        : riwayat.id_pegawai !==
+                                                            null
+                                                          ? `Pegawai #${riwayat.id_pegawai}`
+                                                          : 'Kasir (Penerimaan)'}
+                                                </td>
+                                                <td className="px-4 py-2 text-slate-600">
+                                                    {riwayat.catatan ?? '—'}
+                                                </td>
+                                            </tr>
+                                        ),
+                                    )}
+                                </tbody>
+                            </table>
+                        </section>
+                    )}
+
+                    {/* Laporan Insiden & Kompensasi (KK-04, KK-05) */}
+                    {transaksi.laporan_insiden.length > 0 && (
+                        <section className="mt-5 overflow-hidden rounded-xl border border-amber-200">
+                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-amber-200 bg-amber-50/70 px-4 py-2.5">
+                                <h2 className="text-xs font-bold uppercase tracking-wider text-amber-950">
+                                    Rincian Laporan Insiden &amp; Kompensasi (
+                                    {transaksi.laporan_insiden.length})
+                                </h2>
+                                {transaksi.insiden_pending_count > 0 && (
+                                    <StatusBadge tone="amber">
+                                        {transaksi.insiden_pending_count}{' '}
+                                        Menunggu Konfirmasi
+                                    </StatusBadge>
+                                )}
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
+                                    <thead className="bg-white text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                                        <tr>
+                                            <th className="px-4 py-2">
+                                                Jenis Insiden
+                                            </th>
+                                            <th className="px-4 py-2">
+                                                Item Pakaian
+                                            </th>
+                                            <th className="px-4 py-2">
+                                                Keterangan
+                                            </th>
+                                            <th className="px-4 py-2">
+                                                Status Konfirmasi
+                                            </th>
+                                            <th className="px-4 py-2 text-right">
+                                                Nilai Kompensasi
+                                            </th>
+                                            <th className="px-4 py-2 text-right">
+                                                Kelebihan Ganti Rugi
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                        {transaksi.laporan_insiden.map(
+                                            (laporan) => {
+                                                const isPending =
+                                                    laporan.status_konfirmasi ===
+                                                    'MENUNGGU_KONFIRMASI';
+                                                return (
+                                                    <tr
+                                                        key={
+                                                            laporan.id_laporan
+                                                        }
+                                                    >
+                                                        <td className="whitespace-nowrap px-4 py-2.5">
+                                                            <JenisInsidenBadge
+                                                                jenis={
+                                                                    laporan.jenis_insiden
+                                                                }
+                                                            />
+                                                        </td>
+                                                        <td className="px-4 py-2.5 font-semibold text-slate-900">
+                                                            {
+                                                                laporan
+                                                                    .detail_pakaian
+                                                                    .jenis_pakaian
+                                                            }{' '}
+                                                            (
+                                                            {
+                                                                laporan
+                                                                    .detail_pakaian
+                                                                    .jumlah_potong
+                                                            }{' '}
+                                                            pcs)
+                                                        </td>
+                                                        <td className="px-4 py-2.5 text-slate-700">
+                                                            <p>
+                                                                {
+                                                                    laporan.keterangan
+                                                                }
+                                                            </p>
+                                                            {(laporan.pegawai_pelapor ||
+                                                                laporan.petugas) && (
+                                                                <p className="mt-0.5 text-[10px] text-slate-500">
+                                                                    Pelapor:{' '}
+                                                                    {laporan
+                                                                        .pegawai_pelapor
+                                                                        ?.nama_pegawai ??
+                                                                        'Petugas'}
+                                                                    {laporan.petugas &&
+                                                                        ` • Konfirmator: ${laporan.petugas.nama_petugas}`}
+                                                                </p>
+                                                            )}
+                                                        </td>
+                                                        <td className="whitespace-nowrap px-4 py-2.5">
+                                                            <StatusKonfirmasiBadge
+                                                                status={
+                                                                    laporan.status_konfirmasi
+                                                                }
+                                                            />
+                                                        </td>
+                                                        <td className="whitespace-nowrap px-4 py-2.5 text-right font-semibold tabular-nums text-slate-900">
+                                                            {isPending
+                                                                ? `Menunggu (Est. ${formatRupiah(laporan.estimasi_kompensasi)})`
+                                                                : formatRupiah(
+                                                                      laporan.nilai_kompensasi,
+                                                                  )}
+                                                        </td>
+                                                        <td className="whitespace-nowrap px-4 py-2.5 text-right font-semibold tabular-nums text-amber-800">
+                                                            {formatRupiah(
+                                                                laporan.kelebihan_ganti_rugi,
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            },
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    )}
+
                     {/* Catatan Khusus (bila ada) */}
                     {transaksi.catatan_khusus !== null &&
                         transaksi.catatan_khusus.trim() !== '' && (
@@ -511,7 +739,7 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                 {hasKompensasi && (
                                     <div className="flex justify-between gap-3">
                                         <dt className="text-slate-600">
-                                            Potongan Kompensasi
+                                            Total Kompensasi
                                         </dt>
                                         <dd className="font-semibold tabular-nums text-emerald-700">
                                             -
@@ -522,13 +750,12 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                     </div>
                                 )}
 
-                                {hasBiayaPembatalan && (
+                                {(hasBiayaPembatalan || isDibatalkan) && (
                                     <div className="flex justify-between gap-3">
                                         <dt className="text-slate-600">
                                             Biaya Pembatalan
                                         </dt>
                                         <dd className="font-semibold tabular-nums text-rose-700">
-                                            +
                                             {formatRupiah(
                                                 transaksi.biaya_pembatalan,
                                             )}
@@ -568,6 +795,47 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                         {formatRupiah(transaksi.sisa_tagihan)}
                                     </dd>
                                 </div>
+
+                                {(hasKelebihanBayarTunai ||
+                                    hasKelebihanGantiRugi ||
+                                    hasTotalPengembalian) && (
+                                    <div className="mt-2 space-y-1.5 rounded-lg border border-emerald-200 bg-emerald-50/70 p-2.5 text-xs">
+                                        {hasKelebihanBayarTunai && (
+                                            <div className="flex justify-between gap-3 text-emerald-900">
+                                                <dt>Kelebihan Bayar Tunai</dt>
+                                                <dd className="font-semibold tabular-nums">
+                                                    {formatRupiah(
+                                                        transaksi.kelebihan_bayar_tunai,
+                                                    )}
+                                                </dd>
+                                            </div>
+                                        )}
+                                        {hasKelebihanGantiRugi && (
+                                            <div className="flex justify-between gap-3 text-emerald-900">
+                                                <dt>
+                                                    Total Kelebihan Ganti Rugi
+                                                </dt>
+                                                <dd className="font-semibold tabular-nums">
+                                                    {formatRupiah(
+                                                        transaksi.total_kelebihan_ganti_rugi,
+                                                    )}
+                                                </dd>
+                                            </div>
+                                        )}
+                                        {hasTotalPengembalian && (
+                                            <div className="flex justify-between gap-3 border-t border-emerald-200 pt-1.5 font-bold text-emerald-950">
+                                                <dt>
+                                                    Total Pengembalian Pelanggan
+                                                </dt>
+                                                <dd className="tabular-nums">
+                                                    {formatRupiah(
+                                                        transaksi.total_pengembalian_pelanggan,
+                                                    )}
+                                                </dd>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </dl>
                         </div>
                     </section>

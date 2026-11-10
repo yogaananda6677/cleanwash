@@ -48,16 +48,16 @@ export interface DashboardPetugasSummary {
     total_voucher_tersedia: number;
     transaksi_aktif: number;
     transaksi_belum_lunas: number;
-    insiden_menunggu_konfirmasi?: number;
-    transaksi_selesai_siap_ambil?: number;
+    insiden_menunggu_konfirmasi: number;
+    transaksi_selesai_siap_ambil: number;
 }
 
 export interface DashboardPegawaiSummary {
     role: 'PEGAWAI';
     antrean_aktif: number;
     laporan_insiden_saya: number;
-    perlu_timbang_ulang?: number;
-    siap_proses_berikutnya?: number;
+    perlu_timbang_ulang: number;
+    siap_proses_berikutnya: number;
 }
 
 export interface DashboardPengantarSummary {
@@ -321,7 +321,7 @@ export interface TransaksiIndexProps extends SharedPageProps {
     filters: {
         search: string;
         status_pembayaran?: StatusPembayaran | '';
-        status_transaksi?: StatusTransaksi | '';
+        status_transaksi: StatusTransaksi | '';
     };
 }
 

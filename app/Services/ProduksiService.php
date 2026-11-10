@@ -22,6 +22,8 @@ use InvalidArgumentException;
 
 class ProduksiService
 {
+    private const LATEST_STAGE_SUBQUERY = '(SELECT r.tahap_status FROM riwayat_status_produksi r WHERE r.nomor_nota = transaksi.nomor_nota ORDER BY r.waktu_update DESC, r.id_status_produksi DESC LIMIT 1)';
+
     public function __construct(
         private readonly TransaksiService $transaksiService,
         private readonly PembayaranService $pembayaranService
@@ -58,7 +60,7 @@ class ProduksiService
             })
             ->when($validTahap !== '', function ($query) use ($validTahap): void {
                 $query->whereRaw(
-                    '(SELECT r.tahap_status FROM riwayat_status_produksi r WHERE r.nomor_nota = transaksi.nomor_nota ORDER BY r.waktu_update DESC, r.id_status_produksi DESC LIMIT 1) = ?',
+                    self::LATEST_STAGE_SUBQUERY.' = ?',
                     [$validTahap]
                 );
             })
@@ -84,7 +86,7 @@ class ProduksiService
             : $this->resolveQueueStatuses($statusTransaksi);
 
         $snapshotQuery = DB::table('transaksi')
-            ->selectRaw('(SELECT r.tahap_status FROM riwayat_status_produksi r WHERE r.nomor_nota = transaksi.nomor_nota ORDER BY r.waktu_update DESC, r.id_status_produksi DESC LIMIT 1) as latest_stage')
+            ->selectRaw(self::LATEST_STAGE_SUBQUERY.' as latest_stage')
             ->whereIn('status_transaksi', $allowedStatuses);
 
         $rows = DB::query()
@@ -100,6 +102,60 @@ class ProduksiService
         }
 
         return $counts;
+    }
+
+    /**
+     * Count active production metrics for the Pegawai dashboard in a single ONLY_FULL_GROUP_BY-safe query.
+     *
+     * @return array{perlu_timbang_ulang: int, siap_proses_berikutnya: int}
+     */
+    public function getPegawaiDashboardMetrics(): array
+    {
+        $processableStages = [
+            TahapProduksi::DITERIMA->value,
+            TahapProduksi::DICUCI->value,
+            TahapProduksi::DIKERINGKAN->value,
+            TahapProduksi::DISETRIKA->value,
+        ];
+
+        $snapshotQuery = DB::table('transaksi')
+            ->join('jenis_layanan', 'jenis_layanan.id_layanan', '=', 'transaksi.id_layanan')
+            ->select([
+                'jenis_layanan.metode_hitung',
+                DB::raw(self::LATEST_STAGE_SUBQUERY.' as latest_stage'),
+            ])
+            ->where('transaksi.status_transaksi', StatusTransaksi::AKTIF->value);
+
+        $rows = DB::query()
+            ->fromSub($snapshotQuery, 'active_production_snapshot')
+            ->select([
+                'metode_hitung',
+                'latest_stage',
+                DB::raw('COUNT(*) as aggregate_count'),
+            ])
+            ->whereIn('latest_stage', $processableStages)
+            ->groupBy(['metode_hitung', 'latest_stage'])
+            ->get();
+
+        $perluTimbangUlang = 0;
+        $siapProsesBerikutnya = 0;
+
+        foreach ($rows as $row) {
+            $count = (int) $row->aggregate_count;
+            $siapProsesBerikutnya += $count;
+
+            if (
+                $row->metode_hitung === MetodeHitung::BERAT->value
+                && $row->latest_stage === TahapProduksi::DITERIMA->value
+            ) {
+                $perluTimbangUlang += $count;
+            }
+        }
+
+        return [
+            'perlu_timbang_ulang' => $perluTimbangUlang,
+            'siap_proses_berikutnya' => $siapProsesBerikutnya,
+        ];
     }
 
     /**

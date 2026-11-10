@@ -297,8 +297,7 @@ class InsidenTest extends TestCase
         $response
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                // Temporary shouldExist: false until P2-05 creates Insiden/Index.tsx
-                ->component('Insiden/Index', shouldExist: false)
+                ->component('Insiden/Index')
                 ->where('filters.search', '')
                 ->where('filters.jenis_insiden', '')
                 ->where('filters.status_konfirmasi', '')
@@ -319,8 +318,7 @@ class InsidenTest extends TestCase
             ->get('/insiden?search='.urlencode('100%').'&jenis_insiden=HILANG&status_konfirmasi=MENUNGGU_KONFIRMASI')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                // Temporary shouldExist: false until P2-05 creates Insiden/Index.tsx
-                ->component('Insiden/Index', shouldExist: false)
+                ->component('Insiden/Index')
                 ->where('pendingCount', 11)
                 ->has('laporan.data', 1)
                 ->where('laporan.data.0.detail_pakaian.jenis_pakaian', 'Jaket Kulit')
@@ -333,8 +331,7 @@ class InsidenTest extends TestCase
             ->get('/insiden?search=Kaos&status_konfirmasi=TERKONFIRMASI')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                // Temporary shouldExist: false until P2-05 creates Insiden/Index.tsx
-                ->component('Insiden/Index', shouldExist: false)
+                ->component('Insiden/Index')
                 ->has('laporan.data', 1)
                 ->where('laporan.data.0.detail_pakaian.jenis_pakaian', 'Kaos')
                 ->where('laporan.data.0.nilai_kompensasi', '15000.00')

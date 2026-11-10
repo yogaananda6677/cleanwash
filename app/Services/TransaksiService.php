@@ -40,11 +40,20 @@ class TransaksiService
     /**
      * Paginate transactions formatted to TransaksiDetail with eager-loaded relations (no N+1).
      */
-    public function paginate(string $search = '', string $statusPembayaran = '', int $perPage = 10): LengthAwarePaginator
-    {
+    public function paginate(
+        string $search = '',
+        string $statusPembayaran = '',
+        string $statusTransaksi = '',
+        int $perPage = 10
+    ): LengthAwarePaginator {
         $trimmedSearch = trim($search);
         $normalizedStatus = strtoupper(trim($statusPembayaran));
         $validStatus = in_array($normalizedStatus, StatusPembayaran::values(), true) ? $normalizedStatus : '';
+
+        $normalizedStatusTransaksi = strtoupper(trim($statusTransaksi));
+        $validStatusTransaksi = in_array($normalizedStatusTransaksi, StatusTransaksi::values(), true)
+            ? $normalizedStatusTransaksi
+            : '';
 
         $paginator = Transaksi::query()
             ->with($this->detailRelations())
@@ -61,6 +70,9 @@ class TransaksiService
             })
             ->when($validStatus !== '', function ($query) use ($validStatus): void {
                 $query->where('status_pembayaran', $validStatus);
+            })
+            ->when($validStatusTransaksi !== '', function ($query) use ($validStatusTransaksi): void {
+                $query->where('status_transaksi', $validStatusTransaksi);
             })
             ->orderByDesc('tanggal_penerimaan')
             ->orderByDesc('nomor_nota')

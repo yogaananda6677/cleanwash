@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\StatusPembayaran;
+use App\Enums\StatusTransaksi;
 use App\Http\Requests\Transaksi\StoreTransaksiRequest;
 use App\Models\Transaksi;
 use App\Services\TransaksiService;
@@ -25,12 +26,17 @@ class TransaksiController extends Controller
         $search = trim((string) $request->query('search', ''));
         $rawStatus = strtoupper(trim((string) $request->query('status_pembayaran', '')));
         $statusPembayaran = in_array($rawStatus, StatusPembayaran::values(), true) ? $rawStatus : '';
+        $rawStatusTransaksi = strtoupper(trim((string) $request->query('status_transaksi', '')));
+        $statusTransaksi = in_array($rawStatusTransaksi, StatusTransaksi::values(), true)
+            ? $rawStatusTransaksi
+            : '';
 
         return Inertia::render('Transaksi/Index', [
-            'transaksi' => $this->transaksiService->paginate($search, $statusPembayaran),
+            'transaksi' => $this->transaksiService->paginate($search, $statusPembayaran, $statusTransaksi),
             'filters' => [
                 'search' => $search,
                 'status_pembayaran' => $statusPembayaran,
+                'status_transaksi' => $statusTransaksi,
             ],
         ]);
     }

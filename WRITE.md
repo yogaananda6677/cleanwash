@@ -452,4 +452,63 @@
   1. Lakukan cross-agent review branch `feature/p2-05-frontend-ui` dan merge ke `main`.
   2. Lanjutkan **`P2-06`** (`fullstack-developer` + `product-manager`) untuk menghapus `shouldExist: false` di `ProduksiOperationTest.php` & `InsidenTest.php`, me-wire KPI Phase 2 di `DashboardController.php` + `Dashboard/Index.tsx`, memperbarui `Transaksi/Index.tsx` & `Transaksi/Nota.tsx`, menyusun `Phase2EndToEndTest.php` tanpa `withoutVite()`, serta mengeksekusi **Phase 2 Closing Gate (`AC-P2-01` s.d. `AC-P2-12`)**.
 
+### [#015] 2026-11-10 17:35 — Fullstack Developer (`P2-06`) — Phase 2 (`P2-06`)
+- **Status:** `READY_FOR_REVIEW`
+- **Ringkasan Kegiatan:**
+  - Melakukan Context Sync (`PRD.md`, `AGENTS.md`, `MEMORY.md`, `WRITE.md` `#012`–`#014`, `.claude/napkin.md`, `napkin/PR_REVIEW_LIFECYCLE.md`, `docs/phases/PHASE_1_CONTRACTS.md`, dan `docs/phases/PHASE_2_CONTRACTS.md` §1.2, §3.3, `AC-P2-01`..`AC-P2-12`), membuat branch `feature/p2-06-wiring-gate` dari `main` (`d37e8fd`), serta menginspeksi seluruh controller, service, page TSX, types, dan feature tests terkait.
+  - **Cross-Layer Wiring Backend:**
+    - Memperbarui `app/Services/ProduksiService.php`: mengekstrak konstanta `LATEST_STAGE_SUBQUERY` untuk dipakai bersama pada `paginateQueue()`, `getStageCounts()`, dan helper baru `getPegawaiDashboardMetrics()` (single query `ONLY_FULL_GROUP_BY`-safe di MySQL 8.4 untuk `perlu_timbang_ulang` dan `siap_proses_berikutnya`).
+    - Memperbarui `app/Http/Controllers/DashboardController.php`: menyeragamkan pemeriksaan masa berlaku voucher ke `now('Asia/Jakarta')->toDateString()` (baris 36) serta mengisi KPI Phase 2 `PETUGAS` (`insiden_menunggu_konfirmasi`, `transaksi_selesai_siap_ambil`) dan `PEGAWAI` (`perlu_timbang_ulang`, `siap_proses_berikutnya`).
+    - Memperbarui `app/Services/TransaksiService.php` (`paginate()`) dan `app/Http/Controllers/TransaksiController.php` (`index()`): mendukung filter opsional `$statusTransaksi` (`AKTIF`, `SELESAI`, `DIAMBIL`, `DIBATALKAN`) dan mengirim `filters.status_transaksi`.
+  - **Cross-Layer Wiring Frontend (`types` + UI):**
+    - Memperbarui `resources/js/types/index.ts`: menjadikan `insiden_menunggu_konfirmasi`, `transaksi_selesai_siap_ambil`, `perlu_timbang_ulang`, `siap_proses_berikutnya` required pada `DashboardPetugasSummary` & `DashboardPegawaiSummary`, serta `status_transaksi` required pada `TransaksiIndexProps.filters`.
+    - Memperbarui `resources/js/Pages/Dashboard/Index.tsx`: menampilkan alert/badge kuning ke `/insiden?status_konfirmasi=MENUNGGU_KONFIRMASI` saat `insiden_menunggu_konfirmasi > 0`, KPI `transaksi_selesai_siap_ambil`, & shortcut `/insiden` + `/transaksi` untuk `PETUGAS`; serta mengganti banner *Roadmap Phase 2* `PEGAWAI` dengan KPI `perlu_timbang_ulang` (`/produksi?tahap_status=DITERIMA`), `siap_proses_berikutnya` (`/produksi`), dan kartu aksi cepat `Antrean Produksi` + `Lapor Insiden`.
+    - Memperbarui `resources/js/Pages/Transaksi/Index.tsx`: menambahkan dropdown filter `status_transaksi` (`Semua Status`, `AKTIF`, `SELESAI`, `DIAMBIL`, `DIBATALKAN`), sinkronisasi state filter via `useEffect`, badge `tahap_produksi_terakhir`, badge peringatan saat `insiden_pending_count > 0`, serta indikator pembatalan/kompensasi/pengembalian.
+    - Memperbarui `resources/js/Pages/Transaksi/Nota.tsx`: menambahkan nama `Pegawai` pelaksana pada `Tahap Produksi Terkini` & tabel `Riwayat Status Produksi`, ringkasan status pembatalan & `biaya_pembatalan` saat `status_transaksi === 'DIBATALKAN'`, tabel rincian `laporan_insiden` (jenis insiden, item pakaian, keterangan, status konfirmasi, nilai kompensasi, kelebihan ganti rugi), dan rincian `total_kompensasi`, `kelebihan_bayar_tunai`, `total_kelebihan_ganti_rugi`, serta `total_pengembalian_pelanggan` dalam `Ringkasan Finansial` bila `> 0`.
+  - **Cleanup & Phase 2 E2E Tests:**
+    - Menghapus seluruh `shouldExist: false` (beserta komentar sementara) di `tests/Feature/ProduksiOperationTest.php` dan `tests/Feature/InsidenTest.php` sehingga `config('inertia.testing.ensure_pages_exist') === true` aktif di semua test suite.
+    - Membuat `tests/Feature/Phase2EndToEndTest.php` **tanpa** `$this->withoutVite()` yang memverifikasi `public/build/manifest.json` nyata dan seluruh `AC-P2-01` s.d. `AC-P2-12` melalui 3 skenario penuh (`KK-01`, `KK-02`, `KK-04`, `KK-05`, `KK-08`, `KK-09`, `perlu_setrika = false`, `PEGAWAI -> PETUGAS` kompensasi + `kelebihan_ganti_rugi`, pelepasan atomik & pakai ulang voucher, RBAC `PENGANTAR` `403`, filter `status_transaksi`, & batas tanggal WIB `Asia/Jakarta` di `DashboardController`).
+- **File Dibuat / Diubah:**
+  - `app/Services/ProduksiService.php` — Ekstraksi `LATEST_STAGE_SUBQUERY` & helper `getPegawaiDashboardMetrics()`
+  - `app/Http/Controllers/DashboardController.php` — Tanggal `Asia/Jakarta` & pengisian KPI Phase 2 `PETUGAS`/`PEGAWAI`
+  - `app/Services/TransaksiService.php`, `app/Http/Controllers/TransaksiController.php` — Filter opsional `status_transaksi` di `/transaksi`
+  - `resources/js/types/index.ts` — Field KPI Phase 2 & `TransaksiIndexProps.filters.status_transaksi` wajib (strict)
+  - `resources/js/Pages/Dashboard/Index.tsx` — KPI lintas aktor, alert kuning insiden pending, & quick action `PEGAWAI`/`PETUGAS`
+  - `resources/js/Pages/Transaksi/Index.tsx` — Dropdown filter `status_transaksi`, badge `tahap_produksi_terakhir`, `insiden_pending_count`, & indikator batal/kompensasi
+  - `resources/js/Pages/Transaksi/Nota.tsx` — Nama pelaksana `RiwayatStatusProduksi`, ringkasan batal, tabel `laporan_insiden`, & rincian pengembalian finansial
+  - `tests/Feature/ProduksiOperationTest.php`, `tests/Feature/InsidenTest.php` — Cleanup seluruh `shouldExist: false`
+  - `tests/Feature/Phase2EndToEndTest.php` — E2E integration test Phase 2 penuh tanpa `$this->withoutVite()`
+  - `MEMORY.md`, `WRITE.md` — Update snapshot kesiapan PM Gate (tanpa mencentang `P2-06` sebelum sign-off PM) & Entry `#015`
+- **Verifikasi / Bukti Uji:**
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` (`exit code 0`)
+  - `npx tsc --noEmit` -> `0 errors` (`strict: true`) (`exit code 0`)
+  - `npm run build` -> Vite production build (`674 modules transformed`, `public/build/manifest.json`, `built in 2.13s`) (`exit code 0`)
+  - `php artisan test` -> `84 passed (2722 assertions)` pada MySQL 8.4 port `3307` (`cleanwash_testing`), termasuk `Phase1EndToEndTest` & `Phase2EndToEndTest` tanpa `withoutVite()` (`exit code 0`)
+  - `php artisan migrate --no-interaction && php artisan migrate:rollback --no-interaction && php artisan migrate --seed --no-interaction` -> 18 migrasi rollback & re-migrate + `CleanWashSeeder` bersih (`exit code 0`)
+  - `php artisan route:list --except-vendor` -> `Showing [32] routes` (`exit code 0`)
+  - Audit hygiene (`grep` `shouldExist` di `tests/`, `bcmath`/`(float)`/`floatval`/`dd`/`dump`/`var_dump` di `app/` & `routes/`, `console.log` & `: any` di `resources/js/`) -> `0` temuan.
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Checkbox `[x] P2-06` dan status `Phase 2 -> DONE` di `MEMORY.md` sengaja dibiarkan terbuka menunggu audit & tanda tangan **Phase 2 Closing Gate** oleh `product-manager`.
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  - Delegasikan ke **`product-manager`** untuk mengeksekusi audit **`AC-P2-01` s.d. `AC-P2-12`**, meninjau branch `feature/p2-06-wiring-gate` terhadap 6 Gerbang Kualitas (`napkin/PR_REVIEW_LIFECYCLE.md`), menyusun `docs/phases/PHASE_2_CLOSING_EVIDENCE.md`, menandatangani **Phase 2 Closing Gate** (`[x] P2-06` & `Phase 2 -> DONE` di `MEMORY.md` + entri `WRITE.md`), dan melakukan Squash & Merge ke `main`.
+
+### [#016] 2026-11-10 17:40 — Product Manager & Primary Agent (`Phase 2 Closing Gate`) — Phase 2 (`P2-06` & Gate)
+- **Status:** `DONE` (`APPROVED` — **Phase 2 Resmi Ditutup & Siap Masuk Phase 3**)
+- **Ringkasan Kegiatan:**
+  - `product-manager` mengeksekusi **Adversarial Phase 2 Closing Gate Audit** pada branch `feature/p2-06-wiring-gate` (`b7a92e9`), memeriksa seluruh implementasi backend, frontend, FormRequest, Policy, migrasi, serta unit/feature/E2E test terhadap **`AC-P2-01` s.d. `AC-P2-12`**, **SRS (`UC-10..UC-13`, `KK-01`, `KK-02`, `KK-04`, `KK-05`, `KK-08`, `KK-09`)**, dan **6 Gerbang Kualitas** di `napkin/PR_REVIEW_LIFECYCLE.md`.
+  - Menerbitkan verdict **`APPROVED`** (0 temuan blocker; 2 catatan optimasi minor non-blocking diteruskan ke Phase 3) dan mencatat matriks bukti lengkap ke `docs/phases/PHASE_2_CLOSING_EVIDENCE.md`.
+  - Menandai `P2-06` selesai (`[x]`), menutup status **Phase 2** menjadi `DONE` di `MEMORY.md`, memindahkan `Current Phase` ke **Phase 3 (`NOT_STARTED`)**, dan mengeksekusi **Squash & Merge** `feature/p2-06-wiring-gate` ke `main`.
+- **File Dibuat / Diubah:**
+  - `docs/phases/PHASE_2_CLOSING_EVIDENCE.md` — Berita acara bukti audit `AC-P2-01`..`AC-P2-12` & 6 Gerbang Kualitas Phase 2
+  - `MEMORY.md` — Menandai `[x] P2-06`, status `Phase 2 -> DONE`, dan `Current Phase -> Phase 3` (`NOT_STARTED`)
+  - `WRITE.md` — Menambahkan Entry `#016`
+- **Verifikasi / Bukti Uji:**
+  - Verifikasi silang penuh pada branch `feature/p2-06-wiring-gate` dan ulang pasca-merge di `main`: `./vendor/bin/pint --test` (`passed`), `npx tsc --noEmit` (`0 errors`), `npm run build` (`674 modules`, `public/build/manifest.json`), `php artisan test` (`84 passed (2722 assertions)`), `migrate:rollback && migrate --seed` (18 migrasi rollback & re-migrate + `CleanWashSeeder`), `rg -n "shouldExist" tests/` (`CLEAN`), dan `git status` bersih pada `main`.
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Catatan non-blocking untuk Phase 3: (1) gunakan `centsToDecimalString()` di preview `basisCents` pada `LaporkanInsidenModal.tsx`; (2) pastikan `PengantaranService` (`P3-02`) & `SerahTerimaService` (`P3-03`) mengecualikan transaksi `DIBATALKAN` dan mendukung pelunasan saldo penyesuaian `BELUM_LUNAS` / potongan `total_kompensasi`.
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  - Mulai **Phase 3 (`P3-01` s.d. `P3-05`)**: delegasikan **`P3-01`** ke `product-manager` untuk menyusun `docs/phases/PHASE_3_CONTRACTS.md` (spesifikasi detail `PengantaranService` `KK-07`, `SerahTerimaService` `KK-06`, `PembayaranService::catatPelunasan()`, kontrak endpoint/FormRequest/TS strict, serta Matriks UAT 14 Use Case & 9 Kondisi Khusus).
+
 
