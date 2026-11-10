@@ -7,10 +7,18 @@ final class SqlLike
     /**
      * Escape MySQL LIKE wildcards so literal search characters do not widen matches.
      */
+    public static function escape(string $term): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], trim($term));
+    }
+
     public static function contains(string $term): string
     {
-        $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], trim($term));
+        return '%'.self::escape($term).'%';
+    }
 
-        return '%'.$escaped.'%';
+    public static function prefix(string $term): string
+    {
+        return self::escape($term).'%';
     }
 }

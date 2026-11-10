@@ -177,3 +177,35 @@
 - **Next Exact Action:**
   1. Setelah review & merge `feature/p1-04-master-crud` ke `main`, delegasikan **`P1-05`** ke `cw-backend-dev` pada branch `feature/p1-05-reception-engine` dari `main` untuk membangun `VoucherService::validasiDanKunci()` (`DB::transaction()` + `lockForUpdate()`, `KK-03`), `TransaksiService::buatTransaksi()` (`nomor_nota`, `harga_satuan_snapshot` `KK-09`, `DetailPakaian` `1..*`, `RiwayatStatusProduksi = DITERIMA`, `audit_logs`), `PembayaranService::catatUangMuka()`, `TransaksiController`, dan automated tests (`AC-P1-07` s.d. `AC-P1-12`).
   2. Paralel **`P1-06`** (`frontend-developer`) dapat mengonsumsi kontrak `/pelanggan`, `/layanan`, `/voucher`, dan `POST /voucher/validate` yang telah siap.
+
+### [#006] 2026-11-10 16:08 — Backend Developer (`cw-backend-dev`) — Phase 1 (`P1-05`)
+- **Status:** `READY_FOR_REVIEW`
+- **Ringkasan Kegiatan:**
+  - Melakukan Context Sync (`PRD.md`, `AGENTS.md`, `MEMORY.md`, `WRITE.md` `#003`–`#005`, `.claude/napkin.md`, `napkin/PR_REVIEW_LIFECYCLE.md`, `docs/phases/PHASE_1_CONTRACTS.md` §3.5 & §4 `AC-P1-07`..`AC-P1-12`) serta menginspeksi seluruh TDD RED test eksisting (`tests/Unit/VoucherAtomicLockTest.php`, `tests/Feature/VoucherConcurrencyTest.php`, `tests/Feature/TransaksiReceptionTest.php`) pada branch `feature/p1-05-reception-engine`.
+  - Memperbarui `app/Services/VoucherService.php`: menambahkan `validasiDanKunci(string $nomorVoucher, ?string $tanggalTransaksi = null): Voucher` di dalam `DB::transaction()` dengan `lockForUpdate()` (`SELECT ... FOR UPDATE`), berbagi logika deteksi validitas (`detectInvalidVoucher`) bersama `cekValiditasPreview()`, dan mengunci status `SUDAH_DIGUNAKAN` + `digunakan_pada`.
+  - Membuat `app/Services/PembayaranService.php` (`resolveStatusPembayaranAwal`, `catatPembayaranAwal`) menggunakan `App\Support\DecimalMoney` (tanpa `float`/`bcmath`) untuk seluruh aturan `BELUM_BAYAR`, `DP`, `LUNAS`, dan penolakan overpay/negatif `422`.
+  - Membuat `app/Services/TransaksiService.php` (`generateNomorNota` berurutan harian `CW-YYYYMMDD-XXXX` dengan `SqlLike::prefix()` + `lockForUpdate()`, `buatTransaksi` dalam `DB::transaction()` mencakup lock voucher `KK-03`, salin `harga_satuan_snapshot` `KK-09`, `DetailPakaian` `1..*`, entri awal `RiwayatStatusProduksi = DITERIMA` dengan `id_pegawai = null`, integrasi `PembayaranService`, dan `audit_logs` `TRANSAKSI_CREATED`, serta `paginate`, `getCreateOptions`, `findForDetail`, dan `formatTransaksiDetail` sinkron penuh dengan kontrak `TransaksiDetail` §3.5 tanpa query N+1).
+  - Membuat `app/Http/Requests/Transaksi/StoreTransaksiRequest.php`, `app/Policies/TransaksiPolicy.php` (didaftarkan di `AppServiceProvider`), `app/Http/Controllers/TransaksiController.php` (`index`, `create`, `store`, `show`, `nota`), dan mendaftarkan route `/transaksi` (`transaksi.index`, `transaksi.create`, `transaksi.store`, `transaksi.nota`, `transaksi.show`) di `routes/web.php` di bawah middleware `['auth', 'role:PETUGAS']`.
+  - Menambahkan penguatan edge-case test di `tests/Unit/VoucherAtomicLockTest.php` dan `tests/Feature/TransaksiReceptionTest.php`, serta menjaga `resources/js/` dan `resources/css/` tidak tersentuh sama sekali.
+- **File Dibuat / Diubah:**
+  - `app/Support/SqlLike.php` — Penambahan helper `escape()` dan `prefix()` untuk pencarian & prefix `nomor_nota`
+  - `app/Services/VoucherService.php` — Penambahan `validasiDanKunci()` (`FOR UPDATE`) dan refactor `detectInvalidVoucher()`
+  - `app/Services/PembayaranService.php` — Service resolusi status awal dan pencatatan pembayaran `DP`/`PELUNASAN` berbasis `DecimalMoney`
+  - `app/Services/TransaksiService.php` — Engine penerimaan transaksi atomik, snapshot tarif `KK-09`, serialisasi `TransaksiDetail`, dan eager pagination
+  - `app/Http/Requests/Transaksi/StoreTransaksiRequest.php` — Validasi FormRequest (`detail_pakaian` min 1, layanan aktif, integer `pcs` untuk `JUMLAH`, normalisasi input)
+  - `app/Policies/TransaksiPolicy.php`, `app/Providers/AppServiceProvider.php` — Otorisasi peran aktif `PETUGAS` & registrasi policy
+  - `app/Http/Controllers/TransaksiController.php`, `routes/web.php` — Endpoint `/transaksi` (`index`, `create`, `store`, `show`, `nota`)
+  - `tests/Unit/VoucherAtomicLockTest.php`, `tests/Feature/VoucherConcurrencyTest.php`, `tests/Feature/TransaksiReceptionTest.php` — Unit test lock & DP, test konkurensi row-lock & dual-process MySQL 8.4, serta feature test reception & kontrak Inertia
+  - `MEMORY.md`, `.claude/napkin.md`, `WRITE.md` — Update `[x] P1-05`, catatan lock ordering & CLI actor resolution, dan Entry `#006`
+- **Verifikasi / Bukti Uji:**
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` (`exit code 0`)
+  - `php artisan test` -> `53 passed (1182 assertions)` pada MySQL 8.4 port `3307` (`cleanwash_testing`), termasuk `VoucherConcurrencyTest` real InnoDB `FOR UPDATE` & dual-process race (`exit code 0`)
+  - `npx tsc --noEmit && npm run build` -> 0 error TS, Vite production build (`654 modules transformed`) (`exit code 0`)
+  - `php artisan migrate:fresh --seed --no-interaction && php artisan migrate:rollback --no-interaction && php artisan migrate --seed --no-interaction` -> 18 migrasi + rollback + migrasi ulang + seed bersih (`exit code 0`)
+  - `php artisan route:list --except-vendor` -> 23 route terdaftar termasuk 5 route `transaksi.*`
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Ditambahkan catatan #8 di `.claude/napkin.md` mengenai urutan lock (`validasiDanKunci()` sebelum `generateNomorNota()`) dan fallback `audit_logs.user_id` via `$petugas->user_id` untuk pemanggilan service dari proses CLI/worker.
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  1. Lakukan cross-agent review & merge `feature/p1-05-reception-engine` ke `main` sesuai `napkin/PR_REVIEW_LIFECYCLE.md`.
+  2. Delegasikan **`P1-06`** ke subagent frontend (`cw-frontend-dev`) pada branch `feature/p1-06-frontend-ui` dari `main` untuk membangun UI Login, App Shell per peran, Master CRUD pages, serta halaman `Transaksi/Index`, `Transaksi/Create` (form dinamis `kg`/`pcs`, multi `DetailPakaian`, live `POST /voucher/validate`, input DP), dan `Transaksi/Show`.

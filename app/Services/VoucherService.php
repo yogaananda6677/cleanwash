@@ -166,20 +166,13 @@ class VoucherService
         $kode = Str::upper(trim($nomorVoucher));
         $voucher = $kode !== '' ? Voucher::find($kode) : null;
 
-        if ($voucher === null) {
-            return $this->invalidPreview('NOT_FOUND', 'Voucher tidak ditemukan.');
+        $invalid = $this->detectInvalidVoucher($voucher, $tanggalTransaksi);
+
+        if ($invalid !== null) {
+            return $this->invalidPreview($invalid['reason'], $invalid['message']);
         }
 
-        if ($voucher->status_penggunaan === VoucherStatus::SUDAH_DIGUNAKAN) {
-            return $this->invalidPreview('ALREADY_USED', 'Voucher sudah digunakan pada transaksi lain.');
-        }
-
-        $effectiveStatus = $this->resolveEffectiveStatus($voucher, $tanggalTransaksi);
-
-        if ($effectiveStatus === VoucherStatus::KEDALUWARSA) {
-            return $this->invalidPreview('EXPIRED', 'Voucher sudah melewati masa berlaku (kedaluwarsa).');
-        }
-
+        /** @var Voucher $voucher */
         return [
             'valid' => true,
             'nomor_voucher' => $voucher->nomor_voucher,
@@ -188,6 +181,74 @@ class VoucherService
             'status_penggunaan' => $voucher->status_penggunaan->value,
             'message' => 'Voucher valid dan siap digunakan.',
         ];
+    }
+
+    /**
+     * Validate and atomically lock a voucher for exclusive transaction consumption (KK-03).
+     *
+     * @throws ValidationException
+     */
+    public function validasiDanKunci(string $nomorVoucher, ?string $tanggalTransaksi = null): Voucher
+    {
+        $kode = Str::upper(trim($nomorVoucher));
+
+        if ($kode === '') {
+            throw ValidationException::withMessages([
+                'nomor_voucher' => 'Voucher tidak ditemukan.',
+            ]);
+        }
+
+        return DB::transaction(function () use ($kode, $tanggalTransaksi): Voucher {
+            $voucher = Voucher::query()
+                ->where('nomor_voucher', $kode)
+                ->lockForUpdate()
+                ->first();
+
+            $invalid = $this->detectInvalidVoucher($voucher, $tanggalTransaksi);
+
+            if ($invalid !== null) {
+                throw ValidationException::withMessages([
+                    'nomor_voucher' => $invalid['message'],
+                ]);
+            }
+
+            /** @var Voucher $voucher */
+            $voucher->update([
+                'status_penggunaan' => VoucherStatus::SUDAH_DIGUNAKAN,
+                'digunakan_pada' => now('Asia/Jakarta'),
+            ]);
+
+            return $voucher->refresh();
+        });
+    }
+
+    /**
+     * @return array{reason: 'NOT_FOUND'|'EXPIRED'|'ALREADY_USED', message: string}|null
+     */
+    private function detectInvalidVoucher(?Voucher $voucher, ?string $tanggalTransaksi = null): ?array
+    {
+        if ($voucher === null) {
+            return [
+                'reason' => 'NOT_FOUND',
+                'message' => 'Voucher tidak ditemukan.',
+            ];
+        }
+
+        if ($voucher->status_penggunaan === VoucherStatus::SUDAH_DIGUNAKAN) {
+            return [
+                'reason' => 'ALREADY_USED',
+                'message' => 'Voucher sudah digunakan pada transaksi lain.',
+            ];
+        }
+
+        if ($this->resolveEffectiveStatus($voucher, $tanggalTransaksi) === VoucherStatus::KEDALUWARSA) {
+            return [
+                'reason' => 'EXPIRED',
+                'message' => 'Voucher sudah melewati masa berlaku (kedaluwarsa).',
+            ];
+        }
+
+        return null;
     }
 
     /**

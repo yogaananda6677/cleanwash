@@ -1,0 +1,564 @@
+<?php
+
+namespace App\Services;
+
+use App\Enums\MetodeHitung;
+use App\Enums\StatusPembayaran;
+use App\Enums\StatusTransaksi;
+use App\Enums\TahapProduksi;
+use App\Enums\UserRole;
+use App\Models\AuditLog;
+use App\Models\DetailPakaian;
+use App\Models\JenisLayanan;
+use App\Models\Pelanggan;
+use App\Models\Pembayaran;
+use App\Models\Petugas;
+use App\Models\RiwayatStatusProduksi;
+use App\Models\TahapLayanan;
+use App\Models\Transaksi;
+use App\Models\User;
+use App\Support\DecimalMoney;
+use App\Support\SqlLike;
+use BackedEnum;
+use Carbon\CarbonInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use InvalidArgumentException;
+
+class TransaksiService
+{
+    public function __construct(
+        private readonly VoucherService $voucherService,
+        private readonly PembayaranService $pembayaranService
+    ) {}
+
+    /**
+     * Paginate transactions formatted to TransaksiDetail with eager-loaded relations (no N+1).
+     */
+    public function paginate(string $search = '', string $statusPembayaran = '', int $perPage = 10): LengthAwarePaginator
+    {
+        $trimmedSearch = trim($search);
+        $normalizedStatus = strtoupper(trim($statusPembayaran));
+        $validStatus = in_array($normalizedStatus, StatusPembayaran::values(), true) ? $normalizedStatus : '';
+
+        $paginator = Transaksi::query()
+            ->with($this->detailRelations())
+            ->when($trimmedSearch !== '', function ($query) use ($trimmedSearch): void {
+                $pattern = SqlLike::contains($trimmedSearch);
+
+                $query->where(function ($subQuery) use ($pattern): void {
+                    $subQuery->where('nomor_nota', 'like', $pattern)
+                        ->orWhereHas('pelanggan', function ($pelangganQuery) use ($pattern): void {
+                            $pelangganQuery->where('nama', 'like', $pattern)
+                                ->orWhere('no_telepon', 'like', $pattern);
+                        });
+                });
+            })
+            ->when($validStatus !== '', function ($query) use ($validStatus): void {
+                $query->where('status_pembayaran', $validStatus);
+            })
+            ->orderByDesc('tanggal_penerimaan')
+            ->orderByDesc('nomor_nota')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        $paginator->through(fn (Transaksi $transaksi): array => $this->formatTransaksiDetail($transaksi));
+
+        return $paginator;
+    }
+
+    /**
+     * Retrieve option lists for the reception creation screen (Transaksi/Create).
+     *
+     * @return array{
+     *     pelangganOptions: Collection<int, Pelanggan>,
+     *     layananOptions: Collection<int, JenisLayanan>
+     * }
+     */
+    public function getCreateOptions(): array
+    {
+        return [
+            'pelangganOptions' => Pelanggan::query()
+                ->select(['id_pelanggan', 'nama', 'no_telepon', 'boleh_bayar_akhir'])
+                ->orderBy('nama')
+                ->get(),
+            'layananOptions' => JenisLayanan::query()
+                ->where('is_active', true)
+                ->with(['tahapLayanan' => fn ($query) => $query->orderBy('urutan')])
+                ->orderBy('nama_layanan')
+                ->orderBy('tingkat_kecepatan')
+                ->get(),
+        ];
+    }
+
+    /**
+     * Find a transaction by nomor_nota with all relations needed for detail/nota display.
+     */
+    public function findForDetail(string $nomorNota): Transaksi
+    {
+        return Transaksi::query()
+            ->with($this->detailRelations())
+            ->findOrFail($nomorNota);
+    }
+
+    /**
+     * Generate a sequential daily receipt number (CW-YYYYMMDD-XXXX).
+     */
+    public function generateNomorNota(CarbonInterface|string|null $tanggalPenerimaan = null): string
+    {
+        $date = match (true) {
+            $tanggalPenerimaan instanceof CarbonInterface => $tanggalPenerimaan->copy()->timezone('Asia/Jakarta'),
+            is_string($tanggalPenerimaan) && trim($tanggalPenerimaan) !== '' => Carbon::parse($tanggalPenerimaan, 'Asia/Jakarta'),
+            default => now('Asia/Jakarta'),
+        };
+
+        $prefix = 'CW-'.$date->format('Ymd').'-';
+
+        $latest = Transaksi::query()
+            ->where('nomor_nota', 'like', SqlLike::prefix($prefix))
+            ->orderByRaw('LENGTH(nomor_nota) DESC')
+            ->orderByDesc('nomor_nota')
+            ->lockForUpdate()
+            ->value('nomor_nota');
+
+        $nextNumber = $latest !== null
+            ? ((int) substr($latest, strlen($prefix))) + 1
+            : 1;
+
+        return sprintf('%s%04d', $prefix, $nextNumber);
+    }
+
+    /**
+     * Create a transaction atomically with tariff snapshot (KK-09), voucher row lock (KK-03),
+     * clothing item breakdown, initial production status, DP ledger entry, and audit log.
+     *
+     * @param  array{
+     *     id_pelanggan: int|string,
+     *     id_layanan: int|string,
+     *     berat_atau_jumlah: string|int|float,
+     *     nomor_voucher?: string|null,
+     *     nominal_dp?: string|int|float|null,
+     *     catatan_khusus?: string|null,
+     *     detail_pakaian: list<array{jenis_pakaian: string, jumlah_potong: int|string, kondisi_pakaian: string}>
+     * }  $data
+     *
+     * @throws ValidationException
+     */
+    public function buatTransaksi(Petugas $petugas, array $data, ?User $actor = null): Transaksi
+    {
+        return DB::transaction(function () use ($petugas, $data, $actor): Transaksi {
+            $now = now('Asia/Jakarta');
+
+            $pelanggan = $this->resolvePelanggan($data['id_pelanggan'] ?? null);
+            $layanan = $this->resolveActiveLayanan($data['id_layanan'] ?? null);
+            $detailItems = $this->validateDetailItems($data['detail_pakaian'] ?? null);
+            $beratAtauJumlah = $this->resolveValidatedQuantity($data['berat_atau_jumlah'] ?? '', $layanan);
+
+            // Lock voucher before nota sequence generation so concurrent claims on the same voucher
+            // serialize on the voucher row and the loser rolls back cleanly without contention.
+            $rawVoucher = isset($data['nomor_voucher']) ? trim((string) $data['nomor_voucher']) : '';
+            $lockedVoucher = $rawVoucher !== ''
+                ? $this->voucherService->validasiDanKunci($rawVoucher, $now->toDateString())
+                : null;
+            $nilaiVoucherSnapshot = $lockedVoucher !== null ? (string) $lockedVoucher->nilai : '0.00';
+
+            $hargaSatuanSnapshot = DecimalMoney::toDecimalString(
+                DecimalMoney::toCents((string) $layanan->harga_satuan)
+            );
+            $subtotalLayanan = DecimalMoney::multiplyQuantity($beratAtauJumlah, $hargaSatuanSnapshot);
+            $totalHarga = DecimalMoney::maxZero(
+                DecimalMoney::subtract($subtotalLayanan, $nilaiVoucherSnapshot)
+            );
+
+            $rawDp = $data['nominal_dp'] ?? null;
+            $nominalDp = ($rawDp === null || trim((string) $rawDp) === '')
+                ? '0.00'
+                : $this->normalizeDecimal($rawDp, 'nominal_dp');
+
+            $statusPembayaran = $this->pembayaranService->resolveStatusPembayaranAwal($nominalDp, $totalHarga);
+
+            $catatanKhusus = isset($data['catatan_khusus']) && trim((string) $data['catatan_khusus']) !== ''
+                ? trim((string) $data['catatan_khusus'])
+                : null;
+
+            $transaksi = Transaksi::create([
+                'nomor_nota' => $this->generateNomorNota($now),
+                'id_pelanggan' => $pelanggan->id_pelanggan,
+                'id_petugas' => $petugas->id_petugas,
+                'id_layanan' => $layanan->id_layanan,
+                'nomor_voucher' => $lockedVoucher?->nomor_voucher,
+                'tanggal_penerimaan' => $now,
+                'berat_atau_jumlah' => $beratAtauJumlah,
+                'catatan_khusus' => $catatanKhusus,
+                'harga_satuan_snapshot' => $hargaSatuanSnapshot,
+                'nilai_voucher_snapshot' => $nilaiVoucherSnapshot,
+                'total_kompensasi' => '0.00',
+                'biaya_pembatalan' => '0.00',
+                'total_harga' => $totalHarga,
+                'status_pembayaran' => $statusPembayaran,
+                'status_transaksi' => StatusTransaksi::AKTIF,
+                'diambil_pada' => null,
+            ]);
+
+            $this->persistDetailAndInitialHistory($transaksi, $detailItems, $now);
+
+            $this->pembayaranService->catatPembayaranAwal(
+                $transaksi,
+                $petugas,
+                $nominalDp,
+                $totalHarga,
+                $now
+            );
+
+            $this->recordCreatedAuditLog(
+                $transaksi,
+                $petugas,
+                $actor,
+                $subtotalLayanan,
+                $nominalDp,
+                count($detailItems),
+                $now
+            );
+
+            return $transaksi->load($this->detailRelations());
+        });
+    }
+
+    /**
+     * Serialize a Transaksi model into the Phase 1 TransaksiDetail contract shape.
+     *
+     * @return array<string, mixed>
+     */
+    public function formatTransaksiDetail(Transaksi $transaksi): array
+    {
+        $transaksi->loadMissing($this->detailRelations());
+
+        $subtotalLayanan = DecimalMoney::multiplyQuantity(
+            (string) $transaksi->berat_atau_jumlah,
+            (string) $transaksi->harga_satuan_snapshot
+        );
+
+        $totalDibayar = '0.00';
+        foreach ($transaksi->pembayaran as $pembayaran) {
+            $totalDibayar = DecimalMoney::add($totalDibayar, (string) $pembayaran->nominal_bayar);
+        }
+
+        $sisaTagihan = DecimalMoney::maxZero(
+            DecimalMoney::subtract((string) $transaksi->total_harga, $totalDibayar)
+        );
+
+        $pelanggan = $transaksi->pelanggan;
+        $petugas = $transaksi->petugas;
+        $layanan = $transaksi->layanan;
+        $voucher = $transaksi->voucher;
+
+        return [
+            'nomor_nota' => $transaksi->nomor_nota,
+            'tanggal_penerimaan' => $transaksi->tanggal_penerimaan?->toISOString(),
+            'berat_atau_jumlah' => (string) $transaksi->berat_atau_jumlah,
+            'catatan_khusus' => $transaksi->catatan_khusus,
+            'harga_satuan_snapshot' => (string) $transaksi->harga_satuan_snapshot,
+            'nilai_voucher_snapshot' => (string) $transaksi->nilai_voucher_snapshot,
+            'total_kompensasi' => (string) $transaksi->total_kompensasi,
+            'biaya_pembatalan' => (string) $transaksi->biaya_pembatalan,
+            'subtotal_layanan' => $subtotalLayanan,
+            'total_harga' => (string) $transaksi->total_harga,
+            'total_dibayar' => $totalDibayar,
+            'sisa_tagihan' => $sisaTagihan,
+            'status_pembayaran' => $this->enumValue($transaksi->status_pembayaran),
+            'status_transaksi' => $this->enumValue($transaksi->status_transaksi),
+            'diambil_pada' => $transaksi->diambil_pada?->toISOString(),
+            'pelanggan' => [
+                'id_pelanggan' => $pelanggan->id_pelanggan,
+                'nama' => $pelanggan->nama,
+                'no_telepon' => $pelanggan->no_telepon,
+                'alamat' => $pelanggan->alamat,
+                'boleh_bayar_akhir' => (bool) $pelanggan->boleh_bayar_akhir,
+                'created_at' => $pelanggan->created_at?->toISOString(),
+                'updated_at' => $pelanggan->updated_at?->toISOString(),
+            ],
+            'petugas' => [
+                'id_petugas' => $petugas->id_petugas,
+                'nama_petugas' => $petugas->nama_petugas,
+            ],
+            'layanan' => [
+                'id_layanan' => $layanan->id_layanan,
+                'nama_layanan' => $layanan->nama_layanan,
+                'tingkat_kecepatan' => $this->enumValue($layanan->tingkat_kecepatan),
+                'metode_hitung' => $this->enumValue($layanan->metode_hitung),
+                'satuan' => $this->enumValue($layanan->satuan),
+                'harga_satuan' => (string) $layanan->harga_satuan,
+                'perlu_setrika' => (bool) $layanan->perlu_setrika,
+                'is_active' => (bool) $layanan->is_active,
+                'tahap_layanan' => $layanan->tahapLayanan
+                    ->values()
+                    ->map(fn (TahapLayanan $tahap): array => [
+                        'id_tahap' => $tahap->id_tahap,
+                        'id_layanan' => $tahap->id_layanan,
+                        'nama_tahap' => $this->enumValue($tahap->nama_tahap),
+                        'urutan' => (int) $tahap->urutan,
+                    ])
+                    ->all(),
+            ],
+            'voucher' => $voucher !== null ? [
+                'nomor_voucher' => $voucher->nomor_voucher,
+                'nilai' => (string) $voucher->nilai,
+                'masa_berlaku' => $voucher->masa_berlaku->toDateString(),
+                'status_penggunaan' => $this->enumValue($voucher->status_penggunaan),
+                'effective_status' => (string) $voucher->effective_status,
+                'digunakan_pada' => $voucher->digunakan_pada?->toISOString(),
+            ] : null,
+            'detail_pakaian' => $transaksi->detailPakaian
+                ->values()
+                ->map(fn (DetailPakaian $detail): array => [
+                    'id_detail' => $detail->id_detail,
+                    'nomor_nota' => $detail->nomor_nota,
+                    'jenis_pakaian' => $detail->jenis_pakaian,
+                    'jumlah_potong' => (int) $detail->jumlah_potong,
+                    'kondisi_pakaian' => $detail->kondisi_pakaian,
+                ])
+                ->all(),
+            'pembayaran' => $transaksi->pembayaran
+                ->values()
+                ->map(fn (Pembayaran $pembayaran): array => [
+                    'id_pembayaran' => $pembayaran->id_pembayaran,
+                    'nomor_nota' => $pembayaran->nomor_nota,
+                    'id_petugas' => $pembayaran->id_petugas,
+                    'tanggal_bayar' => $pembayaran->tanggal_bayar?->toISOString(),
+                    'jenis_bayar' => $this->enumValue($pembayaran->jenis_bayar),
+                    'nominal_bayar' => (string) $pembayaran->nominal_bayar,
+                    'petugas' => $pembayaran->petugas !== null ? [
+                        'id_petugas' => $pembayaran->petugas->id_petugas,
+                        'nama_petugas' => $pembayaran->petugas->nama_petugas,
+                    ] : null,
+                ])
+                ->all(),
+            'riwayat_status_produksi' => $transaksi->riwayatStatusProduksi
+                ->values()
+                ->map(fn (RiwayatStatusProduksi $riwayat): array => [
+                    'id_status_produksi' => $riwayat->id_status_produksi,
+                    'nomor_nota' => $riwayat->nomor_nota,
+                    'id_pegawai' => $riwayat->id_pegawai,
+                    'tahap_status' => $this->enumValue($riwayat->tahap_status),
+                    'waktu_update' => $riwayat->waktu_update?->toISOString(),
+                    'catatan' => $riwayat->catatan,
+                ])
+                ->all(),
+        ];
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    private function resolvePelanggan(mixed $idPelanggan): Pelanggan
+    {
+        $pelanggan = Pelanggan::find((int) $idPelanggan);
+
+        if ($pelanggan === null) {
+            throw ValidationException::withMessages([
+                'id_pelanggan' => 'Pelanggan tidak ditemukan.',
+            ]);
+        }
+
+        return $pelanggan;
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    private function resolveActiveLayanan(mixed $idLayanan): JenisLayanan
+    {
+        $layanan = JenisLayanan::find((int) $idLayanan);
+
+        if ($layanan === null) {
+            throw ValidationException::withMessages([
+                'id_layanan' => 'Jenis layanan tidak ditemukan.',
+            ]);
+        }
+
+        if (! $layanan->is_active) {
+            throw ValidationException::withMessages([
+                'id_layanan' => 'Jenis layanan yang dipilih sedang tidak aktif.',
+            ]);
+        }
+
+        return $layanan;
+    }
+
+    /**
+     * @return list<array{jenis_pakaian: string, jumlah_potong: int, kondisi_pakaian: string}>
+     *
+     * @throws ValidationException
+     */
+    private function validateDetailItems(mixed $rawItems): array
+    {
+        if (! is_array($rawItems) || count($rawItems) < 1) {
+            throw ValidationException::withMessages([
+                'detail_pakaian' => 'Minimal harus ada 1 rincian pakaian.',
+            ]);
+        }
+
+        $validated = [];
+
+        foreach (array_values($rawItems) as $index => $item) {
+            if (! is_array($item)) {
+                throw ValidationException::withMessages([
+                    "detail_pakaian.{$index}" => 'Format rincian pakaian tidak valid.',
+                ]);
+            }
+
+            $jenisPakaian = trim((string) ($item['jenis_pakaian'] ?? ''));
+            $kondisiPakaian = trim((string) ($item['kondisi_pakaian'] ?? ''));
+            $jumlahPotong = filter_var($item['jumlah_potong'] ?? null, FILTER_VALIDATE_INT);
+
+            if ($jenisPakaian === '') {
+                throw ValidationException::withMessages([
+                    "detail_pakaian.{$index}.jenis_pakaian" => 'Jenis pakaian wajib diisi.',
+                ]);
+            }
+
+            if ($jumlahPotong === false || $jumlahPotong < 1) {
+                throw ValidationException::withMessages([
+                    "detail_pakaian.{$index}.jumlah_potong" => 'Jumlah potong minimal 1.',
+                ]);
+            }
+
+            if ($kondisiPakaian === '') {
+                throw ValidationException::withMessages([
+                    "detail_pakaian.{$index}.kondisi_pakaian" => 'Kondisi pakaian wajib diisi.',
+                ]);
+            }
+
+            $validated[] = [
+                'jenis_pakaian' => $jenisPakaian,
+                'jumlah_potong' => $jumlahPotong,
+                'kondisi_pakaian' => $kondisiPakaian,
+            ];
+        }
+
+        return $validated;
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    private function resolveValidatedQuantity(mixed $rawQuantity, JenisLayanan $layanan): string
+    {
+        $beratAtauJumlah = $this->normalizeDecimal($rawQuantity, 'berat_atau_jumlah');
+        $quantityCents = DecimalMoney::toCents($beratAtauJumlah);
+
+        if ($quantityCents <= 0) {
+            throw ValidationException::withMessages([
+                'berat_atau_jumlah' => 'Berat atau jumlah harus lebih besar dari 0.',
+            ]);
+        }
+
+        if ($layanan->metode_hitung === MetodeHitung::JUMLAH && ($quantityCents < 100 || ($quantityCents % 100) !== 0)) {
+            throw ValidationException::withMessages([
+                'berat_atau_jumlah' => 'Kuantitas untuk layanan metode JUMLAH (pcs) wajib berupa bilangan bulat minimal 1.',
+            ]);
+        }
+
+        return $beratAtauJumlah;
+    }
+
+    /**
+     * @param  list<array{jenis_pakaian: string, jumlah_potong: int, kondisi_pakaian: string}>  $detailItems
+     */
+    private function persistDetailAndInitialHistory(Transaksi $transaksi, array $detailItems, CarbonInterface $now): void
+    {
+        foreach ($detailItems as $item) {
+            DetailPakaian::create([
+                'nomor_nota' => $transaksi->nomor_nota,
+                'jenis_pakaian' => $item['jenis_pakaian'],
+                'jumlah_potong' => $item['jumlah_potong'],
+                'kondisi_pakaian' => $item['kondisi_pakaian'],
+            ]);
+        }
+
+        RiwayatStatusProduksi::create([
+            'nomor_nota' => $transaksi->nomor_nota,
+            'id_pegawai' => null,
+            'tahap_status' => TahapProduksi::DITERIMA,
+            'waktu_update' => $now,
+            'catatan' => 'Transaksi diterima di loket kasir.',
+        ]);
+    }
+
+    private function recordCreatedAuditLog(
+        Transaksi $transaksi,
+        Petugas $petugas,
+        ?User $actor,
+        string $subtotalLayanan,
+        string $nominalDp,
+        int $detailCount,
+        CarbonInterface $now
+    ): void {
+        AuditLog::create([
+            'user_id' => $actor?->id ?? $petugas->user_id,
+            'actor_role' => $actor !== null
+                ? $this->enumValue($actor->role)
+                : UserRole::PETUGAS->value,
+            'action' => 'TRANSAKSI_CREATED',
+            'subject_type' => Transaksi::class,
+            'subject_id' => $transaksi->nomor_nota,
+            'payload_before' => null,
+            'payload_after' => [
+                'nomor_nota' => $transaksi->nomor_nota,
+                'id_pelanggan' => $transaksi->id_pelanggan,
+                'id_petugas' => $transaksi->id_petugas,
+                'id_layanan' => $transaksi->id_layanan,
+                'nomor_voucher' => $transaksi->nomor_voucher,
+                'berat_atau_jumlah' => (string) $transaksi->berat_atau_jumlah,
+                'harga_satuan_snapshot' => (string) $transaksi->harga_satuan_snapshot,
+                'nilai_voucher_snapshot' => (string) $transaksi->nilai_voucher_snapshot,
+                'subtotal_layanan' => $subtotalLayanan,
+                'total_harga' => (string) $transaksi->total_harga,
+                'nominal_dp' => $nominalDp,
+                'status_pembayaran' => $this->enumValue($transaksi->status_pembayaran),
+                'status_transaksi' => $this->enumValue($transaksi->status_transaksi),
+                'detail_pakaian_count' => $detailCount,
+            ],
+            'created_at' => $now,
+        ]);
+    }
+
+    /**
+     * @return array<int|string, mixed>
+     */
+    private function detailRelations(): array
+    {
+        return [
+            'pelanggan',
+            'petugas',
+            'layanan.tahapLayanan' => fn ($query) => $query->orderBy('urutan'),
+            'voucher',
+            'detailPakaian' => fn ($query) => $query->orderBy('id_detail'),
+            'pembayaran' => fn ($query) => $query->orderBy('tanggal_bayar')->orderBy('id_pembayaran'),
+            'pembayaran.petugas',
+            'riwayatStatusProduksi',
+        ];
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    private function normalizeDecimal(mixed $value, string $field): string
+    {
+        try {
+            return DecimalMoney::toDecimalString(DecimalMoney::toCents((string) $value));
+        } catch (InvalidArgumentException) {
+            throw ValidationException::withMessages([
+                $field => 'Format angka desimal tidak valid.',
+            ]);
+        }
+    }
+
+    private function enumValue(mixed $value): string
+    {
+        return $value instanceof BackedEnum ? (string) $value->value : (string) $value;
+    }
+}

@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JenisLayananController;
 use App\Http\Controllers\PelangganController;
+use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\VoucherController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -36,5 +37,11 @@ Route::middleware('auth')->group(function () {
             ->name('voucher.validate');
         Route::resource('voucher', VoucherController::class)
             ->only(['index', 'store', 'update', 'destroy']);
+
+        Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
+        Route::get('/transaksi/create', [TransaksiController::class, 'create'])->name('transaksi.create');
+        Route::post('/transaksi', [TransaksiController::class, 'store'])->name('transaksi.store');
+        Route::get('/transaksi/{nota}/nota', [TransaksiController::class, 'nota'])->name('transaksi.nota');
+        Route::get('/transaksi/{nota}', [TransaksiController::class, 'show'])->name('transaksi.show');
     });
 });

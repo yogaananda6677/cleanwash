@@ -56,6 +56,8 @@ Dilarang mencatat log kronologis harian di file ini — **catat log aktivitas di
    Do instead: Hindari fungsi `bcmath` dan `float` untuk nominal uang/kuantitas; gunakan helper aritmatika integer-scaled decimal (`App\Support\DecimalMoney` skala 100 / sen) bersama kolom MySQL `DECIMAL(12,2)`.
 7. **[2026-11-10] Policy `false` mengembalikan `403`, sedangkan penolakan kondisi bisnis harus `422` + flash/error**
    Do instead: Batasi Laravel Policy hanya untuk otorisasi peran aktif, lalu lempar `ValidationException` (`422` JSON atau redirect `flash.error` + `errors` untuk Inertia) ketika memblokir penghapusan master yang berelasi `Transaksi` atau modifikasi/hapus `Voucher` berstatus `SUDAH_DIGUNAKAN`. Hitung juga `Voucher.effective_status` secara dinamis terhadap tanggal `Asia/Jakarta` agar voucher `TERSEDIA` yang melewati `masa_berlaku` tetap terdeteksi kedaluwarsa.
+8. **[2026-11-10] Klaim voucher konkuren dan pemanggilan service di luar HTTP (`CLI`/worker)**
+   Do instead: Jalankan `VoucherService::validasiDanKunci()` (`lockForUpdate()`) lebih dulu sebelum `generateNomorNota()` agar proses pesaing pada voucher yang sama langsung antre di row lock voucher dan rollback bersih tanpa contention gap lock pada `transaksi`; serta selesaikan `audit_logs.user_id` lewat `$actor?->id ?? $petugas->user_id` agar service tetap bekerja di worker/CLI test.
 
 ---
 
