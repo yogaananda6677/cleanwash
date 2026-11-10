@@ -511,4 +511,26 @@
 - **Next Exact Action:**
   - Mulai **Phase 3 (`P3-01` s.d. `P3-05`)**: delegasikan **`P3-01`** ke `product-manager` untuk menyusun `docs/phases/PHASE_3_CONTRACTS.md` (spesifikasi detail `PengantaranService` `KK-07`, `SerahTerimaService` `KK-06`, `PembayaranService::catatPelunasan()`, kontrak endpoint/FormRequest/TS strict, serta Matriks UAT 14 Use Case & 9 Kondisi Khusus).
 
+### [#017] 2026-11-10 17:48 — Product Manager & Primary Agent (`P3-01`) — Phase 3 (`P3-01`)
+- **Status:** `DONE` (`PHASE_3_CONTRACTS.md` Terkunci)
+- **Ringkasan Kegiatan:**
+  - `product-manager` mengaudit [PRD.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/PRD.md), [PHASE_2_CLOSING_EVIDENCE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_2_CLOSING_EVIDENCE.md), migrasi `pengantaran` & `item_pengantaran`, seluruh Enum/Model/Service terkait (`Pengantaran`, `ItemPengantaran`, `PetugasPengantaran`, `PembayaranService`, `TransaksiService`), serta `resources/js/types/index.ts`.
+  - Mengunci dokumen kontrak penuh **`docs/phases/PHASE_3_CONTRACTS.md`**:
+    - Kepemilikan eksklusif file `P3-01` s.d. `P3-05` tanpa tumpang tindih.
+    - Aturan detail `PengantaranService` (`buatJadwal`, `mulaiPengantaran`, `updateStatusItem`, sinkronisasi header `Pengantaran`, pengecekan `cekHakBayarAkhir` saat kurir memilih `DITERIMA`, dan `jadwalkanUlang` terisolasi `KK-07` dengan proteksi double-reschedule).
+    - Aturan detail `PembayaranService::catatPelunasan()` + `updateStatusLunas()` (`PELUNASAN_RECORDED`) & `SerahTerimaService` (`ambilPakaian`, `cekHakBayarAkhir`, `serahkanPakaian` `KK-06` termasuk penutupan item `MENUNGGU -> GAGAL` bila diambil di loket serta blokir bila `DIAMBIL`/`DALAM_PERJALANAN`).
+    - Endpoint `/pengantaran*`, `/serah-terima`, `/transaksi/{nota}/{pembayaran,serah-terima}`, `/audit`, KPI `DashboardController` (`PETUGAS` & `PENGANTAR`), FormRequest, kontrak TS strict, tindak lanjut cleanup `LaporkanInsidenModal.tsx` (`centsToDecimalString`), `AC-P3-01`..`AC-P3-12`, dan **Matriks UAT 14 Use Case + 9 Kondisi Khusus**.
+- **File Dibuat / Diubah:**
+  - `docs/phases/PHASE_3_CONTRACTS.md` — Kontrak bisnis, endpoint, Policy, FormRequest, TS strict, `AC-P3-01`..`AC-P3-12`, dan Matriks UAT 14 UC + 9 KK
+  - `MEMORY.md` — Menandai `Phase 3 -> IN_PROGRESS`, `[x] P3-01`
+  - `WRITE.md` — Menambahkan Entry `#017`
+- **Verifikasi / Bukti Uji:**
+  - Seluruh jalur route, model, enum (`DIJADWALKAN`/`BERJALAN`/`SELESAI`, `MENUNGGU`/`DIAMBIL`/`DALAM_PERJALANAN`/`DITERIMA`/`GAGAL`), dan nama `AuditLog` (`PELUNASAN_RECORDED`, `SERAH_TERIMA`) terverifikasi sinkron 100% dengan kode & migrasi `main` (`d2c87ba`).
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Zero migrasi baru (memanfaatkan penuh 16 tabel MySQL 8.4 eksisting); `SerahTerimaService::cekHakBayarAkhir()` dapat diekstrak/dibuat sejak `P3-02` agar `PengantaranService::updateStatusItem()` memanggil sumber kebenaran tunggal sejak awal.
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  - Delegasikan **`P3-02`** ke `cw-backend-dev` pada branch `feature/p3-02-pengantaran-service` untuk mengimplementasikan `PengantaranService`, `SerahTerimaService::cekHakBayarAkhir()`, `PengantaranPolicy`, `StorePengantaranRequest`/`UpdateItemPengantaranStatusRequest`/`JadwalkanUlangRequest`, `PengantaranController`, route pengantaran di `routes/web.php`, penambahan properti pengantaran di `TransaksiService`, serta unit & feature test (`AC-P3-01`..`AC-P3-05`).
+
+
 

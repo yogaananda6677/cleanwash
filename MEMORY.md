@@ -13,9 +13,9 @@ Dokumen ini adalah memori status arsitektur proyek **CleanWash** untuk manusia d
 | **Product** | CleanWash — Sistem Informasi Manajemen Operasional Laundry |
 | **SRS Reference** | [UTS.pdf](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/Outputtts/UTS.pdf) & [2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx) |
 | **Current Phase** | Phase 3 — Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening |
-| **Current Status** | `NOT_STARTED` (Phase 2 Resmi `DONE` per PM Gate; siap memulai `P3-01`) |
+| **Current Status** | `IN_PROGRESS` (`P3-01` selesai mengunci kontrak `PHASE_3_CONTRACTS.md` & Matriks UAT; siap eksekusi **`P3-02`** oleh `cw-backend-dev`) |
 | **Last Updated** | 2026-11-10 |
-| **Updated By** | Product Manager & Primary Agent (`Phase 2 Closing Gate Sign-Off`) |
+| **Updated By** | Product Manager (`P3-01`) |
 
 ---
 
@@ -66,7 +66,7 @@ Status yang diizinkan: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 | **Phase 0 (Docs)** | PRD, AGENTS.md, 4 Subagent, Napkin & Context Ledger | `DONE` | 2026-11-10 | 2026-11-10 | [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#001` |
 | **Phase 1** | Fondasi Sistem, Master Data & Penerimaan Transaksi (DP & Voucher) | `DONE` | 2026-11-10 | 2026-11-10 | [PHASE_1_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_1_CONTRACTS.md), [PHASE_1_CLOSING_EVIDENCE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_1_CLOSING_EVIDENCE.md), & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#002`–`#009` |
 | **Phase 2** | Operasional Produksi, Timbang Ulang, Ubah/Batal & Kompensasi Insiden | `DONE` | 2026-11-10 | 2026-11-10 | [PHASE_2_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_2_CONTRACTS.md), [PHASE_2_CLOSING_EVIDENCE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_2_CLOSING_EVIDENCE.md), & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#010`–`#016` |
-| **Phase 3** | Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening | `NOT_STARTED` | — | — | Siap memulai `P3-01` (Phase 2 resmi `DONE`) |
+| **Phase 3** | Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening | `IN_PROGRESS` | 2026-11-10 | — | [PHASE_3_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_3_CONTRACTS.md) & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#017` |
 
 ---
 
@@ -90,7 +90,7 @@ Status yang diizinkan: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - [x] `P2-06` (`fullstack-developer` + `product-manager`): Integrasi notifikasi/indikator lintas aktor, E2E tests Phase 2, audit 6 Gerbang, & Phase 2 Sign-off ([PHASE_2_CLOSING_EVIDENCE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_2_CLOSING_EVIDENCE.md)).
 
 ### Phase 3 — Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening
-- [ ] `P3-01` (`product-manager`): Matriks UAT lengkap 14 Use Case & 9 Kondisi Khusus + spesifikasi Dashboard/Audit view.
+- [x] `P3-01` (`product-manager`): Matriks UAT lengkap 14 Use Case & 9 Kondisi Khusus + spesifikasi Dashboard/Audit view ([PHASE_3_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_3_CONTRACTS.md)).
 - [ ] `P3-02` (`backend-developer`): `PengantaranService` (`Pengantaran` + `ItemPengantaran` `*..*`, status berurutan, `jadwalkanUlang` independen `KK-07`).
 - [ ] `P3-03` (`backend-developer`): `SerahTerimaService` (`cekHakBayarAkhir` `KK-06`, `catatPelunasan`, `updateStatusLunas`) & endpoint Dashboard/Audit Log.
 - [ ] `P3-04` (`frontend-developer`): UI Kurir (`PetugasPengantaran`), modal Pelunasan & Serah Terima Kasir, Dashboard & Audit Trail viewer.
