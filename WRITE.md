@@ -145,3 +145,35 @@
 - **Next Exact Action:**
   1. Setelah review & merge `feature/p1-03-schema-auth` ke `main`, delegasikan **`P1-04`** ke `backend-developer` pada branch `feature/p1-04-master-crud` untuk membangun `PelangganService`/`Controller`/`Policy`, `JenisLayananService`/`Controller` (sinkronisasi `TahapLayanan`), dan `VoucherService::cekValiditasPreview()` + `VoucherController` (`POST /voucher/validate`) beserta automated tests (`AC-P1-04` s.d. `AC-P1-06`).
   2. Secara paralel setelah `P1-03` di-merge, **`P1-06`** (`frontend-developer`) dapat mulai membangun `resources/js/types/` sinkron dengan `PHASE_1_CONTRACTS.md` §3, `AppLayout` per peran, `Auth/Login.tsx`, dan `Dashboard/Index.tsx`, lalu terintegrasi dengan `P1-04` & `P1-05`.
+
+### [#005] 2026-11-10 13:40 — Backend Developer (`cw-backend-dev`) — Phase 1 (`P1-04`)
+- **Status:** `READY_FOR_REVIEW`
+- **Ringkasan Kegiatan:**
+  - Melakukan Context Sync (`PRD.md`, `AGENTS.md`, `MEMORY.md`, `WRITE.md` `#002`–`#004`, `.claude/napkin.md`, `napkin/PR_REVIEW_LIFECYCLE.md`, `docs/phases/PHASE_1_CONTRACTS.md`) dan membuat branch `feature/p1-04-master-crud` dari `main`.
+  - Menerapkan TDD (Red $\rightarrow$ Green $\rightarrow$ Refactor): menulis `tests/Feature/MasterPelangganTest.php`, `tests/Feature/MasterJenisLayananTest.php`, dan `tests/Feature/MasterVoucherTest.php` (17 test gagal awal pada fase Red) sebelum implementasi layanan & endpoint.
+  - Mengimplementasikan Master **`Pelanggan`**: `PelangganService` (paginasi + pencarian `nama`/`no_telepon` aman LIKE escaping via `App\Support\SqlLike`, create/update, blokir delete bila memiliki `Transaksi`), `BasePelangganRequest`/`StorePelangganRequest`/`UpdatePelangganRequest`, `PelangganPolicy`, dan `PelangganController` (`Pelanggan/Index`, kontrak §3.2).
+  - Mengimplementasikan Master **`JenisLayanan` + `TahapLayanan`**: `JenisLayananService` (dalam `DB::transaction()`, normalisasi `harga_satuan` via `DecimalMoney`, sinkronisasi otomatis urutan kanonik atau validasi tahapan kustom tanpa `DISETRIKA` jika `perlu_setrika = false`, blokir delete bila dipakai `Transaksi`), `BaseJenisLayananRequest`/`StoreJenisLayananRequest`/`UpdateJenisLayananRequest` (pasangan wajib `BERAT <-> kg` & `JUMLAH <-> pcs`, unik `(nama_layanan, tingkat_kecepatan)`), `JenisLayananPolicy`, dan `JenisLayananController` (`Layanan/Index`, kontrak §3.3).
+  - Mengimplementasikan Master **`Voucher`** & validasi **`KK-03`**: accessor `Voucher::$appends = ['effective_status']` (deteksi dinamis kedaluwarsa zona `Asia/Jakarta` walau status DB masih `TERSEDIA`), `VoucherService` (filter status efektif, normalisasi kode uppercase, proteksi ubah/hapus voucher `SUDAH_DIGUNAKAN` atau terhubung `Transaksi`, serta `cekValiditasPreview()`), `StoreVoucherRequest`/`UpdateVoucherRequest`/`ValidateVoucherRequest`, `VoucherPolicy`, dan `VoucherController` (`Voucher/Index` + `POST /voucher/validate` JSON `200`/`422`, kontrak §3.4).
+  - Mendaftarkan route `/pelanggan`, `/layanan`, `/voucher`, dan `POST /voucher/validate` pada middleware `['auth', 'role:PETUGAS']` di `routes/web.php`, mendaftarkan Policies di `AppServiceProvider`, serta menjaga `resources/js/` dan `resources/css/` tidak tersentuh sama sekali.
+- **File Dibuat / Diubah:**
+  - `app/Support/SqlLike.php` — Helper escaping wildcard `LIKE` untuk pencarian master
+  - `app/Models/Voucher.php` — Penambahan appended attribute `effective_status` (zona `Asia/Jakarta`)
+  - `app/Providers/AppServiceProvider.php` — Registrasi eksplisit `PelangganPolicy`, `JenisLayananPolicy`, `VoucherPolicy`
+  - `app/Policies/Concerns/ChecksPetugasRole.php`, `app/Policies/{PelangganPolicy,JenisLayananPolicy,VoucherPolicy}.php` — Otorisasi RBAC aktif `PETUGAS`
+  - `app/Http/Requests/Concerns/AuthorizesPetugasRequest.php`, `app/Http/Requests/Master/{BasePelangganRequest,StorePelangganRequest,UpdatePelangganRequest,BaseJenisLayananRequest,StoreJenisLayananRequest,UpdateJenisLayananRequest,StoreVoucherRequest,UpdateVoucherRequest,ValidateVoucherRequest}.php` — FormRequest validation & normalisasi input
+  - `app/Services/{PelangganService,JenisLayananService,VoucherService}.php` — Domain service layer CRUD master, sinkronisasi `TahapLayanan`, dan `cekValiditasPreview()`
+  - `app/Http/Controllers/Controller.php`, `app/Http/Controllers/{PelangganController,JenisLayananController,VoucherController}.php`, `routes/web.php` — Controller Inertia/JSON, helper `executeWithFlashRedirect`, & proteksi route `role:PETUGAS`
+  - `tests/Feature/{MasterPelangganTest,MasterJenisLayananTest,MasterVoucherTest}.php` — Feature tests mencakup `AC-P1-04`, `AC-P1-05`, `AC-P1-06`, dan `AC-P1-09`
+  - `MEMORY.md`, `.claude/napkin.md`, `WRITE.md` — Update checklist `[x] P1-04`, aturan Policy `403` vs validasi bisnis `422`, & Entry `#005`
+- **Verifikasi / Bukti Uji:**
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` (`exit code 0`)
+  - `php artisan test` -> `36 passed (749 assertions)` pada MySQL 8.4 port `3307` (`cleanwash_testing`) (`exit code 0`)
+  - `npx tsc --noEmit && npm run build` -> 0 error TS, Vite production build (`654 modules transformed`) (`exit code 0`)
+  - `php artisan migrate:fresh --seed --no-interaction && php artisan migrate:rollback --no-interaction && php artisan migrate --seed --no-interaction` -> 18 migrasi + rollback + migrasi ulang + seed bersih (`exit code 0`)
+  - `php artisan route:list --except-vendor` -> 18 route terdaftar lengkap (`pelanggan.*`, `layanan.*`, `voucher.*`, `voucher.validate`)
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Ditambahkan catatan di `.claude/napkin.md` mengenai pemisahan Policy `403` (RBAC peran) vs `ValidationException` `422`/flash error (penolakan kondisi bisnis saat hapus data berelasi `Transaksi` atau ubah/hapus voucher `SUDAH_DIGUNAKAN`) dan evaluasi dinamis `Voucher.effective_status`.
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  1. Setelah review & merge `feature/p1-04-master-crud` ke `main`, delegasikan **`P1-05`** ke `cw-backend-dev` pada branch `feature/p1-05-reception-engine` dari `main` untuk membangun `VoucherService::validasiDanKunci()` (`DB::transaction()` + `lockForUpdate()`, `KK-03`), `TransaksiService::buatTransaksi()` (`nomor_nota`, `harga_satuan_snapshot` `KK-09`, `DetailPakaian` `1..*`, `RiwayatStatusProduksi = DITERIMA`, `audit_logs`), `PembayaranService::catatUangMuka()`, `TransaksiController`, dan automated tests (`AC-P1-07` s.d. `AC-P1-12`).
+  2. Paralel **`P1-06`** (`frontend-developer`) dapat mengonsumsi kontrak `/pelanggan`, `/layanan`, `/voucher`, dan `POST /voucher/validate` yang telah siap.

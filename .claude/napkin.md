@@ -54,6 +54,8 @@ Dilarang mencatat log kronologis harian di file ini — **catat log aktivitas di
    Do instead: Panggil `cekHakBayarAkhir()` sebelum serah terima (tolak bila sisa > 0 dan `boleh_bayar_akhir === false`), serta kelola status antar & `jadwalkanUlang()` pada level `ItemPengantaran` per `nomor_nota`, bukan level header `Pengantaran`.
 6. **[2026-11-10] PHP 8.4 lokal tidak memiliki ekstensi `bcmath` sehingga `bcadd`/`bcmul` fatal error**
    Do instead: Hindari fungsi `bcmath` dan `float` untuk nominal uang/kuantitas; gunakan helper aritmatika integer-scaled decimal (`App\Support\DecimalMoney` skala 100 / sen) bersama kolom MySQL `DECIMAL(12,2)`.
+7. **[2026-11-10] Policy `false` mengembalikan `403`, sedangkan penolakan kondisi bisnis harus `422` + flash/error**
+   Do instead: Batasi Laravel Policy hanya untuk otorisasi peran aktif, lalu lempar `ValidationException` (`422` JSON atau redirect `flash.error` + `errors` untuk Inertia) ketika memblokir penghapusan master yang berelasi `Transaksi` atau modifikasi/hapus `Voucher` berstatus `SUDAH_DIGUNAKAN`. Hitung juga `Voucher.effective_status` secara dinamis terhadap tanggal `Asia/Jakarta` agar voucher `TERSEDIA` yang melewati `masa_berlaku` tetap terdeteksi kedaluwarsa.
 
 ---
 

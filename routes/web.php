@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\JenisLayananController;
+use App\Http\Controllers\PelangganController;
+use App\Http\Controllers\VoucherController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,4 +24,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->middleware('role:PETUGAS,PEGAWAI,PENGANTAR')
         ->name('dashboard');
+
+    Route::middleware('role:PETUGAS')->group(function () {
+        Route::resource('pelanggan', PelangganController::class)
+            ->only(['index', 'store', 'update', 'destroy']);
+
+        Route::resource('layanan', JenisLayananController::class)
+            ->only(['index', 'store', 'update', 'destroy']);
+
+        Route::post('/voucher/validate', [VoucherController::class, 'validateCode'])
+            ->name('voucher.validate');
+        Route::resource('voucher', VoucherController::class)
+            ->only(['index', 'store', 'update', 'destroy']);
+    });
 });
