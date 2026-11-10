@@ -239,3 +239,52 @@
 - **Next Exact Action:**
   1. Lakukan cross-agent review & merge `feature/p1-06-frontend-ui` ke `main` sesuai `napkin/PR_REVIEW_LIFECYCLE.md`.
   2. Delegasikan **`P1-07`** ke `cw-fullstack-dev` + `product-manager` pada branch `feature/p1-07-nota-gate` dari `main` untuk membuat halaman cetak `resources/js/Pages/Transaksi/Nota.tsx` (`@media print`), uji E2E alur penerimaan $\rightarrow$ voucher $\rightarrow$ DP $\rightarrow$ cetak nota $\rightarrow$ verifikasi `KK-09`, audit 6 Gerbang Kualitas, dan Phase 1 Sign-off.
+
+### [#008] 2026-11-10 16:25 — Fullstack Developer (`P1-07`) — Phase 1 (`P1-07`)
+- **Status:** `READY_FOR_REVIEW`
+- **Ringkasan Kegiatan:**
+  - Melakukan Context Sync (`PRD.md` §7.1/§8/§14, `AGENTS.md`, `MEMORY.md`, `WRITE.md` `#004`–`#007`, `.claude/napkin.md`, `napkin/PR_REVIEW_LIFECYCLE.md`, `docs/phases/PHASE_1_CONTRACTS.md` §3.5 `TransaksiNotaProps` & §4 `AC-P1-01..AC-P1-12`) serta membuat branch `feature/p1-07-nota-gate` dari `main`.
+  - Mengimplementasikan halaman cetak nota resmi `resources/js/Pages/Transaksi/Nota.tsx` menggunakan kontrak `TransaksiNotaProps`, helper `formatRupiah`, `formatTanggal` (`Asia/Jakarta`), `parseDecimalToCents`, dan komponen badge (`StatusBadge.tsx`), serta aturan `@media print` / Tailwind `print:` utilities: baris aksi navigasi (`Kembali ke Detail`, `Daftar Transaksi`, tombol `Cetak Nota` memanggil `window.print()`) dengan kelas `print:hidden`; isi nota lengkap (`AC-P1-12`) mencakup header CleanWash, Nomor Nota `CW-...`, tanggal penerimaan WIB, petugas penerima, identitas pelanggan beserta penanda `PayLaterBadge` bila `boleh_bayar_akhir = true`, rincian layanan (`nama_layanan`, `tingkat_kecepatan`, `berat_atau_jumlah` + `satuan`, `harga_satuan_snapshot`, serta tahapan produksi layanan), tabel `DetailPakaian`, catatan khusus (bila ada), ringkasan finansial (`Subtotal Layanan`, `Potongan Voucher` + kode voucher, `Total Harga`, tabel `Riwayat Pembayaran / DP`, `Sisa Tagihan`), status pembayaran, tahap produksi terkini, dan footer tanda tangan resmi. Menambahkan aturan `@page` A4 & `print-color-adjust: exact` pada `resources/css/app.css`.
+  - Menghapus seluruh parameter `shouldExist: false` pada `assertInertia()` di 6 file test eksisting (`ExampleTest.php`, `AuthAndRbacTest.php`, `MasterPelangganTest.php`, `MasterJenisLayananTest.php`, `MasterVoucherTest.php`, `TransaksiReceptionTest.php`) sehingga `config('inertia.testing.ensure_pages_exist') === true` memverifikasi keberadaan seluruh 9 file `.tsx` nyata di `resources/js/Pages/`.
+  - Menulis test integrasi E2E `tests/Feature/Phase1EndToEndTest.php` **tanpa** `$this->withoutVite()` (memverifikasi `public/build/manifest.json` nyata dan seluruh 9 halaman Inertia Phase 1): login Petugas $\rightarrow$ `/dashboard` $\rightarrow$ buat `Pelanggan` (`boleh_bayar_akhir = false`) $\rightarrow$ buat `JenisLayanan` (`Cuci Sepatu Kilat`, `JUMLAH`/`pcs`, `perlu_setrika = false`, `30000.00`, `TahapLayanan` tanpa `DISETRIKA`) $\rightarrow$ buat `Voucher` (`CLEAN10K`, `10000.00`, +14 hari) $\rightarrow$ cek `POST /voucher/validate` (`200 valid`) $\rightarrow$ `POST /transaksi` (2 baris `DetailPakaian`, qty `2`, `CLEAN10K`, `nominal_dp = 20000.00`) $\rightarrow$ verifikasi redirect `/transaksi/{nota}`, buka `Transaksi/Show` & `Transaksi/Nota` (`subtotal = 60000.00`, `voucher = 10000.00`, `total_harga = 50000.00`, `total_dibayar = 20000.00`, `sisa_tagihan = 30000.00`, `status_pembayaran = DP`, voucher `SUDAH_DIGUNAKAN`) $\rightarrow$ verifikasi `KK-09` (ubah tarif master jadi `45000.00` via `PUT /layanan/{id}`, buka ulang `/transaksi/{nota}/nota`, snapshot tetap `30000.00` / `50000.00` / `30000.00`) $\rightarrow$ verifikasi `KK-03` (pakai ulang `CLEAN10K` via `/voucher/validate` & `POST /transaksi` ditolak `422`) $\rightarrow$ verifikasi RBAC lintas aktor (`PEGAWAI` & `PENGANTAR` ditolak `403` di `/transaksi/{nota}/nota`).
+  - Memperbarui urutan langkah di `.github/workflows/ci.yml` agar `npx tsc --noEmit` dan `npm run build` dijalankan sebelum `php artisan test` sehingga manifest Vite tersedia untuk test E2E tanpa `withoutVite()`.
+- **File Dibuat / Diubah:**
+  - `resources/js/Pages/Transaksi/Nota.tsx` — Halaman cetak nota resmi CleanWash (`@media print` / `print:`)
+  - `resources/css/app.css` — Aturan `@media print` (`@page` A4 & `print-color-adjust: exact`)
+  - `tests/Feature/Phase1EndToEndTest.php` — E2E integration test Phase 1 lengkap tanpa `withoutVite()`
+  - `tests/Feature/{ExampleTest,AuthAndRbacTest,MasterPelangganTest,MasterJenisLayananTest,MasterVoucherTest,TransaksiReceptionTest}.php` — Hapus `shouldExist: false` agar `ensure_pages_exist = true` aktif penuh
+  - `.github/workflows/ci.yml` — Jalankan `npx tsc --noEmit` & `npm run build` sebelum `php artisan test`
+  - `MEMORY.md`, `.claude/napkin.md`, `WRITE.md` — Update status `P1-07` siap PM Gate, catatan Vite manifest di CI/E2E, dan Entry `#008`
+- **Verifikasi / Bukti Uji:**
+  - `npm run build` -> Vite production build (`670 modules transformed`, `public/build/manifest.json`, `Nota-sCuLIZu-.js`) -> `exit code 0`
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` -> `exit code 0`
+  - `npx tsc --noEmit` -> `0 errors` (`strict: true`) -> `exit code 0`
+  - `php artisan test` -> `54 passed (1435 assertions)` pada MySQL 8.4 port `3307` (`cleanwash_testing`), termasuk `Phase1EndToEndTest` & `VoucherConcurrencyTest` -> `exit code 0`
+  - `php artisan migrate:fresh --seed --no-interaction && php artisan migrate:rollback --no-interaction && php artisan migrate --seed --no-interaction` -> 18 migrasi + `CleanWashSeeder` + rollback 18 migrasi + re-migrate + re-seed bersih -> `exit code 0`
+  - Audit hygiene (`grep` `console.log` di `resources/js`, `dd`/`dump`/`var_dump` di `app/`, `shouldExist` di `tests/`) -> `0` temuan; `git status` bersih tanpa `.env`/secret/file build tracked.
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Checkbox `P1-07` & status `Phase 1 -> DONE` di `MEMORY.md` sengaja dibiarkan terbuka menunggu audit & tanda tangan Phase 1 Closing Gate oleh `product-manager`.
+  - Ditambahkan catatan #7 di `.claude/napkin.md` mengenai penghapusan `shouldExist: false` setelah file `.tsx` tersedia dan keharusan menjalankan `npm run build` sebelum `php artisan test` di CI/lokal untuk test tanpa `withoutVite()`.
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  - Delegasikan ke **`product-manager`** untuk mengeksekusi audit **`AC-P1-01` s.d. `AC-P1-12`**, meninjau branch `feature/p1-07-nota-gate` terhadap 6 Gerbang Kualitas, menandatangani **Phase 1 Closing Gate** (`[x] P1-07` & `Phase 1 -> DONE` di `MEMORY.md` + entri `WRITE.md`), serta melakukan Squash & Merge ke `main` sebelum membuka `P2-01`.
+
+### [#009] 2026-11-10 16:33 — Product Manager (`product-manager`) + Primary Agent — Phase 1 Closing Gate (`P1-07`)
+- **Status:** `DONE`
+- **Ringkasan Kegiatan:**
+  - Melakukan Context Sync terhadap `PRD.md`, `AGENTS.md`, `MEMORY.md`, `WRITE.md` (`#001`–`#008`), `.claude/napkin.md`, `napkin/PR_REVIEW_LIFECYCLE.md`, dan `docs/phases/PHASE_1_CONTRACTS.md`.
+  - Melaksanakan audit adversarial silang oleh `product-manager` atas implementasi aktual di branch `feature/p1-07-nota-gate` terhadap seluruh 12 Acceptance Criteria (`AC-P1-01` s.d. `AC-P1-12`), cakupan SRS Phase 1 (`UC-01` DP, `UC-03..UC-09`, `KK-03`, `KK-09`, *Activity 1*, *Sequence 1*), dan 6 Gerbang Kualitas di `napkin/PR_REVIEW_LIFECYCLE.md`.
+  - Menyetujui (`APPROVED`) **Phase 1 Closing Gate**, menyusun dokumen bukti `docs/phases/PHASE_1_CLOSING_EVIDENCE.md`, memperbarui `MEMORY.md` (`[x] P1-07`, `Phase 1 -> DONE`, `Current Phase -> Phase 2`, `Current Status -> NOT_STARTED`), serta mengeksekusi Squash & Merge `feature/p1-07-nota-gate` ke `main`.
+- **File Dibuat / Diubah:**
+  - `docs/phases/PHASE_1_CLOSING_EVIDENCE.md` — Laporan audit adversarial, matriks bukti `AC-P1-01`..`AC-P1-12`, & sign-off 6 Gerbang Phase 1
+  - `MEMORY.md` — Centang `[x] P1-07`, Phase 1 `DONE`, transisi Current Phase ke Phase 2 (`NOT_STARTED`)
+  - `WRITE.md` — Penambahan Entry `#009`
+- **Verifikasi / Bukti Uji:**
+  - Audit silang dokumen & kode (`AC-P1-01`..`AC-P1-12`, 54 metode test aktual pada 12 berkas test, 0 `shouldExist: false`, 0 `console.log`, 0 `dd/dump`, 0 `bcmath`/`(float)`) -> `APPROVED`.
+  - Full quality gate dijalankan ulang di `main` pasca Squash & Merge (`pint --test`, `tsc --noEmit`, `npm run build`, `php artisan test`, `migrate:fresh --seed && migrate:rollback && migrate --seed`) -> `exit code 0`.
+- **Keputusan / Blocker / Catatan Napkin:**
+  - **Phase 1 resmi `DONE`** dan seluruh Exit Criteria Phase 1 terpenuhi 100%.
+  - Catatan non-blocking untuk Phase 2: seragamkan `now('Asia/Jakarta')->toDateString()` di `DashboardController.php` baris 36.
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  - Mulai **Phase 2** dari `main`: delegasikan **`P2-01`** ke subagent `product-manager` (pada branch `docs/p2-01-rules-contracts`) untuk menyusun `docs/phases/PHASE_2_CONTRACTS.md` yang mengunci aturan bisnis, formula keuangan, state machine, kontrak API/Inertia Props, dan Acceptance Criteria `AC-P2-*` untuk `UC-10`, `UC-11`, `UC-12`, `UC-13`, `KK-01`, `KK-02`, `KK-04`/`KK-05`, dan `KK-08`.

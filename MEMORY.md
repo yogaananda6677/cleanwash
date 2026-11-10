@@ -12,10 +12,10 @@ Dokumen ini adalah memori status arsitektur proyek **CleanWash** untuk manusia d
 | --- | --- |
 | **Product** | CleanWash — Sistem Informasi Manajemen Operasional Laundry |
 | **SRS Reference** | [UTS.pdf](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/Outputtts/UTS.pdf) & [2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx) |
-| **Current Phase** | Phase 1 — Fondasi Sistem, Master Data & Penerimaan Transaksi |
-| **Current Status** | `IN_PROGRESS` (`P1-01` s.d. `P1-06` selesai; siap review/merge `P1-06` & lanjut `P1-07` Nota Cetak & Phase 1 Gate) |
+| **Current Phase** | Phase 2 — Operasional Produksi, Penimbangan Ulang, Penyesuaian & Kompensasi Insiden |
+| **Current Status** | `NOT_STARTED` (Phase 1 `DONE` & di-merge ke `main`; siap memulai `P2-01` oleh `product-manager`) |
 | **Last Updated** | 2026-11-10 |
-| **Updated By** | Frontend Developer (`cw-frontend-dev`) — P1-06 UI Login, App Shell Berbasis Peran, Dashboard, Master CRUD & Form Kasir Penerimaan Nota |
+| **Updated By** | Product Manager + Primary Agent — Phase 1 Closing Gate Sign-Off (`P1-07`) |
 
 ---
 
@@ -64,8 +64,8 @@ Status yang diizinkan: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 | Phase | Scope | Status | Started | Completed | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | **Phase 0 (Docs)** | PRD, AGENTS.md, 4 Subagent, Napkin & Context Ledger | `DONE` | 2026-11-10 | 2026-11-10 | [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#001` |
-| **Phase 1** | Fondasi Sistem, Master Data & Penerimaan Transaksi (DP & Voucher) | `IN_PROGRESS` | 2026-11-10 | — | [PHASE_1_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_1_CONTRACTS.md) & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#002`–`#006` |
-| **Phase 2** | Operasional Produksi, Timbang Ulang, Ubah/Batal & Kompensasi Insiden | `NOT_STARTED` | — | — | Menunggu Phase 1 `DONE` |
+| **Phase 1** | Fondasi Sistem, Master Data & Penerimaan Transaksi (DP & Voucher) | `DONE` | 2026-11-10 | 2026-11-10 | [PHASE_1_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_1_CONTRACTS.md), [PHASE_1_CLOSING_EVIDENCE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_1_CLOSING_EVIDENCE.md), & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#002`–`#009` |
+| **Phase 2** | Operasional Produksi, Timbang Ulang, Ubah/Batal & Kompensasi Insiden | `NOT_STARTED` | — | — | Menunggu `P2-01` |
 | **Phase 3** | Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening | `NOT_STARTED` | — | — | Menunggu Phase 2 `DONE` |
 
 ---
@@ -79,7 +79,7 @@ Status yang diizinkan: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - [x] `P1-04` (`backend-developer`): CRUD Master `Pelanggan` (`boleh_bayar_akhir`), `JenisLayanan` + `TahapLayanan`, dan `Voucher`.
 - [x] `P1-05` (`backend-developer`): Engine Penerimaan `Transaksi` + `DetailPakaian`, `harga_satuan_snapshot` (`KK-09`), validasi/lock atomik `Voucher` (`KK-03`), DP `Pembayaran`, & automated tests.
 - [x] `P1-06` (`frontend-developer`): UI Login, App Shell per peran, Master CRUD pages, dan Form Kasir Penerimaan Nota dinamis.
-- [ ] `P1-07` (`fullstack-developer` + `product-manager`): Halaman Detail & Cetak Nomor Nota, integrasi E2E Phase 1, audit 6 Gerbang, & Phase 1 Sign-off.
+- [x] `P1-07` (`fullstack-developer` + `product-manager`): Halaman Detail & Cetak Nomor Nota, integrasi E2E Phase 1, audit 6 Gerbang, & Phase 1 Sign-off ([PHASE_1_CLOSING_EVIDENCE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_1_CLOSING_EVIDENCE.md)).
 
 ### Phase 2 — Operasional Produksi, Timbang Ulang, Penyesuaian & Kompensasi Insiden
 - [ ] `P2-01` (`product-manager`): Spesifikasi aturan selisih ubah layanan, biaya pembatalan setelah cuci, dan formula kompensasi.

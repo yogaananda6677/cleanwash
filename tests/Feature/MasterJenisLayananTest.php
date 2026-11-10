@@ -126,7 +126,7 @@ class MasterJenisLayananTest extends TestCase
             ->get('/layanan')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('Layanan/Index', shouldExist: false)
+                ->component('Layanan/Index')
                 ->where('filters.search', '')
                 ->has('layanan.data', 2)
                 ->where('layanan.data.0.id_layanan', $cuciSepatu->id_layanan)
@@ -140,7 +140,7 @@ class MasterJenisLayananTest extends TestCase
             ->get('/layanan?search=Sepatu')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('Layanan/Index', shouldExist: false)
+                ->component('Layanan/Index')
                 ->where('filters.search', 'Sepatu')
                 ->has('layanan.data', 1)
                 ->where('layanan.data.0.id_layanan', $cuciSepatu->id_layanan)

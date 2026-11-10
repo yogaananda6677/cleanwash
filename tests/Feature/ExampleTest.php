@@ -21,7 +21,7 @@ class ExampleTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertInertia(fn (Assert $page) => $page
-            ->component('Auth/Login', shouldExist: false)
+            ->component('Auth/Login')
             ->where('auth.user', null)
             ->has('flash')
         );

@@ -364,7 +364,7 @@ class TransaksiReceptionTest extends TestCase
             ->get("/transaksi/{$oldTransaksi->nomor_nota}")
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('Transaksi/Show', shouldExist: false)
+                ->component('Transaksi/Show')
                 ->where('transaksi.harga_satuan_snapshot', '8000.00')
                 ->where('transaksi.subtotal_layanan', '24000.00')
                 ->where('transaksi.total_harga', '24000.00')
@@ -629,7 +629,7 @@ class TransaksiReceptionTest extends TestCase
             ->get('/transaksi/create')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('Transaksi/Create', shouldExist: false)
+                ->component('Transaksi/Create')
                 ->has('pelangganOptions', 2)
                 ->where('pelangganOptions.0.nama', 'Andi Wijaya')
                 ->where('pelangganOptions.0.boleh_bayar_akhir', true)
@@ -674,7 +674,7 @@ class TransaksiReceptionTest extends TestCase
         $indexResponse
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('Transaksi/Index', shouldExist: false)
+                ->component('Transaksi/Index')
                 ->where('filters.search', '')
                 ->where('filters.status_pembayaran', '')
                 ->has('transaksi.data', 10)
@@ -686,7 +686,7 @@ class TransaksiReceptionTest extends TestCase
             ->get('/transaksi?search=Andi&status_pembayaran=DP')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('Transaksi/Index', shouldExist: false)
+                ->component('Transaksi/Index')
                 ->where('filters.search', 'Andi')
                 ->where('filters.status_pembayaran', 'DP')
                 ->has('transaksi.data', 1)
@@ -732,7 +732,7 @@ class TransaksiReceptionTest extends TestCase
                 ->get($uri)
                 ->assertOk()
                 ->assertInertia(fn (Assert $page) => $page
-                    ->component($component, shouldExist: false)
+                    ->component($component)
                     ->where('transaksi.nomor_nota', $targetNota)
                     ->where('transaksi.berat_atau_jumlah', '2.50')
                     ->where('transaksi.harga_satuan_snapshot', '8000.00')

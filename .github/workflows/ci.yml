@@ -74,11 +74,11 @@ jobs:
           php artisan migrate --force --no-interaction
           php artisan migrate:rollback --force --no-interaction
 
-      - name: Run PHPUnit test suite
-        run: php artisan test
-
       - name: Run TypeScript type check
         run: npx tsc --noEmit
 
       - name: Build production frontend assets
         run: npm run build
+
+      - name: Run PHPUnit test suite
+        run: php artisan test

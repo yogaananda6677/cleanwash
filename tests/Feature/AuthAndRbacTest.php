@@ -32,7 +32,7 @@ class AuthAndRbacTest extends TestCase
         $response = $this->get('/login');
         $response->assertOk();
         $response->assertInertia(fn (Assert $page) => $page
-            ->component('Auth/Login', shouldExist: false)
+            ->component('Auth/Login')
             ->where('auth.user', null)
             ->has('flash')
         );
@@ -87,7 +87,7 @@ class AuthAndRbacTest extends TestCase
             $dashboardResponse = $this->get('/dashboard');
             $dashboardResponse->assertOk();
             $dashboardResponse->assertInertia(fn (Assert $page) => $page
-                ->component('Dashboard/Index', shouldExist: false)
+                ->component('Dashboard/Index')
                 ->where('auth.user.id', $user->id)
                 ->where('auth.user.name', $user->name)
                 ->where('auth.user.email', $user->email)

@@ -101,7 +101,7 @@ class MasterPelangganTest extends TestCase
             ->get('/pelanggan')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('Pelanggan/Index', shouldExist: false)
+                ->component('Pelanggan/Index')
                 ->where('filters.search', '')
                 ->has('pelanggan.data', 2)
                 ->where('pelanggan.total', 2)
@@ -114,7 +114,7 @@ class MasterPelangganTest extends TestCase
             ->get('/pelanggan?search=Siti')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('Pelanggan/Index', shouldExist: false)
+                ->component('Pelanggan/Index')
                 ->where('filters.search', 'Siti')
                 ->has('pelanggan.data', 1)
                 ->where('pelanggan.data.0.id_pelanggan', $siti->id_pelanggan)
@@ -124,7 +124,7 @@ class MasterPelangganTest extends TestCase
             ->get('/pelanggan?search=081111')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('Pelanggan/Index', shouldExist: false)
+                ->component('Pelanggan/Index')
                 ->where('filters.search', '081111')
                 ->has('pelanggan.data', 1)
                 ->where('pelanggan.data.0.id_pelanggan', $budi->id_pelanggan)

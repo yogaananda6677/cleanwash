@@ -116,7 +116,7 @@ class MasterVoucherTest extends TestCase
             ->get('/voucher?search=STALEEXP')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('Voucher/Index', shouldExist: false)
+                ->component('Voucher/Index')
                 ->where('filters.search', 'STALEEXP')
                 ->has('voucher.data', 1)
                 ->where('voucher.data.0.nomor_voucher', 'STALEEXP')
@@ -128,7 +128,7 @@ class MasterVoucherTest extends TestCase
             ->get('/voucher?status=TERSEDIA')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('Voucher/Index', shouldExist: false)
+                ->component('Voucher/Index')
                 ->where('filters.status', 'TERSEDIA')
                 ->has('voucher.data', 1)
                 ->where('voucher.data.0.nomor_voucher', 'AKTIF10K')
@@ -139,7 +139,7 @@ class MasterVoucherTest extends TestCase
             ->get('/voucher?status=KEDALUWARSA')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('Voucher/Index', shouldExist: false)
+                ->component('Voucher/Index')
                 ->where('filters.status', 'KEDALUWARSA')
                 ->has('voucher.data', 1)
                 ->where('voucher.data.0.nomor_voucher', 'STALEEXP')

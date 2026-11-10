@@ -24,6 +24,8 @@ Dilarang mencatat log kronologis harian di file ini — **catat log aktivitas di
    Do instead: Publish `config/inertia.php`, ubah `'paths' => [resource_path('js/Pages')]`, dan atur `INERTIA_SSR_ENABLED` default `false` untuk mode CSR Vite.
 6. **[2026-11-10] `assertInertia()` atau `@vite` gagal pada test backend ketika TSX belum dibuat atau manifest Vite belum di-build di CI**
    Do instead: Panggil `$this->withoutVite()` pada feature test Inertia dan gunakan `$page->component('Nama/Halaman', shouldExist: false)` jika halaman React (`resources/js/Pages/...`) baru dibuat pada task FE berikutnya.
+7. **[2026-11-10] Test E2E tanpa `withoutVite()` gagal di CI jika `php artisan test` dijalankan sebelum `npm run build`**
+   Do instead: Setelah seluruh halaman `.tsx` selesai dibuat, hapus parameter `shouldExist: false` agar `config('inertia.testing.ensure_pages_exist') === true` aktif penuh, serta pastikan `npx tsc --noEmit` dan `npm run build` dijalankan sebelum `php artisan test` (baik lokal maupun di `.github/workflows/ci.yml`) agar `public/build/manifest.json` selalu up-to-date.
 
 ---
 
