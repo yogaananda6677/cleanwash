@@ -174,8 +174,7 @@ class AuditAndDashboardPhase3Test extends TestCase
 
         $response->assertOk();
         $response->assertInertia(fn (Assert $page) => $page
-            // Temporary shouldExist: false until P3-04 creates SerahTerima/Index.tsx and Audit/Index.tsx
-            ->component('Audit/Index', shouldExist: false)
+            ->component('Audit/Index')
             ->where('logs.per_page', 15)
             ->has('logs.data', 15)
             ->has('availableActions', 13)
@@ -191,8 +190,7 @@ class AuditAndDashboardPhase3Test extends TestCase
             ->get('/audit?action=SERAH_TERIMA&actor_role=PETUGAS&search=Kasir_50%25')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                // Temporary shouldExist: false until P3-04 creates SerahTerima/Index.tsx and Audit/Index.tsx
-                ->component('Audit/Index', shouldExist: false)
+                ->component('Audit/Index')
                 ->where('filters.action', 'SERAH_TERIMA')
                 ->where('filters.actor_role', UserRole::PETUGAS->value)
                 ->where('filters.search', 'Kasir_50%')
@@ -205,8 +203,7 @@ class AuditAndDashboardPhase3Test extends TestCase
             ->get("/audit?actor_role=PEGAWAI&search={$targetNota}")
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                // Temporary shouldExist: false until P3-04 creates SerahTerima/Index.tsx and Audit/Index.tsx
-                ->component('Audit/Index', shouldExist: false)
+                ->component('Audit/Index')
                 ->has('logs.data', 4)
             );
     }

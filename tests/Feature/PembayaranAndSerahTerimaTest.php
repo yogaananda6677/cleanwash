@@ -204,8 +204,7 @@ class PembayaranAndSerahTerimaTest extends TestCase
 
         $response->assertOk();
         $response->assertInertia(fn (Assert $page) => $page
-            // Temporary shouldExist: false until P3-04 creates SerahTerima/Index.tsx and Audit/Index.tsx
-            ->component('SerahTerima/Index', shouldExist: false)
+            ->component('SerahTerima/Index')
             ->where('filters.mode', 'SIAP_AMBIL')
             ->where('filters.search', '100%_Reg')
             ->where('summary.siap_ambil_count', 2)
@@ -221,8 +220,7 @@ class PembayaranAndSerahTerimaTest extends TestCase
             ->get('/serah-terima?mode=PIUTANG')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                // Temporary shouldExist: false until P3-04 creates SerahTerima/Index.tsx and Audit/Index.tsx
-                ->component('SerahTerima/Index', shouldExist: false)
+                ->component('SerahTerima/Index')
                 ->where('filters.mode', 'PIUTANG')
                 ->has('transaksi.data', 2)
             );

@@ -218,8 +218,7 @@ class PengantaranOperationTest extends TestCase
                 ->get('/pengantaran')
                 ->assertOk()
                 ->assertInertia(fn (Assert $page) => $page
-                    // Temporary shouldExist: false until P3-04 creates Pengantaran UI
-                    ->component('Pengantaran/Index', shouldExist: false)
+                    ->component('Pengantaran/Index')
                     ->has('pengantaran.data', 1)
                     ->where('pengantaran.data.0.id_pengantaran', $sesiKurirA->id_pengantaran)
                     ->where('statusCounts.DIJADWALKAN', 1)
@@ -233,8 +232,7 @@ class PengantaranOperationTest extends TestCase
                 ->get('/pengantaran')
                 ->assertOk()
                 ->assertInertia(fn (Assert $page) => $page
-                    // Temporary shouldExist: false until P3-04 creates Pengantaran UI
-                    ->component('Pengantaran/Index', shouldExist: false)
+                    ->component('Pengantaran/Index')
                     ->has('pengantaran.data', 2)
                     ->where('statusCounts.DIJADWALKAN', 2)
                 );
@@ -244,8 +242,7 @@ class PengantaranOperationTest extends TestCase
                 ->get("/pengantaran/{$sesiKurirB->id_pengantaran}")
                 ->assertOk()
                 ->assertInertia(fn (Assert $page) => $page
-                    // Temporary shouldExist: false until P3-04 creates Pengantaran UI
-                    ->component('Pengantaran/Show', shouldExist: false)
+                    ->component('Pengantaran/Show')
                     ->where('pengantaran.id_pengantaran', $sesiKurirB->id_pengantaran)
                 );
         } finally {
@@ -519,8 +516,7 @@ class PengantaranOperationTest extends TestCase
 
             $indexResponse->assertOk()
                 ->assertInertia(fn (Assert $page) => $page
-                    // Temporary shouldExist: false until P3-04 creates Pengantaran UI
-                    ->component('Pengantaran/Index', shouldExist: false)
+                    ->component('Pengantaran/Index')
                     ->has('pengantaran.data', 10)
                     ->where('pengantaran.total', 11)
                     ->has('kurirOptions', 2)
@@ -536,8 +532,7 @@ class PengantaranOperationTest extends TestCase
                 ->get('/pengantaran?status_pengantaran=SELESAI&search='.$trxLunas->nomor_nota)
                 ->assertOk()
                 ->assertInertia(fn (Assert $page) => $page
-                    // Temporary shouldExist: false until P3-04 creates Pengantaran UI
-                    ->component('Pengantaran/Index', shouldExist: false)
+                    ->component('Pengantaran/Index')
                     ->has('pengantaran.data', 1)
                     ->where('pengantaran.data.0.id_pengantaran', $sesi->id_pengantaran)
                     ->where('pengantaran.data.0.item_selesai_count', 3)
@@ -556,8 +551,7 @@ class PengantaranOperationTest extends TestCase
 
             $showResponse->assertOk()
                 ->assertInertia(fn (Assert $page) => $page
-                    // Temporary shouldExist: false until P3-04 creates Pengantaran UI
-                    ->component('Pengantaran/Show', shouldExist: false)
+                    ->component('Pengantaran/Show')
                     ->where('pengantaran.id_pengantaran', $sesi->id_pengantaran)
                     ->has('pengantaran.items', 3)
                     ->where('pengantaran.items.2.bisa_jadwalkan_ulang', false)
@@ -587,8 +581,7 @@ class PengantaranOperationTest extends TestCase
             $this->assertLessThanOrEqual(18, count($kurirQueries), 'Possible N+1 query on courier GET /pengantaran: '.count($kurirQueries));
             $kurirIndexResponse->assertOk()
                 ->assertInertia(fn (Assert $page) => $page
-                    // Temporary shouldExist: false until P3-04 creates Pengantaran UI
-                    ->component('Pengantaran/Index', shouldExist: false)
+                    ->component('Pengantaran/Index')
                     ->has('eligibleTransaksiOptions', 0)
                 );
 
@@ -597,8 +590,7 @@ class PengantaranOperationTest extends TestCase
                 ->get('/pengantaran?tanggal_pengantaran=2026-11-11&id_petugas_antar='.$kurirB->id_petugas_antar)
                 ->assertOk()
                 ->assertInertia(fn (Assert $page) => $page
-                    // Temporary shouldExist: false until P3-04 creates Pengantaran UI
-                    ->component('Pengantaran/Index', shouldExist: false)
+                    ->component('Pengantaran/Index')
                     ->has('pengantaran.data', 1)
                     ->where('pengantaran.data.0.id_pengantaran', $sesiBaru->id_pengantaran)
                 );
@@ -650,8 +642,7 @@ class PengantaranOperationTest extends TestCase
                 ->get('/pengantaran?search=100%25')
                 ->assertOk()
                 ->assertInertia(fn (Assert $page) => $page
-                    // Temporary shouldExist: false until P3-04 creates Pengantaran UI
-                    ->component('Pengantaran/Index', shouldExist: false)
+                    ->component('Pengantaran/Index')
                     ->has('pengantaran.data', 1)
                     ->where('pengantaran.data.0.items.0.nomor_nota', $trxWildcard->nomor_nota)
                 );

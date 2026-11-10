@@ -646,3 +646,56 @@
   1. Lakukan cross-agent review & Squash Merge `feature/p3-04-frontend-ui` ke `main` sesuai `napkin/PR_REVIEW_LIFECYCLE.md`.
   2. Delegasikan **`P3-05`** (`fullstack-developer` + `product-manager`) untuk menghapus `shouldExist: false` & `$this->withoutVite()`, menyusun `Phase3EndToEndTest.php`, menjalankan audit keamanan/NFR (RBAC, CSRF, N+1, decimal precision, backup/restore MySQL 8.4), memverifikasi Matriks UAT 14 Use Case & 9 Kondisi Khusus, dan menandatangani **Phase 3 Closing Gate**.
 
+### [#021] 2026-11-10 19:00 — Fullstack Developer (`P3-05`) — Phase 3 (`P3-05`)
+- **Status:** `READY_FOR_REVIEW`
+- **Ringkasan Kegiatan:**
+  - Melakukan Context Sync (`MEMORY.md`, `WRITE.md` `#018`–`#020`, `.claude/napkin.md`, `PRD.md`, `AGENTS.md`, `napkin/PR_REVIEW_LIFECYCLE.md`, `docs/phases/PHASE_1_CONTRACTS.md`, dan `docs/phases/PHASE_3_CONTRACTS.md` §1.2, §4 `AC-P3-11`–`AC-P3-12`, §5 UAT 14 UC + 9 KK, §6), menginspeksi seluruh file uji Phase 2–3, `docker-compose.yml`, `config/inertia.php`, `routes/web.php`, seluruh 16 Eloquent models di `app/Models/`, serta membuat branch `feature/p3-05-hardening-uat-gate` dari `main` (`d9a79d7`).
+  - **Cleanup `shouldExist: false` & Verifikasi Manifest:**
+    - Menghapus seluruh `shouldExist: false` beserta komentar sementara pada `tests/Feature/AuditAndDashboardPhase3Test.php` (`Audit/Index`), `tests/Feature/PengantaranOperationTest.php` (`Pengantaran/Index`, `Pengantaran/Show`), dan `tests/Feature/PembayaranAndSerahTerimaTest.php` (`SerahTerima/Index`) sehingga `config('inertia.testing.ensure_pages_exist') === true` aktif penuh di seluruh test suite.
+    - Memverifikasi seluruh wiring FE–BE dan 15 halaman Inertia di `public/build/manifest.json` tidak memiliki mismatch kontrak.
+  - **`tests/Feature/Phase3EndToEndTest.php` (Tanpa `$this->withoutVite()`):**
+    - Verifikasi `config('inertia.testing.ensure_pages_exist') === true` dan seluruh 15 entri halaman Inertia (`Auth/Login`, `Dashboard/Index`, `Pelanggan/Index`, `Layanan/Index`, `Voucher/Index`, `Transaksi/{Index,Create,Show,Nota}`, `Produksi/Index`, `Insiden/Index`, `Pengantaran/{Index,Show}`, `SerahTerima/Index`, `Audit/Index`) + `app.tsx` di `public/build/manifest.json`.
+    - **Skenario 1 (`KK-01`, `KK-04`, `KK-06`, `KK-07`, `KK-08`):** Siklus penuh pengantaran multi-pelanggan Nota A (reguler + timbang ulang `2.00 -> 4.00 kg` + kompensasi insiden `RUSAK` `15000.00`), Nota B (`boleh_bayar_akhir = true`, tanpa DP), & Nota C (`DIBATALKAN` pasca cuci `KK-08` tidak muncul di `eligibleTransaksiOptions`, ditolak `422` dari `POST /pengantaran` & `POST /transaksi/{notaC}/serah-terima`, namun tetap berhasil dilunasi via `POST /transaksi/{notaC}/pembayaran`); isolasi kurir (`Kurir 2` & `PEGAWAI` `403`), blokir kurir `KK-06` + rollback bersih pada Nota A lalu pelunasan + serah terima kurir (`DIAMBIL`, `diambil_pada` WIB, `AuditLog(SERAH_TERIMA)`), gagal antar Nota B (sesi induk auto `SELESAI`, Nota A tetap `DITERIMA`), `jadwalkanUlang` ke `Kurir 2` + tolak double-reschedule `422`, pengantaran paylater `BELUM_LUNAS` tampil di `/serah-terima?mode=PIUTANG` & `/audit`, hingga pelunasan akhir menurunkan `piutang_nominal_total` ke `'0.00'`.
+    - **Skenario 2 (`KK-06` Loket, Anti-Konflik Kurir, & Query Budget):** Penolakan `422` Nota D reguler belum lunas di loket, pelunasan + serah terima loket menutup item `MENUNGGU -> GAGAL` & menyinkronkan sesi induk (`DIJADWALKAN -> BERJALAN`), penolakan `422` loket saat Nota E sedang `DIAMBIL` kurir (`sedang dibawa kurir`), serta verifikasi `DB::enableQueryLog()` `<= 20` query untuk `/pengantaran`, `/pengantaran/{id}`, `/serah-terima`, `/audit`, dan `/dashboard` (peran `PETUGAS` & `PENGANTAR`).
+    - **Skenario 3 (Security & NFR Regression `AC-P3-11`):** Verifikasi seluruh 16 Eloquent model di `app/Models/` memiliki `$fillable` non-empty & `$guarded = ['*']`, `ValidateCsrfToken` aktif di middleware group `web`, seluruh route mutasi bisnis (`>= 24` route) memakai `web` + `auth` + `role:...` (`EnsureUserHasRole`), seluruh 10 kolom uang di MySQL memakai `DECIMAL(12,2)`, dan non-`PETUGAS` (`PEGAWAI`, `PENGANTAR`, & `PETUGAS` nonaktif) diblokir `403` pada `/audit`, `/serah-terima`, `/transaksi/*/pembayaran`, `/transaksi/*/serah-terima`, dan `POST /pengantaran`.
+  - **Backup & Restore Integrity Check (MySQL 8.4 `cleanwash-mysql`, port `3307`):**
+    - Eksekusi `mysqldump` DB `cleanwash` pasca `migrate --seed` ke `/tmp/cleanwash_p3_backup.sql` (`33K`), restore ke scratch DB `cleanwash_restore_verify`, verifikasi jumlah tabel identik (`24` tabel) dan jumlah baris identik (`pelanggan = 3`, `jenis_layanan = 4`, `tahap_layanan = 18`, `voucher = 3`, `users = 3`, `migrations = 18`), kemudian `DROP DATABASE cleanwash_restore_verify` & `rm -f /tmp/cleanwash_p3_backup.sql`.
+- **File Dibuat / Diubah:**
+  - `tests/Feature/AuditAndDashboardPhase3Test.php` — Hapus `shouldExist: false` pada `Audit/Index`
+  - `tests/Feature/PengantaranOperationTest.php` — Hapus `shouldExist: false` pada `Pengantaran/Index` & `Pengantaran/Show`
+  - `tests/Feature/PembayaranAndSerahTerimaTest.php` — Hapus `shouldExist: false` pada `SerahTerima/Index`
+  - `tests/Feature/Phase3EndToEndTest.php` — E2E integration test Phase 3 penuh tanpa `$this->withoutVite()` (Skenario 1, 2, 3)
+  - `MEMORY.md`, `WRITE.md` — Update snapshot kesiapan PM Closing Gate (tanpa mencentang `[x] P3-05` atau mengubah `Phase 3 -> DONE` sebelum sign-off PM) & Entry `#021`
+- **Verifikasi / Bukti Uji:**
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` (`exit code 0`)
+  - `npx tsc --noEmit` -> `0 errors` (`exit code 0`)
+  - `npm run build` -> Vite production build (`680 modules transformed`, `public/build/manifest.json`, `built in 2.08s`) (`exit code 0`)
+  - `php artisan test` -> `114 passed (4149 assertions)` pada MySQL 8.4 port `3307` (`cleanwash_testing`), `0` failed, `0` skipped, termasuk `Phase1EndToEndTest`, `Phase2EndToEndTest`, & `Phase3EndToEndTest` tanpa `$this->withoutVite()` (`exit code 0`)
+  - `php artisan migrate --no-interaction && php artisan migrate:rollback --no-interaction && php artisan migrate --seed --no-interaction` -> `18` migrasi rollback & re-migrate + `CleanWashSeeder` bersih (`exit code 0`)
+  - Audit hygiene (`rg` `shouldExist` di `tests/`, `bcadd`/`bcsub`/`bcmul`/`bcdiv`/`bccomp`/`floatval`/`(float)`/`(double)`/`dd`/`dump`/`var_dump` di `app/` & `routes/`, `console.log` / `: any` / `as any` di `resources/js/`) -> `0` temuan (`CLEAN`)
+  - Backup/restore MySQL 8.4 (`cleanwash` -> `/tmp/cleanwash_p3_backup.sql` -> `cleanwash_restore_verify` -> verifikasi `24` tabel & row count identik -> drop & hapus dump) -> `BACKUP_RESTORE_VERIFIED_AND_CLEANED` (`exit code 0`)
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Checkbox `[x] P3-05` dan status `Phase 3 -> DONE` di `MEMORY.md` sengaja dibiarkan terbuka menunggu audit & tanda tangan **Phase 3 Closing Gate** oleh `product-manager`.
+  - Tidak ada file dump database maupun file sementara yang tertinggal di repositori.
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  - Delegasikan ke **`product-manager`** untuk mengeksekusi **Phase 3 Closing Gate Audit** pada branch `feature/p3-05-hardening-uat-gate`: memverifikasi seluruh **`AC-P3-01` s.d. `AC-P3-12`**, Matriks UAT **14 Use Case (`UC-01`..`UC-14`)** & **9 Kondisi Khusus (`KK-01`..`KK-09`)**, serta 6 Gerbang Kualitas (`napkin/PR_REVIEW_LIFECYCLE.md`), menyusun `docs/phases/PHASE_3_CLOSING_EVIDENCE.md`, menandai `[x] P3-05` dan `Phase 3 -> DONE` di `MEMORY.md` + Entry `#022` di `WRITE.md`, lalu melakukan Squash & Merge ke `main`.
+
+### [#022] 2026-11-10 19:08 — Product Manager & Primary Agent (`Phase 3 Closing Gate`) — Phase 3 (`P3-05` & Final Release)
+- **Status:** `DONE` (`APPROVED` — **`FINAL RELEASE READY` Phase 1–3 Selesai**)
+- **Ringkasan Kegiatan:**
+  - `product-manager` mengeksekusi **Adversarial Phase 3 Closing Gate & Final Release Audit** pada branch `feature/p3-05-hardening-uat-gate` (`5344fd2`), memeriksa seluruh implementasi Phase 3 + keseluruhan sistem CleanWash terhadap **`AC-P3-01` s.d. `AC-P3-12`**, **2 tindak lanjut non-blocking Phase 2**, **Matriks UAT 14 Use Case (`UC-01`..`UC-14`)**, **9 Kondisi Khusus (`KK-01`..`KK-09`)**, serta **6 Gerbang Kualitas** pada `napkin/PR_REVIEW_LIFECYCLE.md`.
+  - Menerbitkan verdict **`APPROVED`** (0 temuan defect/blocker; kedua tindak lanjut non-blocking Phase 2 terverifikasi `CLOSED`), menyusun [PHASE_3_CLOSING_EVIDENCE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_3_CLOSING_EVIDENCE.md), menutup `[x] P3-05` dan **Phase 3 -> `DONE`** di `MEMORY.md`, memindahkan `Current Status` menjadi `FINAL RELEASE READY`, dan mengeksekusi **Squash & Merge** `feature/p3-05-hardening-uat-gate` ke `main`.
+- **File Dibuat / Diubah:**
+  - `docs/phases/PHASE_3_CLOSING_EVIDENCE.md` — Berita acara bukti audit `AC-P3-01`..`AC-P3-12`, UAT 14 UC + 9 KK, & 6 Gerbang Kualitas
+  - `MEMORY.md` — Menandai `[x] P3-05`, status `Phase 3 -> DONE`, dan `Current Status -> FINAL RELEASE READY`
+  - `WRITE.md` — Menambahkan Entry `#022`
+- **Verifikasi / Bukti Uji:**
+  - Verifikasi penuh pra-merge (`5344fd2`) dan ulang pasca Squash & Merge pada `main`: `./vendor/bin/pint --test` (`passed`), `npx tsc --noEmit` (`0 errors`), `npm run build` (`680 modules transformed`, `public/build/manifest.json`), `php artisan test` (`114 passed (4149 assertions)`, `0` failed, `0` skipped, termasuk `Phase1EndToEndTest`, `Phase2EndToEndTest`, & `Phase3EndToEndTest` tanpa `$this->withoutVite()`), `migrate:rollback && migrate --seed` (`18` migrasi rollback & re-migrate + `CleanWashSeeder`), backup/restore MySQL 8.4 (`24` tabel terverifikasi konsisten), audit hygiene (`shouldExist`/`bc*`/`float`/`dd`/`console.log`/`: any` -> `CLEAN`), dan `git status` bersih di `main`.
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Seluruh Phase 1–3 resmi `DONE` (`FINAL RELEASE READY`). Tidak ada blocker.
+- **Next Exact Action:**
+  - Siap diserahterimakan / dijalankan langsung oleh pengguna atau reviewer pada environment MySQL 8.4 terisolasi (`cleanwash-mysql`, port `3307`).
+
+
+
