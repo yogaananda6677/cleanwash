@@ -377,3 +377,40 @@
 - **Next Exact Action:**
   1. Lakukan cross-agent review & Squash Merge `feature/p2-03-ubah-batal` ke `main` sesuai `napkin/PR_REVIEW_LIFECYCLE.md`.
   2. Delegasikan **`P2-04`** ke `cw-backend-dev` pada branch `feature/p2-04-kompensasi` dari `main` untuk mengimplementasikan `KompensasiService` (`LaporanKerusakanKehilangan` per `DetailPakaian`, `hitungKompensasi`, `potongKompensasi` tanpa double-counting `kelebihan_ganti_rugi`), `LaporanKerusakanPolicy`, `StoreInsidenRequest`, `KonfirmasiKompensasiRequest`, `InsidenController`, dan automated tests `AC-P2-09` s.d. `AC-P2-10`.
+
+### [#013] 2026-11-10 17:15 — Backend Developer (`cw-backend-dev`) — Phase 2 (`P2-04`)
+- **Status:** `READY_FOR_REVIEW`
+- **Ringkasan Kegiatan:**
+  - Melakukan Context Sync (`PRD.md` §5/§7.3/§8 `FR-08`/§10, `AGENTS.md`, `MEMORY.md`, `WRITE.md` `#010`–`#012`, `.claude/napkin.md`, `napkin/PR_REVIEW_LIFECYCLE.md`, `docs/phases/PHASE_1_CONTRACTS.md`, dan `docs/phases/PHASE_2_CONTRACTS.md` §2.0, §2.5, §3.1–§3.3, §4 `AC-P2-09`..`AC-P2-10`, plus `DecimalMoney`, `TransaksiService`, `PembayaranService`, `ProduksiService`, `ProduksiPolicy`, `ProduksiController`, `AppServiceProvider`, & `routes/web.php`) lalu membuat branch `feature/p2-04-kompensasi` dari `main` (`bd483c6`).
+  - Menerapkan TDD (**Red $\rightarrow$ Green $\rightarrow$ Refactor**): menulis `tests/Unit/KompensasiServiceTest.php` dan `tests/Feature/InsidenTest.php` lebih dulu (7 test gagal pada fase Red) sebelum implementasi service, policy, request, controller, dan routes.
+  - Mengimplementasikan `app/Services/KompensasiService.php` (bebas `float` dan `bcmath`, berbasis `App\Support\DecimalMoney`):
+    - `estimateCompensation()` (formula tunggal yang dibagikan dengan `TransaksiService::formatLaporanInsiden()` tanpa duplikasi) & `hitungKompensasi()` (`5×` basis prorata item untuk `RUSAK`, `10×` untuk `HILANG`, floor `100` sen, imun `KK-09` snapshot tarif).
+    - `laporInsiden()` dalam `DB::transaction()` + `lockForUpdate()` pada `Transaksi`: validasi `AKTIF`/`SELESAI` dan kepemilikan `id_detail` (`422` jika silang nota atau status `DIAMBIL`/`DIBATALKAN`); Mode 1 (`PEGAWAI`) membuat `MENUNGGU_KONFIRMASI` (`id_petugas = null`, nominal `'0.00'`, `AuditLog` `INSIDEN_REPORTED`); Mode 2 (`PETUGAS`) menghitung/memvalidasi kompensasi, mengeksekusi `potongKompensasi()`, dan mencatat `INSIDEN_REPORTED` + `KOMPENSASI_CONFIRMED`.
+    - `konfirmasiKompensasi()` dalam `DB::transaction()` + `lockForUpdate()` pada `LaporanKerusakanKehilangan` dan `Transaksi`: menolak `422` (`"Laporan insiden sudah dikonfirmasi."`) bila `id_petugas !== null` atau status transaksi non-`AKTIF`/`SELESAI`, memotong tagihan lewat `potongKompensasi()`, dan mencatat `AuditLog` `KOMPENSASI_CONFIRMED` (beserta `keterangan_konfirmasi` bila diisi).
+    - `potongKompensasi()`: menghitung `sisa_tagihan_sebelum`, `kelebihan_ganti_rugi = max(0, nilai_kompensasi - sisa_tagihan_sebelum)` anti-double-counting untuk multi-insiden, memperbarui `total_kompensasi`, `total_harga = max(0, tagihan_dasar - total_kompensasi_baru)`, dan `status_pembayaran` via `PembayaranService::resolveStatusPembayaranSetelahPenyesuaian()` (`-> LUNAS` saat sisa `'0.00'`).
+    - Helper `GET /insiden` tanpa N+1 query: `paginateLaporan()` (pencarian `SqlLike` di `nomor_nota`, `keterangan`, `transaksi.pelanggan.nama`, `detailPakaian.jenis_pakaian`; filter `jenis_insiden` & `status_konfirmasi`), `countPending()`, `getEligibleTransaksiOptions()` (`EligibleInsidenTransaksiOption` hanya `AKTIF`/`SELESAI`), dan `formatLaporanDetail()` (`LaporanInsidenDetailItem`).
+  - Memperbarui `app/Services/TransaksiService.php` agar `formatLaporanInsiden()` bersifat `public` dan memakai `KompensasiService::estimateCompensation()` secara langsung.
+  - Membuat `app/Policies/LaporanKerusakanPolicy.php` (terdaftar di `AppServiceProvider` untuk `LaporanKerusakanKehilangan`): `viewAny` & `create` untuk `PETUGAS`/`PEGAWAI` aktif, `konfirmasi` khusus `PETUGAS` aktif (`PEGAWAI` & `PENGANTAR` ditolak `403`).
+  - Membuat `StoreInsidenRequest` (menggabungkan/memvalidasi konsistensi parameter route `nota` di `prepareForValidation()`/`after()`) & `KonfirmasiKompensasiRequest`, `app/Http/Controllers/InsidenController.php` (memakai `executeWithFlashRedirect()`, membedakan fallback redirect `PEGAWAI` ke `produksi.index` & `PETUGAS` ke `transaksi.show` pada `storeForTransaksi`), serta mendaftarkan `GET /insiden`, `POST /insiden`, `POST /transaksi/{nota}/insiden` di group `role:PETUGAS,PEGAWAI` dan `POST /insiden/{laporan}/konfirmasi` di group `role:PETUGAS` pada `routes/web.php`.
+- **File Dibuat / Diubah:**
+  - `app/Services/KompensasiService.php` — Engine kompensasi (`estimateCompensation`, `hitungKompensasi`, `laporInsiden`, `konfirmasiKompensasi`, `potongKompensasi`, `paginateLaporan`, `countPending`, `getEligibleTransaksiOptions`, `formatLaporanDetail`)
+  - `app/Services/TransaksiService.php` — Berbagi formula `KompensasiService::estimateCompensation()` & expose `formatLaporanInsiden()`
+  - `app/Policies/LaporanKerusakanPolicy.php`, `app/Providers/AppServiceProvider.php` — Policy & registrasi Gate `LaporanKerusakanKehilangan`
+  - `app/Http/Requests/Insiden/{StoreInsidenRequest,KonfirmasiKompensasiRequest}.php` — FormRequest otorisasi & validasi insiden/konfirmasi
+  - `app/Http/Controllers/InsidenController.php`, `routes/web.php` — Endpoint `insiden.index`, `insiden.store`, `transaksi.insiden.store`, dan `insiden.konfirmasi`
+  - `tests/Unit/KompensasiServiceTest.php`, `tests/Feature/InsidenTest.php` — Automated tests `AC-P2-09`, `AC-P2-10`, multi-insiden anti-double-counting `kelebihan_ganti_rugi`, RBAC `403`, cross-nota `422`, dan proteksi N+1
+  - `MEMORY.md`, `WRITE.md` — Update `[x] P2-04` dan Entry `#013`
+- **Verifikasi / Bukti Uji:**
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` (`exit code 0`)
+  - `npx tsc --noEmit` -> `0 errors` (`exit code 0`)
+  - `php artisan test` -> `83 passed (2274 assertions)` pada MySQL 8.4 port `3307` (`cleanwash_testing`), termasuk seluruh unit & feature tests Phase 1, `P2-02`, `P2-03`, dan `P2-04` (`exit code 0`)
+  - `npm run build` -> Vite production build (`670 modules transformed`, `public/build/manifest.json`, `built in 2.02s`) (`exit code 0`)
+  - `php artisan migrate --no-interaction && php artisan migrate:rollback --no-interaction && php artisan migrate --seed --no-interaction` -> 18 migrasi rollback & re-migrate + `CleanWashSeeder` bersih (`exit code 0`)
+  - `php artisan route:list --except-vendor` -> 32 route terdaftar termasuk `insiden.index`, `insiden.store`, `transaksi.insiden.store`, dan `insiden.konfirmasi`; hygiene grep (`dd`/`dump`/`var_dump`/`bcmath`/`(float)`) -> `0` temuan; `resources/js/`, `resources/css/`, & `Archive/` tidak tersentuh.
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Assertion Inertia `GET /insiden` pada `tests/Feature/InsidenTest.php` menggunakan `$this->withoutVite()` dan `->component('Insiden/Index', shouldExist: false)` dengan komentar `// Temporary shouldExist: false until P2-05 creates Insiden/Index.tsx`; wajib dihapus di `P2-05` setelah `resources/js/Pages/Insiden/Index.tsx` dibuat (sekaligus `Produksi/Index.tsx` pada `ProduksiOperationTest.php`).
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  1. Lakukan cross-agent review & Squash Merge `feature/p2-04-kompensasi` ke `main` sesuai `napkin/PR_REVIEW_LIFECYCLE.md`.
+  2. Delegasikan **`P2-05`** ke `cw-frontend-dev` pada branch `feature/p2-05-frontend-ui` dari `main` untuk membangun UI `Produksi/Index.tsx`, `Insiden/Index.tsx`, pembaruan `Transaksi/Show.tsx`, `AppLayout.tsx`, `StatusBadge.tsx`, `format.ts`, dan `types/index.ts`, serta menghapus `shouldExist: false` pada `ProduksiOperationTest.php` dan `InsidenTest.php`.
+

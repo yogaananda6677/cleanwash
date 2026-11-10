@@ -742,7 +742,7 @@ class TransaksiService
     /**
      * @return array<string, mixed>
      */
-    private function formatLaporanInsiden(
+    public function formatLaporanInsiden(
         LaporanKerusakanKehilangan $laporan,
         string $subtotalLayanan,
         int $totalPotongNota
@@ -762,7 +762,7 @@ class TransaksiService
             'keterangan' => $laporan->keterangan,
             'nilai_kompensasi' => (string) $laporan->nilai_kompensasi,
             'kelebihan_ganti_rugi' => (string) $laporan->kelebihan_ganti_rugi,
-            'estimasi_kompensasi' => $this->estimateIncidentCompensation(
+            'estimasi_kompensasi' => KompensasiService::estimateCompensation(
                 $subtotalLayanan,
                 $totalPotongNota,
                 $detail,
@@ -787,29 +787,6 @@ class TransaksiService
                 'nama_pegawai' => $laporan->pegawaiPelapor->nama_pegawai,
             ] : null,
         ];
-    }
-
-    private function estimateIncidentCompensation(
-        string $subtotalLayanan,
-        int $totalPotongNota,
-        ?DetailPakaian $detail,
-        JenisInsiden $jenisInsiden
-    ): string {
-        $itemPotong = max(1, (int) ($detail?->jumlah_potong ?? 1));
-        $prorated = DecimalMoney::prorateAndMultiply(
-            $subtotalLayanan,
-            $itemPotong,
-            max(1, $totalPotongNota),
-            1
-        );
-        $basisCents = max(100, DecimalMoney::toCents($prorated));
-        $multiplier = $jenisInsiden === JenisInsiden::HILANG ? 10 : 5;
-
-        if ($basisCents > intdiv(PHP_INT_MAX, $multiplier)) {
-            throw new InvalidArgumentException('Incident compensation calculation exceeds integer bounds.');
-        }
-
-        return DecimalMoney::toDecimalString($basisCents * $multiplier);
     }
 
     /**
