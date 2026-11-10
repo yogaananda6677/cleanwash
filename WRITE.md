@@ -209,3 +209,33 @@
 - **Next Exact Action:**
   1. Lakukan cross-agent review & merge `feature/p1-05-reception-engine` ke `main` sesuai `napkin/PR_REVIEW_LIFECYCLE.md`.
   2. Delegasikan **`P1-06`** ke subagent frontend (`cw-frontend-dev`) pada branch `feature/p1-06-frontend-ui` dari `main` untuk membangun UI Login, App Shell per peran, Master CRUD pages, serta halaman `Transaksi/Index`, `Transaksi/Create` (form dinamis `kg`/`pcs`, multi `DetailPakaian`, live `POST /voucher/validate`, input DP), dan `Transaksi/Show`.
+
+### [#007] 2026-11-10 16:17 — Frontend Developer (`cw-frontend-dev`) — Phase 1 (`P1-06`)
+- **Status:** `READY_FOR_REVIEW`
+- **Ringkasan Kegiatan:**
+  - Melakukan Context Sync (`PRD.md` §4/§7.1/§8/§11, `AGENTS.md`, `MEMORY.md`, `WRITE.md` `#003`–`#006`, `.claude/napkin.md`, `napkin/PR_REVIEW_LIFECYCLE.md`, `docs/phases/PHASE_1_CONTRACTS.md` §3) serta menginspeksi `DashboardController.php`, `PelangganController.php`, `JenisLayananController.php`, `VoucherController.php`, `TransaksiController.php`, dan service terkait pada branch `feature/p1-06-frontend-ui`.
+  - Memperbarui kontrak TypeScript strict di `resources/js/types/index.ts` agar 100% sinkron dengan `PHASE_1_CONTRACTS.md` §3 dan `DashboardController.php` (`UserRole`, `AuthUser`, `SharedPageProps`, `Paginated`, `DashboardIndexProps`, `PelangganIndexProps`, `LayananIndexProps`, `VoucherValidateResponse`, `VoucherIndexProps`, `TransaksiDetail`, `TransaksiCreateProps`, `TransaksiIndexProps`, `TransaksiShowProps`, `TransaksiNotaProps`).
+  - Mengonfigurasi `resources/js/bootstrap.ts` (`window.axios` dengan `withCredentials`, `withXSRFToken`, `X-XSRF-TOKEN`, `X-Requested-With: XMLHttpRequest`) dan mengimpornya di `resources/js/app.tsx`; membuat `resources/js/lib/format.ts` (`formatRupiah`, `formatTanggal`, `parseDecimalToCents`, `centsToDecimalString`, `calculatePreviewTotals` berbasis integer skala 100 bebas `float` drift).
+  - Membangun `resources/js/Layouts/AppLayout.tsx` (sidebar desktop + drawer mobile adaptif peran `PETUGAS`, `PEGAWAI`, `PENGANTAR`, badge peran, flash banner `success`/`error`/`warning`, dan aksi `POST /logout`) serta komponen reusable `resources/js/Components/{Pagination,StatusBadge,Modal,EmptyState}.tsx`.
+  - Mengimplementasikan seluruh halaman Phase 1 (`P1-06`): `Auth/Login.tsx`, `Dashboard/Index.tsx`, `Pelanggan/Index.tsx` (pencarian, modal tambah/edit, flag `boleh_bayar_akhir`, konfirmasi hapus), `Layanan/Index.tsx` (sinkronisasi otomatis `BERAT <-> kg` dan `JUMLAH <-> pcs` + preview tahap produksi tanpa `DISETRIKA` bila `perlu_setrika = false`), `Voucher/Index.tsx` (filter `effective_status`, guard edit/delete `SUDAH_DIGUNAKAN`), `Transaksi/Index.tsx` (pencarian nota/pelanggan/telepon & filter status pembayaran), `Transaksi/Create.tsx` (form kasir dinamis `kg` vs `pcs`, multi baris `DetailPakaian` min 1, cek voucher live `window.axios.post('/voucher/validate')`, DP quick-fill `Rp 0`/`50%`/`Lunas`, dan ringkasan estimasi tagihan integer-cents), dan `Transaksi/Show.tsx` (rincian lengkap nota, pembanding tarif snapshot `KK-09`, `DetailPakaian`, riwayat `Pembayaran`, & timeline `RiwayatStatusProduksi`).
+  - Memastikan tidak ada satu pun file PHP backend (`app/`, `database/`, `routes/`, `config/`, `tests/`) yang disentuh.
+- **File Dibuat / Diubah:**
+  - `resources/js/bootstrap.ts`, `resources/js/app.tsx` — Konfigurasi global `window.axios` dengan CSRF/XSRF Laravel & registrasi di entrypoint
+  - `resources/js/types/index.ts` — Kontrak TypeScript strict lengkap Phase 1
+  - `resources/js/lib/format.ts` — Helper format Rupiah, tanggal `Asia/Jakarta`, dan kalkulasi preview kasir berbasis integer cents
+  - `resources/js/Components/{StatusBadge,Modal,Pagination,EmptyState}.tsx` — Komponen UI reusable bersih tanpa duplikasi
+  - `resources/js/Layouts/AppLayout.tsx` — Shell aplikasi responsif berbasis peran + flash banner & logout
+  - `resources/js/Pages/Auth/Login.tsx`, `Dashboard/Index.tsx`, `Pelanggan/Index.tsx`, `Layanan/Index.tsx`, `Voucher/Index.tsx`, `Transaksi/{Index,Create,Show}.tsx` — 8 halaman UI Phase 1 (`P1-06`)
+  - `MEMORY.md`, `.claude/napkin.md`, `WRITE.md` — Update `[x] P1-06`, catatan Axios XSRF `bootstrap.ts`, & Entry `#007`
+- **Verifikasi / Bukti Uji:**
+  - `npx tsc --noEmit` -> `0 errors` (`strict: true`) (`exit code 0`)
+  - `npm run build` -> Vite production build (`669 modules transformed`, `public/build/manifest.json`) (`exit code 0`)
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` (`exit code 0`)
+  - `php artisan test` -> `53 passed (1182 assertions)` (`exit code 0`)
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Ditambahkan catatan di `.claude/napkin.md` tentang konfigurasi `window.axios` (`withXSRFToken = true`, `withCredentials = true`) via `resources/js/bootstrap.ts`.
+  - Halaman cetak `Transaksi/Nota.tsx` sengaja diserahkan ke `P1-07` (`cw-fullstack-dev`) sesuai pembagian kerja.
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  1. Lakukan cross-agent review & merge `feature/p1-06-frontend-ui` ke `main` sesuai `napkin/PR_REVIEW_LIFECYCLE.md`.
+  2. Delegasikan **`P1-07`** ke `cw-fullstack-dev` + `product-manager` pada branch `feature/p1-07-nota-gate` dari `main` untuk membuat halaman cetak `resources/js/Pages/Transaksi/Nota.tsx` (`@media print`), uji E2E alur penerimaan $\rightarrow$ voucher $\rightarrow$ DP $\rightarrow$ cetak nota $\rightarrow$ verifikasi `KK-09`, audit 6 Gerbang Kualitas, dan Phase 1 Sign-off.

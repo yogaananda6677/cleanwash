@@ -38,6 +38,8 @@ Dilarang mencatat log kronologis harian di file ini — **catat log aktivitas di
    Do instead: Kunci eksplisit `"laravel/laravel:^12.0"` saat membuat skeleton baru agar tetap pada baseline Laravel 12.
 5. **[2026-11-10] `@vitejs/plugin-react` terbaru (`^6.x`) mensyaratkan Vite 8 dan bentrok dengan Vite 7 bawaan Laravel 12**
    Do instead: Pasang `"@vitejs/plugin-react": "^5.2.0"` yang mendukung Vite 7, serta beri tipe generik `<ResolvedComponent>` pada `import.meta.glob` dan `resolvePageComponent` agar lolos `tsc --strict`.
+6. **[2026-11-10] `window.axios.post()` ke endpoint JSON Laravel rawan gagal `419 CSRF Token Mismatch` bila `bootstrap.ts` atau meta CSRF belum disiapkan**
+   Do instead: Konfigurasi `axios` eksplisit di `resources/js/bootstrap.ts` (`withCredentials = true`, `withXSRFToken = true`, `xsrfCookieName = 'XSRF-TOKEN'`, `xsrfHeaderName = 'X-XSRF-TOKEN'`, `X-Requested-With = 'XMLHttpRequest'`), ikat ke `window.axios`, dan impor `./bootstrap` di `resources/js/app.tsx`.
 
 ---
 

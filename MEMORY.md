@@ -13,9 +13,9 @@ Dokumen ini adalah memori status arsitektur proyek **CleanWash** untuk manusia d
 | **Product** | CleanWash — Sistem Informasi Manajemen Operasional Laundry |
 | **SRS Reference** | [UTS.pdf](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/Outputtts/UTS.pdf) & [2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx) |
 | **Current Phase** | Phase 1 — Fondasi Sistem, Master Data & Penerimaan Transaksi |
-| **Current Status** | `IN_PROGRESS` (`P1-01` s.d. `P1-05` selesai; siap review/merge `P1-05` & lanjut `P1-06` UI Frontend) |
+| **Current Status** | `IN_PROGRESS` (`P1-01` s.d. `P1-06` selesai; siap review/merge `P1-06` & lanjut `P1-07` Nota Cetak & Phase 1 Gate) |
 | **Last Updated** | 2026-11-10 |
-| **Updated By** | Backend Developer (`cw-backend-dev`) — P1-05 Reception, Snapshot Tarif (`KK-09`), Atomic Voucher Lock (`KK-03`), & DP Pembayaran |
+| **Updated By** | Frontend Developer (`cw-frontend-dev`) — P1-06 UI Login, App Shell Berbasis Peran, Dashboard, Master CRUD & Form Kasir Penerimaan Nota |
 
 ---
 
@@ -78,7 +78,7 @@ Status yang diizinkan: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - [x] `P1-03` (`backend-developer`): Migrasi seluruh tabel MySQL 8.4, seeder aktor/role (`Petugas`, `Pegawai`, `PetugasPengantaran`), Auth & RBAC Policy.
 - [x] `P1-04` (`backend-developer`): CRUD Master `Pelanggan` (`boleh_bayar_akhir`), `JenisLayanan` + `TahapLayanan`, dan `Voucher`.
 - [x] `P1-05` (`backend-developer`): Engine Penerimaan `Transaksi` + `DetailPakaian`, `harga_satuan_snapshot` (`KK-09`), validasi/lock atomik `Voucher` (`KK-03`), DP `Pembayaran`, & automated tests.
-- [ ] `P1-06` (`frontend-developer`): UI Login, App Shell per peran, Master CRUD pages, dan Form Kasir Penerimaan Nota dinamis.
+- [x] `P1-06` (`frontend-developer`): UI Login, App Shell per peran, Master CRUD pages, dan Form Kasir Penerimaan Nota dinamis.
 - [ ] `P1-07` (`fullstack-developer` + `product-manager`): Halaman Detail & Cetak Nomor Nota, integrasi E2E Phase 1, audit 6 Gerbang, & Phase 1 Sign-off.
 
 ### Phase 2 — Operasional Produksi, Timbang Ulang, Penyesuaian & Kompensasi Insiden
