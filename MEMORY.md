@@ -13,9 +13,9 @@ Dokumen ini adalah memori status arsitektur proyek **CleanWash** untuk manusia d
 | **Product** | CleanWash — Sistem Informasi Manajemen Operasional Laundry |
 | **SRS Reference** | [UTS.pdf](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/Outputtts/UTS.pdf) & [2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx) |
 | **Current Phase** | Phase 2 — Operasional Produksi, Penimbangan Ulang, Penyesuaian & Kompensasi Insiden |
-| **Current Status** | `IN_PROGRESS` (`P2-04` selesai & siap review; lanjut `P2-05` oleh `cw-frontend-dev`) |
+| **Current Status** | `IN_PROGRESS` (`P2-05` selesai & siap review; lanjut `P2-06` oleh `fullstack-developer` + `product-manager`) |
 | **Last Updated** | 2026-11-10 |
-| **Updated By** | Backend Developer (`cw-backend-dev`) — Task `P2-04` |
+| **Updated By** | Frontend Developer (`cw-frontend-dev`) — Task `P2-05` |
 
 ---
 
@@ -86,7 +86,7 @@ Status yang diizinkan: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - [x] `P2-02` (`backend-developer`): `ProduksiService` (`timbangUlang` + hitung ulang harga `KK-01`, state machine `RiwayatStatusProduksi` sesuai `TahapLayanan`).
 - [x] `P2-03` (`backend-developer`): `ubahLayanan()` (`KK-02`) dan `batalkanTransaksi()` (`KK-08`) + unit/feature tests.
 - [x] `P2-04` (`backend-developer`): `KompensasiService` untuk `LaporanKerusakanKehilangan` per `DetailPakaian` (`KK-04`, `KK-05`) + tests.
-- [ ] `P2-05` (`frontend-developer`): UI Antrean Produksi `Pegawai` (progres tahapan dinamis, timbang ulang, lapor insiden) & UI Ubah/Batal di sisi `Petugas`.
+- [x] `P2-05` (`frontend-developer`): UI Antrean Produksi `Pegawai` (progres tahapan dinamis, timbang ulang, lapor insiden) & UI Ubah/Batal di sisi `Petugas`.
 - [ ] `P2-06` (`fullstack-developer` + `product-manager`): Integrasi notifikasi/indikator lintas aktor, E2E tests Phase 2, audit 6 Gerbang, & Phase 2 Sign-off.
 
 ### Phase 3 — Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening

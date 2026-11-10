@@ -414,3 +414,42 @@
   1. Lakukan cross-agent review & Squash Merge `feature/p2-04-kompensasi` ke `main` sesuai `napkin/PR_REVIEW_LIFECYCLE.md`.
   2. Delegasikan **`P2-05`** ke `cw-frontend-dev` pada branch `feature/p2-05-frontend-ui` dari `main` untuk membangun UI `Produksi/Index.tsx`, `Insiden/Index.tsx`, pembaruan `Transaksi/Show.tsx`, `AppLayout.tsx`, `StatusBadge.tsx`, `format.ts`, dan `types/index.ts`, serta menghapus `shouldExist: false` pada `ProduksiOperationTest.php` dan `InsidenTest.php`.
 
+### [#014] 2026-11-10 17:25 — Frontend Developer (`cw-frontend-dev`) — Phase 2 (`P2-05`)
+- **Status:** `READY_FOR_REVIEW`
+- **Ringkasan Kegiatan:**
+  - Melakukan Context Sync (`PRD.md`, `AGENTS.md`, `MEMORY.md`, `WRITE.md` `#011`–`#013`, `.claude/napkin.md`, `docs/phases/PHASE_2_CONTRACTS.md` §3.1/§3.3/`AC-P2-11`, serta `SKILL.md` `modern-web-guidance` `search`/`retrieve` untuk `dialog`, `forms`, `responsive-table`, `accessibility`) dan menginspeksi kontrak UI serta controller (`ProduksiController.php`, `InsidenController.php`, `TransaksiController.php`, `TransaksiAdjustmentController.php`, `TransaksiService.php`, `KompensasiService.php`, `ProduksiService.php`) pada branch baru `feature/p2-05-frontend-ui` dari `main` (`171cb01`).
+  - Memperbarui kontrak TypeScript strict di `resources/js/types/index.ts` sesuai `PHASE_2_CONTRACTS.md` §3.3 (`JenisInsiden`, `StatusKonfirmasiInsiden`, `RiwayatStatusProduksiItem.pegawai?`, `LaporanInsidenItem`, `LaporanInsidenDetailItem`, `AuditLogItem`, properti Phase 2 `TransaksiDetail`, `TransaksiShowProps`, `ProduksiIndexProps`, `EligibleInsidenTransaksiOption`, `InsidenIndexProps`), serta menandai field baru Phase 2 pada `DashboardPetugasSummary`, `DashboardPegawaiSummary`, dan `TransaksiIndexProps.filters.status_transaksi` sebagai opsional (`?`) sementara hingga wiring `P2-06`.
+  - Memperbarui `resources/js/lib/format.ts` (`formatJenisInsiden`, `formatStatusKonfirmasi`, `formatTahapProduksi`, `formatAuditAction`, `calculateMultiplyQuantityCents`, `calculatePercentageCents`, `estimateCompensationPreview` berbasis integer cents tanpa float drift, dan `toEligibleInsidenOption`).
+  - Memperbarui `resources/js/Components/StatusBadge.tsx` (`JenisInsidenBadge`, `StatusKonfirmasiBadge`, `TahapProduksiBadge` + preservasi penuh seluruh badge Phase 1) dan `resources/js/Layouts/AppLayout.tsx` (aktifkan `/insiden` + keep Phase 3 `Pengantaran`/`Serah Terima` disabled untuk `PETUGAS`, aktifkan `/produksi` & `/insiden` untuk `PEGAWAI`, `aria-current="page"`, serta dukungan `Escape` di mobile drawer).
+  - Meningkatkan `resources/js/Components/Modal.tsx` ke elemen native `<dialog>` (`showModal()`, `useId()` untuk `aria-labelledby`, handle `cancel`/`Esc`, `closedby` + fallback pointer luar untuk browser non-Chromium, serta CSS wajib `dialog:modal` & `dialog::backdrop` `overscroll-behavior: contain` di `resources/css/app.css`), serta mengekstrak `LaporkanInsidenModal.tsx` dan `KonfirmasiKompensasiModal.tsx` agar bebas duplikasi lintas halaman.
+  - Membangun `resources/js/Pages/Produksi/Index.tsx` (5 kartu ringkasan `stageCounts` interaktif sebagai filter cepat dengan sinkronisasi `status_transaksi`, pencarian & filter `tahap_status`/`status_transaksi`, rincian pelanggan/layanan/snapshot/pakaian/pipeline terurut + nama & waktu pegawai terakhir, **guard ketat `AC-P2-11` tanpa tombol atau opsi `DISETRIKA` saat `perlu_setrika = false`**, Modal Timbang Ulang `KK-01`/`KK-09` dengan peringatan `LUNAS -> BELUM_LUNAS`, dan Modal Lapor Insiden per `DetailPakaian`).
+  - Membangun `resources/js/Pages/Insiden/Index.tsx` (header badge `pendingCount` + Modal `+ Laporkan Insiden` berbasis `eligibleTransaksiOptions` & role-aware Mode 1 vs Mode 2, filter search/jenis/status, tabel semantik `<caption>` + `scope` + scrollable `role="region"`, tautan `/transaksi/{nota}` khusus `PETUGAS`, dan Modal Konfirmasi & Potong Saldo khusus `PETUGAS` dengan peringatan `kelebihan_ganti_rugi`).
+  - Memperbarui `resources/js/Pages/Transaksi/Show.tsx` (preservasi fitur Phase 1, nama `pegawai` di `RiwayatStatusProduksi`, banner biaya batal/kompensasi/pending/total pengembalian pelanggan, Modal Ubah Layanan `KK-02`, Modal Batalkan Transaksi `KK-08` gratis + lepas voucher di `DITERIMA` vs biaya proses `50%` pasca cuci, Modal Lapor Insiden, kartu Daftar Insiden & Kompensasi dengan konfirmasi langsung, serta kartu Audit Trail Transaksi `auditLogs`).
+  - Mematuhi larangan tegas untuk tidak menyentuh `app/`, `database/`, `routes/`, `tests/`, maupun `Archive/`.
+- **File Dibuat / Diubah:**
+  - `resources/css/app.css` — Aturan `dialog:modal` & `dialog::backdrop` (`overscroll-behavior: contain`, `overflow: hidden`)
+  - `resources/js/Components/Modal.tsx` — Native `<dialog>` (`showModal()`), unique `useId()`, & `Esc`/backdrop handling
+  - `resources/js/Components/StatusBadge.tsx` — Ekspor `JenisInsidenBadge`, `StatusKonfirmasiBadge`, & `TahapProduksiBadge`
+  - `resources/js/Components/LaporkanInsidenModal.tsx` — Modal reusable pelaporan insiden Mode 1 (`PEGAWAI`) & Mode 2 (`PETUGAS`)
+  - `resources/js/Components/KonfirmasiKompensasiModal.tsx` — Modal reusable konfirmasi & pemotongan saldo kompensasi (`PETUGAS`)
+  - `resources/js/Layouts/AppLayout.tsx` — Navigasi aktif `/produksi` & `/insiden` per peran + item Phase 3 disabled untuk `PETUGAS`
+  - `resources/js/lib/format.ts` — Formatter Phase 2 & kalkulasi preview integer cents
+  - `resources/js/types/index.ts` — Kontrak TypeScript strict Phase 2 (§3.3)
+  - `resources/js/Pages/Produksi/Index.tsx` — Workspace antrean produksi `PEGAWAI`, timbang ulang, & lapor insiden
+  - `resources/js/Pages/Insiden/Index.tsx` — Halaman bersama insiden & konfirmasi kompensasi
+  - `resources/js/Pages/Transaksi/Show.tsx` — Penyesuaian Ubah/Batal, Insiden, & Audit Trail Transaksi
+  - `MEMORY.md`, `WRITE.md` — Update `[x] P2-05` dan Entry `#014`
+- **Verifikasi / Bukti Uji:**
+  - `npx tsc --noEmit` -> `0 errors` (`strict: true`) (`exit code 0`)
+  - `npm run build` -> Vite production build (`674 modules transformed`, `public/build/manifest.json`, aset `Produksi/Index`, `Insiden/Index`, `Transaksi/Show` terbangun bersih dalam `2.07s`) (`exit code 0`)
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` (`exit code 0`)
+  - `php artisan test` -> `83 passed (2274 assertions)` pada MySQL 8.4 port `3307` (`cleanwash_testing`) (`exit code 0`)
+  - Audit hygiene (`grep` `console.log` & `: any` di `resources/js`) -> `0` temuan; tidak ada file di `app/`, `database/`, `routes/`, `tests/`, atau `Archive/` yang dimodifikasi.
+- **Keputusan / Blocker / Catatan Napkin:**
+  - `resources/js/Pages/Produksi/Index.tsx` dan `resources/js/Pages/Insiden/Index.tsx` kini telah tersedia di filesystem sehingga parameter sementara `shouldExist: false` pada `tests/Feature/ProduksiOperationTest.php` dan `tests/Feature/InsidenTest.php` siap dihapus pada langkah review/`P2-06` (sengaja tidak disentuh di `P2-05` karena batas direktori eksklusif frontend).
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  1. Lakukan cross-agent review branch `feature/p2-05-frontend-ui` dan merge ke `main`.
+  2. Lanjutkan **`P2-06`** (`fullstack-developer` + `product-manager`) untuk menghapus `shouldExist: false` di `ProduksiOperationTest.php` & `InsidenTest.php`, me-wire KPI Phase 2 di `DashboardController.php` + `Dashboard/Index.tsx`, memperbarui `Transaksi/Index.tsx` & `Transaksi/Nota.tsx`, menyusun `Phase2EndToEndTest.php` tanpa `withoutVite()`, serta mengeksekusi **Phase 2 Closing Gate (`AC-P2-01` s.d. `AC-P2-12`)**.
+
+

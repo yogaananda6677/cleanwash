@@ -1,4 +1,11 @@
-import type { StatusPembayaran } from '@/types';
+import type {
+    EligibleInsidenTransaksiOption,
+    JenisInsiden,
+    StatusKonfirmasiInsiden,
+    StatusPembayaran,
+    TahapProduksiCode,
+    TransaksiDetail,
+} from '@/types';
 
 const SCALE = 100;
 
@@ -145,6 +152,41 @@ export function formatTanggal(
     return `${dateFormatter.format(parsed)}, ${timeFormatter.format(parsed)} WIB`;
 }
 
+/**
+ * Multiply a 2-decimal quantity by a 2-decimal unit price in integer cents (matching DecimalMoney::multiplyQuantity).
+ */
+export function calculateMultiplyQuantityCents(
+    quantity: string | number,
+    unitPrice: string | number,
+): number {
+    const qtyCents = Math.max(0, parseDecimalToCents(quantity));
+    const priceCents = Math.max(0, parseDecimalToCents(unitPrice));
+
+    const qtyWhole = Math.floor(qtyCents / SCALE);
+    const qtyFrac = qtyCents % SCALE;
+    const wholeCents = qtyWhole * priceCents;
+    const fracCents = Math.floor((qtyFrac * priceCents + 50) / SCALE);
+
+    return wholeCents + fracCents;
+}
+
+/**
+ * Calculate a non-negative integer percentage in integer cents (matching DecimalMoney::percentage).
+ */
+export function calculatePercentageCents(
+    amount: string | number,
+    percent: number,
+): number {
+    const amountCents = Math.max(0, parseDecimalToCents(amount));
+    const normalizedPercent = Math.max(0, Math.trunc(percent));
+
+    if (amountCents === 0 || normalizedPercent === 0) {
+        return 0;
+    }
+
+    return Math.floor((amountCents * normalizedPercent + 50) / SCALE);
+}
+
 export interface PreviewTotalsResult {
     subtotalCents: number;
     voucherCents: number;
@@ -170,14 +212,10 @@ export function calculatePreviewTotals(params: {
     voucherDiscount?: string | number;
     nominalDp?: string | number;
 }): PreviewTotalsResult {
-    const qtyCents = Math.max(0, parseDecimalToCents(params.quantity));
-    const priceCents = Math.max(0, parseDecimalToCents(params.unitPrice));
-
-    const qtyWhole = Math.floor(qtyCents / SCALE);
-    const qtyFrac = qtyCents % SCALE;
-    const wholeCents = qtyWhole * priceCents;
-    const fracCents = Math.floor((qtyFrac * priceCents + 50) / SCALE);
-    const subtotalCents = wholeCents + fracCents;
+    const subtotalCents = calculateMultiplyQuantityCents(
+        params.quantity,
+        params.unitPrice,
+    );
 
     const voucherCents = Math.max(0, parseDecimalToCents(params.voucherDiscount ?? '0'));
     const totalCents = Math.max(0, subtotalCents - voucherCents);
@@ -205,5 +243,114 @@ export function calculatePreviewTotals(params: {
         sisaDecimal: centsToDecimalString(sisaCents),
         isOverpaid,
         previewStatus,
+    };
+}
+
+const JENIS_INSIDEN_LABELS: Record<JenisInsiden, string> = {
+    RUSAK: 'Kerusakan Pakaian',
+    HILANG: 'Kehilangan Pakaian',
+};
+
+export function formatJenisInsiden(jenis: JenisInsiden | string): string {
+    return JENIS_INSIDEN_LABELS[jenis as JenisInsiden] ?? jenis;
+}
+
+const STATUS_KONFIRMASI_LABELS: Record<StatusKonfirmasiInsiden, string> = {
+    MENUNGGU_KONFIRMASI: 'Menunggu Konfirmasi',
+    TERKONFIRMASI: 'Terkonfirmasi',
+};
+
+export function formatStatusKonfirmasi(
+    status: StatusKonfirmasiInsiden | string,
+): string {
+    return STATUS_KONFIRMASI_LABELS[status as StatusKonfirmasiInsiden] ?? status;
+}
+
+const TAHAP_PRODUKSI_LABELS: Record<TahapProduksiCode, string> = {
+    DITERIMA: 'Diterima',
+    DICUCI: 'Dicuci',
+    DIKERINGKAN: 'Dikeringkan',
+    DISETRIKA: 'Disetrika',
+    SELESAI: 'Selesai',
+};
+
+export function formatTahapProduksi(tahap: TahapProduksiCode | string): string {
+    return TAHAP_PRODUKSI_LABELS[tahap as TahapProduksiCode] ?? tahap;
+}
+
+const AUDIT_ACTION_LABELS: Record<string, string> = {
+    TRANSAKSI_CREATED: 'Transaksi Dibuat',
+    TIMBANG_ULANG: 'Penimbangan Ulang (KK-01)',
+    PRODUKSI_STATUS_UPDATED: 'Status Produksi Diperbarui',
+    LAYANAN_CHANGED: 'Layanan Diubah (KK-02)',
+    TRANSAKSI_CANCELLED: 'Transaksi Dibatalkan (KK-08)',
+    INSIDEN_REPORTED: 'Insiden Dilaporkan',
+    KOMPENSASI_CONFIRMED: 'Kompensasi Dikonfirmasi',
+    PELUNASAN_RECORDED: 'Pelunasan Dicatat',
+    SERAH_TERIMA: 'Serah Terima Pakaian',
+};
+
+export function formatAuditAction(action: string): string {
+    return AUDIT_ACTION_LABELS[action] ?? action.replaceAll('_', ' ');
+}
+
+export interface CompensationPreviewResult {
+    basisCents: number;
+    multiplier: number;
+    estimasiCents: number;
+    estimasiDecimal: string;
+}
+
+/**
+ * Preview deterministic incident compensation using integer cents (matching KompensasiService::estimateCompensation).
+ * Official persisted compensation is always calculated by the backend service layer.
+ */
+export function estimateCompensationPreview(params: {
+    subtotalLayanan: string | number;
+    itemJumlahPotong: number;
+    totalPotongNota: number;
+    jenisInsiden: JenisInsiden;
+}): CompensationPreviewResult {
+    const subtotalCents = Math.max(0, parseDecimalToCents(params.subtotalLayanan));
+    const itemPotong = Math.max(0, Math.trunc(params.itemJumlahPotong));
+    const denominator = Math.max(1, Math.trunc(params.totalPotongNota));
+    const halfDenom = Math.floor(denominator / 2);
+    const proratedCents = Math.floor(
+        (subtotalCents * itemPotong + halfDenom) / denominator,
+    );
+    const basisCents = Math.max(SCALE, proratedCents);
+    const multiplier = params.jenisInsiden === 'HILANG' ? 10 : 5;
+    const estimasiCents = basisCents * multiplier;
+
+    return {
+        basisCents,
+        multiplier,
+        estimasiCents,
+        estimasiDecimal: centsToDecimalString(estimasiCents),
+    };
+}
+
+/**
+ * Convert a TransaksiDetail record into EligibleInsidenTransaksiOption for shared incident modals.
+ */
+export function toEligibleInsidenOption(
+    transaksi: TransaksiDetail,
+): EligibleInsidenTransaksiOption {
+    const totalPotong = Math.max(
+        1,
+        transaksi.detail_pakaian.reduce(
+            (sum, item) => sum + item.jumlah_potong,
+            0,
+        ),
+    );
+
+    return {
+        nomor_nota: transaksi.nomor_nota,
+        status_transaksi: transaksi.status_transaksi,
+        pelanggan_nama: transaksi.pelanggan.nama,
+        layanan_nama: transaksi.layanan.nama_layanan,
+        subtotal_layanan: transaksi.subtotal_layanan,
+        total_potong: totalPotong,
+        detail_pakaian: transaksi.detail_pakaian,
     };
 }

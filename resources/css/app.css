@@ -22,3 +22,13 @@
         print-color-adjust: exact;
     }
 }
+
+dialog:modal {
+    overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+    overflow: hidden;
+    overscroll-behavior: contain;
+}
+

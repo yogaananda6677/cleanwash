@@ -1,6 +1,12 @@
 import type { ReactNode } from 'react';
+import {
+    formatStatusKonfirmasi,
+    formatTahapProduksi,
+} from '@/lib/format';
 import type {
     JenisBayar,
+    JenisInsiden,
+    StatusKonfirmasiInsiden,
     StatusPembayaran,
     StatusTransaksi,
     TahapProduksiCode,
@@ -65,16 +71,32 @@ const KECEPATAN_META: Record<TingkatKecepatan, BadgeMeta> = {
 };
 
 const TAHAP_META: Record<TahapProduksiCode, BadgeMeta> = {
-    DITERIMA: { label: 'Diterima', tone: 'sky' },
-    DICUCI: { label: 'Dicuci', tone: 'indigo' },
-    DIKERINGKAN: { label: 'Dikeringkan', tone: 'amber' },
-    DISETRIKA: { label: 'Disetrika', tone: 'violet' },
-    SELESAI: { label: 'Selesai', tone: 'emerald' },
+    DITERIMA: { label: formatTahapProduksi('DITERIMA'), tone: 'sky' },
+    DICUCI: { label: formatTahapProduksi('DICUCI'), tone: 'indigo' },
+    DIKERINGKAN: { label: formatTahapProduksi('DIKERINGKAN'), tone: 'amber' },
+    DISETRIKA: { label: formatTahapProduksi('DISETRIKA'), tone: 'violet' },
+    SELESAI: { label: formatTahapProduksi('SELESAI'), tone: 'emerald' },
 };
 
 const JENIS_BAYAR_META: Record<JenisBayar, BadgeMeta> = {
     DP: { label: 'DP', tone: 'amber' },
     PELUNASAN: { label: 'Pelunasan', tone: 'emerald' },
+};
+
+const JENIS_INSIDEN_META: Record<JenisInsiden, BadgeMeta> = {
+    RUSAK: { label: 'Rusak', tone: 'amber' },
+    HILANG: { label: 'Hilang', tone: 'rose' },
+};
+
+const STATUS_KONFIRMASI_META: Record<StatusKonfirmasiInsiden, BadgeMeta> = {
+    MENUNGGU_KONFIRMASI: {
+        label: formatStatusKonfirmasi('MENUNGGU_KONFIRMASI'),
+        tone: 'amber',
+    },
+    TERKONFIRMASI: {
+        label: formatStatusKonfirmasi('TERKONFIRMASI'),
+        tone: 'emerald',
+    },
 };
 
 interface BaseBadgeProps {
@@ -155,6 +177,28 @@ export function ProductionStageBadge({
             {meta.label}
         </StatusBadge>
     );
+}
+
+export const TahapProduksiBadge = ProductionStageBadge;
+
+export function JenisInsidenBadge({ jenis }: { jenis: JenisInsiden }) {
+    const meta = JENIS_INSIDEN_META[jenis] ?? {
+        label: jenis,
+        tone: 'slate' as const,
+    };
+    return <StatusBadge tone={meta.tone}>{meta.label}</StatusBadge>;
+}
+
+export function StatusKonfirmasiBadge({
+    status,
+}: {
+    status: StatusKonfirmasiInsiden;
+}) {
+    const meta = STATUS_KONFIRMASI_META[status] ?? {
+        label: status,
+        tone: 'slate' as const,
+    };
+    return <StatusBadge tone={meta.tone}>{meta.label}</StatusBadge>;
 }
 
 export function PaymentTypeBadge({ type }: { type: JenisBayar }) {

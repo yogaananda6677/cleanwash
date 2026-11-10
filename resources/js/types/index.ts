@@ -48,12 +48,16 @@ export interface DashboardPetugasSummary {
     total_voucher_tersedia: number;
     transaksi_aktif: number;
     transaksi_belum_lunas: number;
+    insiden_menunggu_konfirmasi?: number;
+    transaksi_selesai_siap_ambil?: number;
 }
 
 export interface DashboardPegawaiSummary {
     role: 'PEGAWAI';
     antrean_aktif: number;
     laporan_insiden_saya: number;
+    perlu_timbang_ulang?: number;
+    siap_proses_berikutnya?: number;
 }
 
 export interface DashboardPengantarSummary {
@@ -163,6 +167,8 @@ export type StatusPembayaran =
     | 'BELUM_LUNAS';
 export type StatusTransaksi = 'AKTIF' | 'SELESAI' | 'DIAMBIL' | 'DIBATALKAN';
 export type JenisBayar = 'DP' | 'PELUNASAN';
+export type JenisInsiden = 'RUSAK' | 'HILANG';
+export type StatusKonfirmasiInsiden = 'MENUNGGU_KONFIRMASI' | 'TERKONFIRMASI';
 
 export interface DetailPakaianItem {
     id_detail: number;
@@ -192,6 +198,72 @@ export interface RiwayatStatusProduksiItem {
     tahap_status: TahapProduksiCode;
     waktu_update: string;
     catatan: string | null;
+    pegawai?: {
+        id_pegawai: number;
+        nama_pegawai: string;
+    } | null;
+}
+
+export interface LaporanInsidenItem {
+    id_laporan: number;
+    nomor_nota: string;
+    id_detail: number;
+    id_petugas: number | null;
+    id_pegawai_pelapor: number | null;
+    jenis_insiden: JenisInsiden;
+    keterangan: string;
+    nilai_kompensasi: string;
+    kelebihan_ganti_rugi: string;
+    estimasi_kompensasi: string;
+    status_konfirmasi: StatusKonfirmasiInsiden;
+    created_at: string;
+    updated_at: string;
+    detail_pakaian: DetailPakaianItem;
+    petugas?: {
+        id_petugas: number;
+        nama_petugas: string;
+    } | null;
+    pegawai_pelapor?: {
+        id_pegawai: number;
+        nama_pegawai: string;
+    } | null;
+}
+
+export interface LaporanInsidenDetailItem extends LaporanInsidenItem {
+    transaksi: {
+        nomor_nota: string;
+        status_transaksi: StatusTransaksi;
+        status_pembayaran: StatusPembayaran;
+        subtotal_layanan: string;
+        total_harga: string;
+        total_dibayar: string;
+        sisa_tagihan: string;
+        pelanggan: Pick<PelangganItem, 'id_pelanggan' | 'nama' | 'no_telepon'>;
+        layanan: Pick<
+            JenisLayananItem,
+            | 'id_layanan'
+            | 'nama_layanan'
+            | 'tingkat_kecepatan'
+            | 'metode_hitung'
+            | 'satuan'
+        >;
+    };
+}
+
+export interface AuditLogItem {
+    id: number;
+    user_id: number | null;
+    actor_role: UserRole;
+    action: string;
+    subject_type: string;
+    subject_id: string;
+    payload_before: Record<string, unknown> | null;
+    payload_after: Record<string, unknown> | null;
+    created_at: string;
+    user?: {
+        id: number;
+        name: string;
+    } | null;
 }
 
 export interface TransaksiDetail {
@@ -207,9 +279,20 @@ export interface TransaksiDetail {
     total_harga: string;
     total_dibayar: string;
     sisa_tagihan: string;
+    kelebihan_bayar_tunai: string;
+    total_kelebihan_ganti_rugi: string;
+    total_pengembalian_pelanggan: string;
     status_pembayaran: StatusPembayaran;
     status_transaksi: StatusTransaksi;
     diambil_pada: string | null;
+    tahap_produksi_terakhir: TahapProduksiCode | null;
+    tahap_produksi_berikutnya: TahapProduksiCode | null;
+    bisa_timbang_ulang: boolean;
+    bisa_ubah_layanan: boolean;
+    bisa_batalkan: boolean;
+    perlu_biaya_pembatalan: boolean;
+    estimasi_biaya_pembatalan: string;
+    insiden_pending_count: number;
     pelanggan: PelangganItem;
     petugas: {
         id_petugas: number;
@@ -220,6 +303,7 @@ export interface TransaksiDetail {
     detail_pakaian: DetailPakaianItem[];
     pembayaran: PembayaranItem[];
     riwayat_status_produksi: RiwayatStatusProduksiItem[];
+    laporan_insiden: LaporanInsidenItem[];
 }
 
 export type PelangganOption = Pick<
@@ -237,13 +321,47 @@ export interface TransaksiIndexProps extends SharedPageProps {
     filters: {
         search: string;
         status_pembayaran?: StatusPembayaran | '';
+        status_transaksi?: StatusTransaksi | '';
     };
 }
 
 export interface TransaksiShowProps extends SharedPageProps {
     transaksi: TransaksiDetail;
+    layananOptions: JenisLayananItem[];
+    auditLogs: AuditLogItem[];
 }
 
 export interface TransaksiNotaProps extends SharedPageProps {
     transaksi: TransaksiDetail;
+}
+
+export interface ProduksiIndexProps extends SharedPageProps {
+    transaksi: Paginated<TransaksiDetail>;
+    filters: {
+        search: string;
+        tahap_status: TahapProduksiCode | '';
+        status_transaksi: 'AKTIF' | 'SELESAI' | 'ALL';
+    };
+    stageCounts: Record<TahapProduksiCode, number>;
+}
+
+export interface EligibleInsidenTransaksiOption {
+    nomor_nota: string;
+    status_transaksi: StatusTransaksi;
+    pelanggan_nama: string;
+    layanan_nama: string;
+    subtotal_layanan: string;
+    total_potong: number;
+    detail_pakaian: DetailPakaianItem[];
+}
+
+export interface InsidenIndexProps extends SharedPageProps {
+    laporan: Paginated<LaporanInsidenDetailItem>;
+    filters: {
+        search: string;
+        jenis_insiden: JenisInsiden | '';
+        status_konfirmasi: StatusKonfirmasiInsiden | '';
+    };
+    pendingCount: number;
+    eligibleTransaksiOptions: EligibleInsidenTransaksiOption[];
 }
