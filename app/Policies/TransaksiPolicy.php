@@ -24,4 +24,14 @@ class TransaksiPolicy
     {
         return $this->isActivePetugas($user);
     }
+
+    public function ubahLayanan(User $user, Transaksi $transaksi): bool
+    {
+        return $this->isActivePetugas($user);
+    }
+
+    public function batalkan(User $user, Transaksi $transaksi): bool
+    {
+        return $this->isActivePetugas($user);
+    }
 }

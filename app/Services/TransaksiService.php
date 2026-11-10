@@ -87,13 +87,56 @@ class TransaksiService
                 ->select(['id_pelanggan', 'nama', 'no_telepon', 'boleh_bayar_akhir'])
                 ->orderBy('nama')
                 ->get(),
-            'layananOptions' => JenisLayanan::query()
-                ->where('is_active', true)
-                ->with(['tahapLayanan' => fn ($query) => $query->orderBy('urutan')])
-                ->orderBy('nama_layanan')
-                ->orderBy('tingkat_kecepatan')
-                ->get(),
+            'layananOptions' => $this->getActiveLayananOptions(),
         ];
+    }
+
+    /**
+     * Retrieve active service options with ordered TahapLayanan stages.
+     *
+     * @return Collection<int, JenisLayanan>
+     */
+    public function getActiveLayananOptions(): Collection
+    {
+        return JenisLayanan::query()
+            ->where('is_active', true)
+            ->with(['tahapLayanan' => fn ($query) => $query->orderBy('urutan')])
+            ->orderBy('nama_layanan')
+            ->orderBy('tingkat_kecepatan')
+            ->get();
+    }
+
+    /**
+     * Retrieve formatted audit trail entries for a transaction with actor user identity.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function getAuditLogs(string $nomorNota): array
+    {
+        return AuditLog::query()
+            ->with(['user:id,name'])
+            ->where('subject_type', Transaksi::class)
+            ->where('subject_id', $nomorNota)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->get()
+            ->map(fn (AuditLog $log): array => [
+                'id' => $log->id,
+                'user_id' => $log->user_id,
+                'actor_role' => (string) $log->actor_role,
+                'action' => $log->action,
+                'subject_type' => $log->subject_type,
+                'subject_id' => $log->subject_id,
+                'payload_before' => $log->payload_before,
+                'payload_after' => $log->payload_after,
+                'created_at' => $log->created_at?->toISOString(),
+                'user' => $log->user !== null ? [
+                    'id' => $log->user->id,
+                    'name' => $log->user->name,
+                ] : null,
+            ])
+            ->values()
+            ->all();
     }
 
     /**
@@ -157,7 +200,7 @@ class TransaksiService
             $pelanggan = $this->resolvePelanggan($data['id_pelanggan'] ?? null);
             $layanan = $this->resolveActiveLayanan($data['id_layanan'] ?? null);
             $detailItems = $this->validateDetailItems($data['detail_pakaian'] ?? null);
-            $beratAtauJumlah = $this->resolveValidatedQuantity($data['berat_atau_jumlah'] ?? '', $layanan);
+            $beratAtauJumlah = $this->validateQuantityForLayanan($data['berat_atau_jumlah'] ?? '', $layanan);
 
             // Lock voucher before nota sequence generation so concurrent claims on the same voucher
             // serialize on the voucher row and the loser rolls back cleanly without contention.
@@ -512,22 +555,33 @@ class TransaksiService
     }
 
     /**
+     * Validate and normalize transaction quantity/weight against the service's counting method.
+     *
      * @throws ValidationException
      */
-    private function resolveValidatedQuantity(mixed $rawQuantity, JenisLayanan $layanan): string
-    {
-        $beratAtauJumlah = $this->normalizeDecimal($rawQuantity, 'berat_atau_jumlah');
+    public function validateQuantityForLayanan(
+        mixed $rawQuantity,
+        JenisLayanan $layanan,
+        string $field = 'berat_atau_jumlah'
+    ): string {
+        $beratAtauJumlah = $this->normalizeDecimal($rawQuantity, $field);
         $quantityCents = DecimalMoney::toCents($beratAtauJumlah);
 
         if ($quantityCents <= 0) {
             throw ValidationException::withMessages([
-                'berat_atau_jumlah' => 'Berat atau jumlah harus lebih besar dari 0.',
+                $field => 'Berat atau jumlah harus lebih besar dari 0.',
+            ]);
+        }
+
+        if (DecimalMoney::gt($beratAtauJumlah, '99999.99')) {
+            throw ValidationException::withMessages([
+                $field => 'Berat atau jumlah maksimal 99999.99.',
             ]);
         }
 
         if ($layanan->metode_hitung === MetodeHitung::JUMLAH && ($quantityCents < 100 || ($quantityCents % 100) !== 0)) {
             throw ValidationException::withMessages([
-                'berat_atau_jumlah' => 'Kuantitas untuk layanan metode JUMLAH (pcs) wajib berupa bilangan bulat minimal 1.',
+                $field => 'Kuantitas untuk layanan metode JUMLAH (pcs) wajib berupa bilangan bulat minimal 1.',
             ]);
         }
 

@@ -6,6 +6,7 @@ use App\Enums\VoucherStatus;
 use App\Models\Voucher;
 use App\Support\DecimalMoney;
 use App\Support\SqlLike;
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -216,6 +217,40 @@ class VoucherService
             $voucher->update([
                 'status_penggunaan' => VoucherStatus::SUDAH_DIGUNAKAN,
                 'digunakan_pada' => now('Asia/Jakarta'),
+            ]);
+
+            return $voucher->refresh();
+        });
+    }
+
+    /**
+     * Atomically release a claimed voucher on pre-wash cancellation (DITERIMA).
+     */
+    public function lepaskan(string $nomorVoucher, ?CarbonInterface $referenceDate = null): ?Voucher
+    {
+        return DB::transaction(function () use ($nomorVoucher, $referenceDate): ?Voucher {
+            $kode = Str::upper(trim($nomorVoucher));
+            $voucher = Voucher::query()
+                ->where('nomor_voucher', $kode)
+                ->lockForUpdate()
+                ->first();
+
+            if ($voucher === null) {
+                return null;
+            }
+
+            $today = ($referenceDate ?? now('Asia/Jakarta'))
+                ->copy()
+                ->timezone('Asia/Jakarta')
+                ->toDateString();
+
+            $nextStatus = $voucher->masa_berlaku->toDateString() >= $today
+                ? VoucherStatus::TERSEDIA
+                : VoucherStatus::KEDALUWARSA;
+
+            $voucher->update([
+                'status_penggunaan' => $nextStatus,
+                'digunakan_pada' => null,
             ]);
 
             return $voucher->refresh();

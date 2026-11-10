@@ -342,3 +342,38 @@
 - **Next Exact Action:**
   1. Lakukan cross-agent review & Squash Merge `feature/p2-02-produksi-service` ke `main` sesuai `napkin/PR_REVIEW_LIFECYCLE.md`.
   2. Delegasikan **`P2-03`** ke `cw-backend-dev` pada branch `feature/p2-03-ubah-batal` dari `main` untuk mengimplementasikan `TransaksiAdjustmentService` (`ubahLayanan` `KK-02` & `batalkanTransaksi` `KK-08` dengan pelepasan atomik `nomor_voucher`), `UbahLayananRequest`, `BatalkanTransaksiRequest`, pembaruan `TransaksiPolicy` & `TransaksiController::show()` (`layananOptions`, `auditLogs`), `TransaksiAdjustmentController`, serta automated tests `AC-P2-06` s.d. `AC-P2-08`.
+
+### [#012] 2026-11-10 17:03 — Backend Developer (`cw-backend-dev`) — Phase 2 (`P2-03`)
+- **Status:** `READY_FOR_REVIEW`
+- **Ringkasan Kegiatan:**
+  - Melakukan Context Sync (`PRD.md` §7.2/§8 `FR-07`/`FR-12`/§9, `AGENTS.md`, `MEMORY.md`, `WRITE.md` `#009`–`#011`, `.claude/napkin.md`, `napkin/PR_REVIEW_LIFECYCLE.md`, `docs/phases/PHASE_1_CONTRACTS.md`, dan `docs/phases/PHASE_2_CONTRACTS.md` §2.0, §2.3–§2.4, §3.1–§3.3, §4 `AC-P2-06`..`AC-P2-08`, serta `TransaksiService` & `PembayaranService`) lalu membuat branch `feature/p2-03-ubah-batal` dari `main`.
+  - Menerapkan TDD (**Red $\rightarrow$ Green $\rightarrow$ Refactor**): menulis `tests/Unit/TransaksiAdjustmentServiceTest.php` dan `tests/Feature/TransaksiAdjustmentTest.php` lebih dulu (9 test gagal pada fase Red) sebelum implementasi kode.
+  - Memperbarui `app/Services/VoucherService.php` dengan `lepaskan()` (`DB::transaction()` + `lockForUpdate()`, mengembalikan status ke `TERSEDIA` bila `masa_berlaku >= today WIB` atau `KEDALUWARSA` bila lewat, serta `digunakan_pada = null`).
+  - Memperbarui `app/Services/TransaksiService.php` dengan `getActiveLayananOptions()`, `getAuditLogs()` (beserta relasi `user:id,name` sesuai `AuditLogItem` §3.3), dan mengekspos `validateQuantityForLayanan()` agar dipakai bersama oleh penerimaan & perubahan layanan tanpa duplikasi logika.
+  - Mengimplementasikan `app/Services/TransaksiAdjustmentService.php` (`ubahLayanan()` dan `batalkanTransaksi()` dalam `DB::transaction()` + `lockForUpdate()`):
+    - `ubahLayanan()` (`KK-02`, `KK-09`): mengizinkan hanya pada `AKTIF` tahap `DITERIMA`/`DICUCI`, memvalidasi layanan aktif non-identik & kecocokan `TahapLayanan`, mewajibkan `berat_atau_jumlah_baru` valid saat pindah `BERAT <-> JUMLAH`, menyalin `harga_satuan_snapshot` baru, merekonsiliasi `total_harga` & `status_pembayaran` via `PembayaranService`, dan mencatat `AuditLog` (`LAYANAN_CHANGED`).
+    - `batalkanTransaksi()` (`KK-08`): Cabang A (`DITERIMA`) menolak biaya `> 0`, menetapkan `biaya_pembatalan = '0.00'`, `total_harga = '0.00'`, melepas voucher secara atomik dengan mengosongkan `transaksi.nomor_voucher = null` & `nilai_voucher_snapshot = '0.00'` (aman dipakai ulang tanpa error `UNIQUE(nomor_voucher)`), dan merekonsiliasi `status_pembayaran`; Cabang B (`DICUCI`/`DIKERINGKAN`/`DISETRIKA`) menolak pembatalan gratis `422`, memakai default `50%` `subtotal_layanan` via `DecimalMoney::percentage()` atau override `0 < biaya <= subtotal_layanan`, mempertahankan voucher sebagai `SUDAH_DIGUNAKAN`, menghitung `total_harga = max(0, biaya_pembatalan - total_kompensasi)`, merekonsiliasi `status_pembayaran` & `kelebihan_bayar_tunai`, serta mencatat `AuditLog` (`TRANSAKSI_CANCELLED`).
+  - Membuat `UbahLayananRequest` & `BatalkanTransaksiRequest` (menggunakan `AuthorizesPetugasRequest`), menambahkan `ubahLayanan()` & `batalkan()` pada `TransaksiPolicy`, memperluas `Controller::executeWithFlashRedirect()` agar mendukung `$routeParams`, membuat `TransaksiAdjustmentController`, memperbarui `TransaksiController::show()` (`layananOptions` + `auditLogs` sesuai `TransaksiShowProps`), dan mendaftarkan route `POST /transaksi/{nota}/ubah-layanan` & `POST /transaksi/{nota}/batalkan` di `routes/web.php` di bawah `role:PETUGAS`, tanpa menyentuh `resources/js/` maupun `resources/css/`.
+- **File Dibuat / Diubah:**
+  - `app/Services/TransaksiAdjustmentService.php` — Engine penyesuaian `ubahLayanan()` (`KK-02`) dan `batalkanTransaksi()` (`KK-08`)
+  - `app/Services/VoucherService.php` — Penambahan `lepaskan()` dengan `lockForUpdate()` & cek tanggal kedaluwarsa WIB
+  - `app/Services/TransaksiService.php` — Penambahan `getActiveLayananOptions()`, `getAuditLogs()`, & `validateQuantityForLayanan()`
+  - `app/Http/Controllers/Controller.php` — Dukungan `$routeParams` opsional di `executeWithFlashRedirect()`
+  - `app/Http/Requests/Transaksi/{UbahLayananRequest,BatalkanTransaksiRequest}.php` — FormRequest validation & otorisasi `PETUGAS` aktif
+  - `app/Policies/TransaksiPolicy.php` — Penambahan kemampuan policy `ubahLayanan` & `batalkan`
+  - `app/Http/Controllers/TransaksiAdjustmentController.php`, `app/Http/Controllers/TransaksiController.php`, `routes/web.php` — Endpoint `transaksi.ubah-layanan`, `transaksi.batalkan`, & props `Transaksi/Show` (`layananOptions`, `auditLogs`)
+  - `tests/Unit/TransaksiAdjustmentServiceTest.php`, `tests/Feature/TransaksiAdjustmentTest.php` — Automated tests lengkap `AC-P2-06` s.d. `AC-P2-08`, RBAC `403`, `KK-09` pasca ubah layanan, & pakai ulang voucher bebas `UNIQUE(nomor_voucher)`
+  - `MEMORY.md`, `WRITE.md` — Update `[x] P2-03` dan Entry `#012`
+- **Verifikasi / Bukti Uji:**
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` (`exit code 0`)
+  - `php artisan test` -> `76 passed (2012 assertions)` pada MySQL 8.4 port `3307` (`cleanwash_testing`), termasuk seluruh test Phase 1 (`TransaksiReceptionTest`, `Phase1EndToEndTest`), `P2-02`, dan `P2-03` (`exit code 0`)
+  - `npx tsc --noEmit` -> `0 errors` (`exit code 0`)
+  - `npm run build` -> Vite production build (`public/build/manifest.json`, `built in 1.98s`) (`exit code 0`)
+  - `php artisan migrate --no-interaction && php artisan migrate:rollback --no-interaction && php artisan migrate --seed --no-interaction` -> 18 migrasi rollback & re-migrate + seed bersih (`exit code 0`)
+  - `php artisan route:list --except-vendor` -> 28 route terdaftar termasuk `transaksi.ubah-layanan` & `transaksi.batalkan`; hygiene grep (`dd`/`dump`/`var_dump`/`bcmath`/`(float)`) -> `0` temuan; `resources/js/` & `resources/css/` tidak tersentuh.
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Aturan #9 di `.claude/napkin.md` (`transaksi.nomor_voucher = null` saat batal di `DITERIMA`) diverifikasi berjalan bersih di MySQL 8.4 tanpa konflik constraint `UNIQUE(nomor_voucher)`.
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  1. Lakukan cross-agent review & Squash Merge `feature/p2-03-ubah-batal` ke `main` sesuai `napkin/PR_REVIEW_LIFECYCLE.md`.
+  2. Delegasikan **`P2-04`** ke `cw-backend-dev` pada branch `feature/p2-04-kompensasi` dari `main` untuk mengimplementasikan `KompensasiService` (`LaporanKerusakanKehilangan` per `DetailPakaian`, `hitungKompensasi`, `potongKompensasi` tanpa double-counting `kelebihan_ganti_rugi`), `LaporanKerusakanPolicy`, `StoreInsidenRequest`, `KonfirmasiKompensasiRequest`, `InsidenController`, dan automated tests `AC-P2-09` s.d. `AC-P2-10`.

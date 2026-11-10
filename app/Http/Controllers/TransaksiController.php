@@ -80,20 +80,22 @@ class TransaksiController extends Controller
 
     public function show(string $nota): Response
     {
-        return $this->renderDetail($nota, 'Transaksi/Show');
+        $transaksi = $this->transaksiService->findForDetail($nota);
+        $this->authorize('view', $transaksi);
+
+        return Inertia::render('Transaksi/Show', [
+            'transaksi' => $this->transaksiService->formatTransaksiDetail($transaksi),
+            'layananOptions' => $this->transaksiService->getActiveLayananOptions(),
+            'auditLogs' => $this->transaksiService->getAuditLogs($transaksi->nomor_nota),
+        ]);
     }
 
     public function nota(string $nota): Response
     {
-        return $this->renderDetail($nota, 'Transaksi/Nota');
-    }
-
-    private function renderDetail(string $nota, string $component): Response
-    {
         $transaksi = $this->transaksiService->findForDetail($nota);
         $this->authorize('view', $transaksi);
 
-        return Inertia::render($component, [
+        return Inertia::render('Transaksi/Nota', [
             'transaksi' => $this->transaksiService->formatTransaksiDetail($transaksi),
         ]);
     }

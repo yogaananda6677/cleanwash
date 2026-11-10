@@ -14,12 +14,15 @@ abstract class Controller
 
     /**
      * Run a state-mutating action and convert domain ValidationException into flash + error bag for Inertia/web requests.
+     *
+     * @param  array<string, mixed>  $routeParams
      */
     protected function executeWithFlashRedirect(
         Request $request,
         Closure $action,
         string $fallbackRoute,
-        string $successMessage
+        string $successMessage,
+        array $routeParams = []
     ): RedirectResponse {
         try {
             $action();
@@ -31,13 +34,13 @@ abstract class Controller
             $firstMessage = collect($exception->errors())->flatten()->first() ?? $exception->getMessage();
 
             return redirect()
-                ->back(fallback: route($fallbackRoute))
+                ->back(fallback: route($fallbackRoute, $routeParams))
                 ->with('error', $firstMessage)
                 ->withErrors($exception->errors());
         }
 
         return redirect()
-            ->route($fallbackRoute)
+            ->route($fallbackRoute, $routeParams)
             ->with('success', $successMessage);
     }
 }

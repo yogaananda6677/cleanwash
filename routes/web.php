@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JenisLayananController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\ProduksiController;
+use App\Http\Controllers\TransaksiAdjustmentController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\VoucherController;
 use Illuminate\Http\Request;
@@ -43,6 +44,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/transaksi/create', [TransaksiController::class, 'create'])->name('transaksi.create');
         Route::post('/transaksi', [TransaksiController::class, 'store'])->name('transaksi.store');
         Route::get('/transaksi/{nota}/nota', [TransaksiController::class, 'nota'])->name('transaksi.nota');
+        Route::post('/transaksi/{nota}/ubah-layanan', [TransaksiAdjustmentController::class, 'ubahLayanan'])->name('transaksi.ubah-layanan');
+        Route::post('/transaksi/{nota}/batalkan', [TransaksiAdjustmentController::class, 'batalkan'])->name('transaksi.batalkan');
         Route::get('/transaksi/{nota}', [TransaksiController::class, 'show'])->name('transaksi.show');
     });
 
