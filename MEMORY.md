@@ -13,9 +13,9 @@ Dokumen ini adalah memori status arsitektur proyek **CleanWash** untuk manusia d
 | **Product** | CleanWash — Sistem Informasi Manajemen Operasional Laundry |
 | **SRS Reference** | [UTS.pdf](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/Outputtts/UTS.pdf) & [2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx) |
 | **Current Phase** | Phase 2 — Operasional Produksi, Penimbangan Ulang, Penyesuaian & Kompensasi Insiden |
-| **Current Status** | `NOT_STARTED` (Phase 1 `DONE` & di-merge ke `main`; siap memulai `P2-01` oleh `product-manager`) |
+| **Current Status** | `IN_PROGRESS` (`P2-01` selesai & dikunci di [PHASE_2_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_2_CONTRACTS.md); siap memulai `P2-02` oleh `cw-backend-dev`) |
 | **Last Updated** | 2026-11-10 |
-| **Updated By** | Product Manager + Primary Agent — Phase 1 Closing Gate Sign-Off (`P1-07`) |
+| **Updated By** | Product Manager (`product-manager`) + Primary Agent — Task `P2-01` |
 
 ---
 
@@ -65,7 +65,7 @@ Status yang diizinkan: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 | --- | --- | --- | --- | --- | --- |
 | **Phase 0 (Docs)** | PRD, AGENTS.md, 4 Subagent, Napkin & Context Ledger | `DONE` | 2026-11-10 | 2026-11-10 | [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#001` |
 | **Phase 1** | Fondasi Sistem, Master Data & Penerimaan Transaksi (DP & Voucher) | `DONE` | 2026-11-10 | 2026-11-10 | [PHASE_1_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_1_CONTRACTS.md), [PHASE_1_CLOSING_EVIDENCE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_1_CLOSING_EVIDENCE.md), & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#002`–`#009` |
-| **Phase 2** | Operasional Produksi, Timbang Ulang, Ubah/Batal & Kompensasi Insiden | `NOT_STARTED` | — | — | Menunggu `P2-01` |
+| **Phase 2** | Operasional Produksi, Timbang Ulang, Ubah/Batal & Kompensasi Insiden | `IN_PROGRESS` | 2026-11-10 | — | [PHASE_2_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_2_CONTRACTS.md) & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#010` |
 | **Phase 3** | Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening | `NOT_STARTED` | — | — | Menunggu Phase 2 `DONE` |
 
 ---
@@ -82,7 +82,7 @@ Status yang diizinkan: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 - [x] `P1-07` (`fullstack-developer` + `product-manager`): Halaman Detail & Cetak Nomor Nota, integrasi E2E Phase 1, audit 6 Gerbang, & Phase 1 Sign-off ([PHASE_1_CLOSING_EVIDENCE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_1_CLOSING_EVIDENCE.md)).
 
 ### Phase 2 — Operasional Produksi, Timbang Ulang, Penyesuaian & Kompensasi Insiden
-- [ ] `P2-01` (`product-manager`): Spesifikasi aturan selisih ubah layanan, biaya pembatalan setelah cuci, dan formula kompensasi.
+- [x] `P2-01` (`product-manager`): Spesifikasi aturan selisih ubah layanan, biaya pembatalan setelah cuci, dan formula kompensasi ([PHASE_2_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_2_CONTRACTS.md)).
 - [ ] `P2-02` (`backend-developer`): `ProduksiService` (`timbangUlang` + hitung ulang harga `KK-01`, state machine `RiwayatStatusProduksi` sesuai `TahapLayanan`).
 - [ ] `P2-03` (`backend-developer`): `ubahLayanan()` (`KK-02`) dan `batalkanTransaksi()` (`KK-08`) + unit/feature tests.
 - [ ] `P2-04` (`backend-developer`): `KompensasiService` untuk `LaporanKerusakanKehilangan` per `DetailPakaian` (`KK-04`, `KK-05`) + tests.

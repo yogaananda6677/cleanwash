@@ -288,3 +288,23 @@
   - Tidak ada blocker.
 - **Next Exact Action:**
   - Mulai **Phase 2** dari `main`: delegasikan **`P2-01`** ke subagent `product-manager` (pada branch `docs/p2-01-rules-contracts`) untuk menyusun `docs/phases/PHASE_2_CONTRACTS.md` yang mengunci aturan bisnis, formula keuangan, state machine, kontrak API/Inertia Props, dan Acceptance Criteria `AC-P2-*` untuk `UC-10`, `UC-11`, `UC-12`, `UC-13`, `KK-01`, `KK-02`, `KK-04`/`KK-05`, dan `KK-08`.
+
+### [#010] 2026-11-10 16:45 — Product Manager (`product-manager`) + Primary Agent — Phase 2 (`P2-01`)
+- **Status:** `DONE`
+- **Ringkasan Kegiatan:**
+  - Melakukan Context Sync terhadap `PRD.md` (§5, §7.2–7.3, §8 `FR-06`–`FR-08`/`FR-12`, §9–§11), `AGENTS.md`, `MEMORY.md`, `WRITE.md` (`#008`–`#009`), `.claude/napkin.md`, `docs/phases/PHASE_1_CONTRACTS.md`, `docs/phases/PHASE_1_CLOSING_EVIDENCE.md`, `Archive/Outputtts/UTS.pdf` (*Class Diagram*, *Activity 2*, *Sequence 2 & 3*), serta model, enum, service, controller, dan tipe TS aktual.
+  - Menyusun kontrak lengkap Phase 2 pada `docs/phases/PHASE_2_CONTRACTS.md` meliputi breakdown `P2-01` s.d. `P2-06`, formula integer-cents `App\Support\DecimalMoney` (`percentage` & `prorateAndMultiply`), aturan tegas `timbangUlang()` (`KK-01`, tahap `DITERIMA` & metode `BERAT`), state machine `RiwayatStatusProduksi` (`UC-11`, `perlu_setrika`), `ubahLayanan()` (`KK-02`, tahap `DITERIMA`/`DICUCI` & konversi `BERAT <-> JUMLAH`), `batalkanTransaksi()` (`KK-08`, gratis + lepas voucher & `transaksi.nomor_voucher = null` di `DITERIMA`, biaya `50%` di `DICUCI`–`DISETRIKA`), serta `KompensasiService` (`KK-04`, `KK-05`, `UC-13`, alur 2-peran `Pegawai -> Petugas` via `id_petugas` nullability, formula `5×`/`10×`, dan anti-double-counting `kelebihan_ganti_rugi`).
+  - Mengunci kontrak route, FormRequest, Inertia Props, TypeScript interfaces (`Produksi/Index.tsx`, `Insiden/Index.tsx`, `Transaksi/Show.tsx`, `DashboardController`), serta 12 Acceptance Criteria (`AC-P2-01` s.d. `AC-P2-12`).
+- **File Dibuat / Diubah:**
+  - `docs/phases/PHASE_2_CONTRACTS.md` — Spesifikasi aturan bisnis, formula finansial, kontrak API/TS, & `AC-P2-01`..`AC-P2-12`
+  - `MEMORY.md` — Status Phase 2 `IN_PROGRESS` dan centang `[x] P2-01`
+  - `.claude/napkin.md` — Penambahan aturan #9 pelepasan `nomor_voucher` (`UNIQUE(nomor_voucher)`) saat batal di `DITERIMA`
+  - `WRITE.md` — Penambahan Entry `#010`
+- **Verifikasi / Bukti Uji:**
+  - Audit silang kontrak terhadap skema MySQL 8.4 Phase 1 (`16` tabel, tanpa butuh migrasi tambahan), SRS *Activity 2* & *Sequence 2–3*, serta formula `DecimalMoney` -> konsisten 100%.
+  - Commit & Squash Merge `docs/p2-01-rules-contracts` -> `main` bersih.
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Status konfirmasi laporan insiden memakai kolom `id_petugas` (`null` = `MENUNGGU_KONFIRMASI`, non-null = `TERKONFIRMASI`) tanpa migrasi tabel baru.
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  - Delegasikan **`P2-02`** ke `cw-backend-dev` pada branch `feature/p2-02-produksi-service` dari `main` untuk mengimplementasikan `ProduksiService` (`timbangUlang` `KK-01`, `ubahStatusProduksi` state machine sesuai `TahapLayanan`), `ProduksiPolicy`, `TimbangUlangRequest`, `UpdateStatusProduksiRequest`, `ProduksiController`, pembaruan `TransaksiService::detailRelations()` / `formatTransaksiDetail()`, dan TDD automated tests (`AC-P2-01` s.d. `AC-P2-05`).
