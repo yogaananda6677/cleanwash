@@ -1,13 +1,17 @@
 import type { ReactNode } from 'react';
 import {
+    formatStatusItemPengantaran,
     formatStatusKonfirmasi,
+    formatStatusPengantaran,
     formatTahapProduksi,
 } from '@/lib/format';
 import type {
     JenisBayar,
     JenisInsiden,
+    StatusItemPengantaran,
     StatusKonfirmasiInsiden,
     StatusPembayaran,
+    StatusPengantaran,
     StatusTransaksi,
     TahapProduksiCode,
     TingkatKecepatan,
@@ -96,6 +100,44 @@ const STATUS_KONFIRMASI_META: Record<StatusKonfirmasiInsiden, BadgeMeta> = {
     TERKONFIRMASI: {
         label: formatStatusKonfirmasi('TERKONFIRMASI'),
         tone: 'emerald',
+    },
+};
+
+const PENGANTARAN_META: Record<StatusPengantaran, BadgeMeta> = {
+    DIJADWALKAN: {
+        label: formatStatusPengantaran('DIJADWALKAN'),
+        tone: 'sky',
+    },
+    BERJALAN: {
+        label: formatStatusPengantaran('BERJALAN'),
+        tone: 'amber',
+    },
+    SELESAI: {
+        label: formatStatusPengantaran('SELESAI'),
+        tone: 'emerald',
+    },
+};
+
+const ITEM_PENGANTARAN_META: Record<StatusItemPengantaran, BadgeMeta> = {
+    MENUNGGU: {
+        label: formatStatusItemPengantaran('MENUNGGU'),
+        tone: 'slate',
+    },
+    DIAMBIL: {
+        label: formatStatusItemPengantaran('DIAMBIL'),
+        tone: 'sky',
+    },
+    DALAM_PERJALANAN: {
+        label: formatStatusItemPengantaran('DALAM_PERJALANAN'),
+        tone: 'indigo',
+    },
+    DITERIMA: {
+        label: formatStatusItemPengantaran('DITERIMA'),
+        tone: 'emerald',
+    },
+    GAGAL: {
+        label: formatStatusItemPengantaran('GAGAL'),
+        tone: 'rose',
     },
 };
 
@@ -215,4 +257,28 @@ export function PayLaterBadge({ allowed }: { allowed: boolean }) {
     ) : (
         <StatusBadge tone="slate">Wajib Lunas</StatusBadge>
     );
+}
+
+export function PengantaranStatusBadge({
+    status,
+}: {
+    status: StatusPengantaran;
+}) {
+    const meta = PENGANTARAN_META[status] ?? {
+        label: status,
+        tone: 'slate' as const,
+    };
+    return <StatusBadge tone={meta.tone}>{meta.label}</StatusBadge>;
+}
+
+export function ItemPengantaranStatusBadge({
+    status,
+}: {
+    status: StatusItemPengantaran;
+}) {
+    const meta = ITEM_PENGANTARAN_META[status] ?? {
+        label: status,
+        tone: 'slate' as const,
+    };
+    return <StatusBadge tone={meta.tone}>{meta.label}</StatusBadge>;
 }

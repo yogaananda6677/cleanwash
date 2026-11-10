@@ -5,11 +5,12 @@ import {
     type BadgeTone,
 } from '@/Components/StatusBadge';
 import AppLayout from '@/Layouts/AppLayout';
+import { formatRupiah, parseDecimalToCents } from '@/lib/format';
 import type { DashboardIndexProps } from '@/types';
 
 interface MetricCardProps {
     label: string;
-    value: number;
+    value: number | string;
     hint: string;
     accentClass?: string;
     href?: string;
@@ -156,6 +157,14 @@ export default function DashboardIndex({ auth, summary }: DashboardIndexProps) {
                             Buka Antrean Produksi &rarr;
                         </Link>
                     )}
+                    {summary.role === 'PENGANTAR' && (
+                        <Link
+                            href="/pengantaran"
+                            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-sky-700"
+                        >
+                            Buka Jadwal Pengantaran &rarr;
+                        </Link>
+                    )}
                 </div>
             </section>
 
@@ -200,8 +209,48 @@ export default function DashboardIndex({ auth, summary }: DashboardIndexProps) {
                             value={summary.transaksi_selesai_siap_ambil}
                             hint="Produksi SELESAI menunggu pengambilan/antar"
                             accentClass="text-emerald-700"
-                            href="/transaksi?status_transaksi=SELESAI"
-                            hrefLabel="Lihat nota selesai"
+                            href="/serah-terima?mode=SIAP_AMBIL"
+                            hrefLabel="Buka loket serah terima"
+                        />
+                        <MetricCard
+                            label="Pengantaran Aktif"
+                            value={summary.pengantaran_aktif}
+                            hint="Sesi kurir DIJADWALKAN / BERJALAN"
+                            accentClass="text-violet-700"
+                            href="/pengantaran"
+                            hrefLabel="Kelola pengantaran"
+                        />
+                        <MetricCard
+                            label="Piutang Belum Lunas"
+                            value={summary.piutang_belum_lunas}
+                            hint={`Total piutang: ${formatRupiah(summary.piutang_nominal_total)}`}
+                            accentClass={
+                                summary.piutang_belum_lunas > 0
+                                    ? 'text-amber-700'
+                                    : 'text-slate-900'
+                            }
+                            badgeText={
+                                summary.piutang_belum_lunas > 0
+                                    ? 'KK-06 Aktif'
+                                    : undefined
+                            }
+                            badgeTone="amber"
+                            href="/serah-terima?mode=PIUTANG"
+                            hrefLabel="Kelola piutang"
+                        />
+                        <MetricCard
+                            label="Total Nominal Piutang"
+                            value={formatRupiah(summary.piutang_nominal_total)}
+                            hint="Akumulasi nota DIAMBIL belum lunas"
+                            accentClass={
+                                parseDecimalToCents(
+                                    summary.piutang_nominal_total,
+                                ) > 0
+                                    ? 'text-rose-700'
+                                    : 'text-emerald-700'
+                            }
+                            href="/audit"
+                            hrefLabel="Lihat ringkasan audit"
                         />
                         <MetricCard
                             label="Belum Lunas"
@@ -256,7 +305,8 @@ export default function DashboardIndex({ auth, summary }: DashboardIndexProps) {
 
                     <section className="mt-8">
                         <h3 className="text-sm font-semibold text-slate-900">
-                            Akses Cepat Loket Kasir, Insiden &amp; Master Data
+                            Akses Cepat Loket Kasir, Pengantaran, Audit &amp;
+                            Master Data
                         </h3>
                         <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             <QuickActionCard
@@ -264,6 +314,28 @@ export default function DashboardIndex({ auth, summary }: DashboardIndexProps) {
                                 title="Buat Nota Penerimaan"
                                 description="Input transaksi laundry baru, rincian pakaian, cek voucher live, dan catat DP."
                                 href="/transaksi/create"
+                            />
+                            <QuickActionCard
+                                title="Loket Serah Terima & Pelunasan"
+                                description="Proses pengambilan cucian di loket (KK-06), catat pelunasan sisa tagihan, dan pantau piutang."
+                                href="/serah-terima"
+                                badgeText={
+                                    summary.transaksi_selesai_siap_ambil > 0
+                                        ? `${summary.transaksi_selesai_siap_ambil} Siap Ambil`
+                                        : undefined
+                                }
+                                badgeTone="emerald"
+                            />
+                            <QuickActionCard
+                                title="Manajemen Pengantaran Kurir"
+                                description="Jadwalkan pengantaran multi-pelanggan, pantau progres kurir, dan kelola reschedule (KK-07)."
+                                href="/pengantaran"
+                                badgeText={
+                                    summary.pengantaran_aktif > 0
+                                        ? `${summary.pengantaran_aktif} Aktif`
+                                        : undefined
+                                }
+                                badgeTone="violet"
                             />
                             <QuickActionCard
                                 title="Daftar Transaksi"
@@ -281,6 +353,17 @@ export default function DashboardIndex({ auth, summary }: DashboardIndexProps) {
                                 badgeText={
                                     summary.insiden_menunggu_konfirmasi > 0
                                         ? `${summary.insiden_menunggu_konfirmasi} Pending`
+                                        : undefined
+                                }
+                                badgeTone="amber"
+                            />
+                            <QuickActionCard
+                                title="Audit Trail & Piutang"
+                                description="Tinjau log audit lintas modul serta rekap piutang pelanggan boleh_bayar_akhir."
+                                href="/audit"
+                                badgeText={
+                                    summary.piutang_belum_lunas > 0
+                                        ? `${summary.piutang_belum_lunas} Piutang`
                                         : undefined
                                 }
                                 badgeTone="amber"
@@ -365,34 +448,80 @@ export default function DashboardIndex({ auth, summary }: DashboardIndexProps) {
 
             {summary.role === 'PENGANTAR' && (
                 <>
-                    <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         <MetricCard
                             label="Jadwal Pengantaran Aktif"
                             value={summary.jadwal_pengantaran_aktif}
                             hint="Sesi pengantaran berstatus DIJADWALKAN / BERJALAN"
                             accentClass="text-violet-700"
+                            href="/pengantaran"
+                            hrefLabel="Lihat sesi aktif"
                         />
                         <MetricCard
                             label="Item Antar Aktif"
                             value={summary.item_pengantaran_aktif}
-                            hint="Nota menunggu / diambil / dalam perjalanan"
+                            hint="Nota MENUNGGU / DIAMBIL / DALAM_PERJALANAN"
                             accentClass="text-sky-700"
+                            href="/pengantaran"
+                            hrefLabel="Kelola item pengantaran"
+                        />
+                        <MetricCard
+                            label="Terkirim Hari Ini"
+                            value={summary.item_terkirim_hari_ini}
+                            hint="Item berstatus DITERIMA hari ini (WIB)"
+                            accentClass="text-emerald-700"
+                            href="/pengantaran?status_pengantaran=SELESAI"
+                            hrefLabel="Lihat sesi selesai"
+                        />
+                        <MetricCard
+                            label="Gagal Perlu Tindak Lanjut"
+                            value={summary.item_gagal_perlu_tindak_lanjut}
+                            hint="Item GAGAL yang belum dijadwalkan ulang (KK-07)"
+                            accentClass={
+                                summary.item_gagal_perlu_tindak_lanjut > 0
+                                    ? 'text-rose-700'
+                                    : 'text-slate-900'
+                            }
+                            badgeText={
+                                summary.item_gagal_perlu_tindak_lanjut > 0
+                                    ? 'Perlu Reschedule'
+                                    : undefined
+                            }
+                            badgeTone="rose"
+                            href="/pengantaran"
+                            hrefLabel="Tindak lanjuti item gagal"
                         />
                     </section>
 
-                    <section className="mt-6 rounded-2xl border border-violet-200 bg-violet-50/70 p-6">
-                        <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-sm font-bold text-violet-950">
-                                Modul Pengantaran Kurir (Segera Hadir — Phase 3)
-                            </h3>
-                            <StatusBadge tone="violet">Roadmap Phase 3</StatusBadge>
+                    <section className="mt-8">
+                        <h3 className="text-sm font-semibold text-slate-900">
+                            Akses Cepat Kurir Pengantaran
+                        </h3>
+                        <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <QuickActionCard
+                                primary
+                                title="Jadwal Pengantaran Harian"
+                                description="Mulai sesi pengantaran, perbarui status tiap nota pelanggan (DIAMBIL \u2192 DALAM_PERJALANAN \u2192 DITERIMA / GAGAL), serta jadwalkan ulang item gagal (KK-07)."
+                                href="/pengantaran"
+                                badgeText={
+                                    summary.item_pengantaran_aktif > 0
+                                        ? `${summary.item_pengantaran_aktif} Item Aktif`
+                                        : undefined
+                                }
+                                badgeTone="violet"
+                            />
+                            <QuickActionCard
+                                title="Tindak Lanjut Pengantaran Gagal"
+                                description="Periksa item yang gagal diantar karena pelanggan tidak di tempat atau kendala tagihan (KK-06) dan buat jadwal ulang terisolasi."
+                                href="/pengantaran?status_pengantaran=SELESAI"
+                                badgeText={
+                                    summary.item_gagal_perlu_tindak_lanjut > 0
+                                        ? `${summary.item_gagal_perlu_tindak_lanjut} Perlu Jadwal Ulang`
+                                        : undefined
+                                }
+                                badgeTone="rose"
+                            />
                         </div>
-                        <p className="mt-2 text-xs leading-relaxed text-violet-900">
-                            Workspace khusus Petugas Pengantaran untuk daftar rute
-                            multi-pelanggan, pembaruan status per item nota, serta
-                            pencatatan gagal antar & penjadwalan ulang independen akan
-                            aktif pada Phase 3.
-                        </p>
                     </section>
                 </>
             )}

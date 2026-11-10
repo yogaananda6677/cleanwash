@@ -5,11 +5,15 @@ import KonfirmasiKompensasiModal, {
 } from '@/Components/KonfirmasiKompensasiModal';
 import LaporkanInsidenModal from '@/Components/LaporkanInsidenModal';
 import Modal from '@/Components/Modal';
+import PelunasanModal from '@/Components/PelunasanModal';
+import SerahTerimaModal from '@/Components/SerahTerimaModal';
 import {
+    ItemPengantaranStatusBadge,
     JenisInsidenBadge,
     PayLaterBadge,
     PaymentStatusBadge,
     PaymentTypeBadge,
+    PengantaranStatusBadge,
     ProductionStageBadge,
     RoleBadge,
     SpeedTierBadge,
@@ -137,6 +141,44 @@ function summarizeAuditLog(log: AuditLogItem): string[] {
                 `Total awal: ${formatRupiah(String(after.total_harga))}`,
             );
         }
+    } else if (log.action === 'PELUNASAN_RECORDED') {
+        if (after.nominal_bayar !== undefined) {
+            highlights.push(
+                `Pelunasan: ${formatRupiah(String(after.nominal_bayar))}`,
+            );
+        }
+        if (after.sisa_tagihan !== undefined) {
+            highlights.push(
+                `Sisa sesudah: ${formatRupiah(String(after.sisa_tagihan))}`,
+            );
+        }
+    } else if (log.action === 'SERAH_TERIMA') {
+        if (after.kanal) {
+            highlights.push(`Kanal: ${String(after.kanal)}`);
+        }
+        if (after.piutang_dicatat === true && after.sisa_tagihan !== undefined) {
+            highlights.push(
+                `Piutang dicatat: ${formatRupiah(String(after.sisa_tagihan))}`,
+            );
+        }
+        if (after.catatan) {
+            highlights.push(`Catatan: ${String(after.catatan)}`);
+        }
+    } else if (log.action === 'ITEM_PENGANTARAN_UPDATED') {
+        if (before.status_terima_pelanggan && after.status_terima_pelanggan) {
+            highlights.push(
+                `Item antar: ${String(before.status_terima_pelanggan)} \u2192 ${String(after.status_terima_pelanggan)}`,
+            );
+        }
+        if (after.alasan_gagal) {
+            highlights.push(`Alasan gagal: ${String(after.alasan_gagal)}`);
+        }
+    } else if (log.action === 'PENGANTARAN_RESCHEDULED') {
+        if (after.new_id_pengantaran) {
+            highlights.push(
+                `Dijadwalkan ulang ke sesi #${String(after.new_id_pengantaran)} (${String(after.tanggal_pengantaran_baru ?? '')})`,
+            );
+        }
     }
 
     if (
@@ -178,6 +220,8 @@ export default function TransaksiShow({
     const [ubahModalOpen, setUbahModalOpen] = useState(false);
     const [batalModalOpen, setBatalModalOpen] = useState(false);
     const [insidenModalOpen, setInsidenModalOpen] = useState(false);
+    const [pelunasanModalOpen, setPelunasanModalOpen] = useState(false);
+    const [serahTerimaModalOpen, setSerahTerimaModalOpen] = useState(false);
     const [konfirmasiTarget, setKonfirmasiTarget] =
         useState<KonfirmasiKompensasiTarget | null>(null);
 
@@ -451,10 +495,53 @@ export default function TransaksiShow({
                     </div>
                 </div>
 
-                {(transaksi.bisa_ubah_layanan ||
+                {(transaksi.bisa_pelunasan ||
+                    transaksi.status_transaksi === 'SELESAI' ||
+                    transaksi.bisa_ubah_layanan ||
                     transaksi.bisa_batalkan ||
                     canReportIncident) && (
                     <div className="mt-4 flex flex-wrap items-center gap-2.5 border-t border-slate-100 pt-4">
+                        {transaksi.bisa_pelunasan && (
+                            <button
+                                type="button"
+                                onClick={() => setPelunasanModalOpen(true)}
+                                className="rounded-xl bg-sky-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-sky-700"
+                            >
+                                Catat Pelunasan
+                            </button>
+                        )}
+                        {transaksi.status_transaksi === 'SELESAI' &&
+                            !transaksi.sedang_diantar_kurir && (
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setSerahTerimaModalOpen(true)
+                                    }
+                                    className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition ${
+                                        transaksi.bisa_serah_terima_loket
+                                            ? 'bg-emerald-600 text-white shadow-xs hover:bg-emerald-700'
+                                            : 'border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100'
+                                    }`}
+                                >
+                                    {transaksi.bisa_serah_terima_loket
+                                        ? 'Serah Terima Loket'
+                                        : 'Serah Terima Loket (Wajib Lunas KK-06)'}
+                                </button>
+                            )}
+                        {transaksi.sedang_diantar_kurir &&
+                            transaksi.pengantaran_aktif && (
+                                <Link
+                                    href={`/pengantaran/${transaksi.pengantaran_aktif.id_pengantaran}`}
+                                    className="inline-flex items-center gap-1.5 rounded-xl border border-violet-200 bg-violet-50 px-3.5 py-2 text-xs font-semibold text-violet-800 transition hover:bg-violet-100"
+                                >
+                                    Sedang Diantar Kurir (
+                                    {
+                                        transaksi.pengantaran_aktif
+                                            .status_terima_pelanggan
+                                    }
+                                    ) &rarr;
+                                </Link>
+                            )}
                         {transaksi.bisa_ubah_layanan && (
                             <button
                                 type="button"
@@ -485,8 +572,50 @@ export default function TransaksiShow({
                     </div>
                 )}
 
-                {/* Phase 1 & Phase 2 Contextual Banners */}
+                {/* Phase 1, Phase 2 & Phase 3 Contextual Banners */}
                 <div className="mt-4 space-y-2.5 empty:hidden">
+                    {transaksi.sedang_diantar_kurir &&
+                        transaksi.pengantaran_aktif && (
+                            <div className="rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-xs text-violet-950">
+                                <span className="font-semibold">
+                                    Sedang Diantar Kurir:
+                                </span>{' '}
+                                Pakaian nota ini berada pada sesi pengantaran{' '}
+                                <Link
+                                    href={`/pengantaran/${transaksi.pengantaran_aktif.id_pengantaran}`}
+                                    className="font-bold underline"
+                                >
+                                    #{transaksi.pengantaran_aktif.id_pengantaran}
+                                </Link>{' '}
+                                ({transaksi.pengantaran_aktif.pengantaran?.nama_petugas_antar ?? 'Kurir'}) berstatus{' '}
+                                <strong>
+                                    {
+                                        transaksi.pengantaran_aktif
+                                            .status_terima_pelanggan
+                                    }
+                                </strong>
+                                . Serah terima di loket kasir diblokir hingga
+                                pengantaran diselesaikan atau ditandai gagal.
+                            </div>
+                        )}
+
+                    {transaksi.status_transaksi === 'SELESAI' &&
+                        !transaksi.sedang_diantar_kurir &&
+                        !transaksi.bisa_serah_terima_loket && (
+                            <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs text-amber-950">
+                                <span className="font-semibold">
+                                    Penyerahan Memerlukan Pelunasan (KK-06):
+                                </span>{' '}
+                                Pelanggan tidak memiliki hak bayar akhir dan
+                                masih memiliki sisa tagihan{' '}
+                                <strong className="tabular-nums">
+                                    {formatRupiah(transaksi.sisa_tagihan)}
+                                </strong>
+                                . Gunakan tombol <strong>Catat Pelunasan</strong>{' '}
+                                terlebih dahulu sebelum serah terima.
+                            </div>
+                        )}
+
                     {hasSnapshotTariffDifference && (
                         <div className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-xs text-sky-900">
                             <span className="font-semibold">
@@ -1145,6 +1274,133 @@ export default function TransaksiShow({
                             );
                         })}
                     </div>
+                )}
+            </section>
+
+            {/* Riwayat Pengantaran Kurir */}
+            <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                    <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <h2 className="text-sm font-bold text-slate-900">
+                                Riwayat Pengantaran (
+                                {transaksi.riwayat_pengantaran.length})
+                            </h2>
+                            {transaksi.pengantaran_aktif && (
+                                <ItemPengantaranStatusBadge
+                                    status={
+                                        transaksi.pengantaran_aktif
+                                            .status_terima_pelanggan
+                                    }
+                                />
+                            )}
+                        </div>
+                        <p className="mt-0.5 text-xs text-slate-500">
+                            Jejak penjadwalan kurir multi-pelanggan dan
+                            penjadwalan ulang independen (KK-07).
+                        </p>
+                    </div>
+                    <Link
+                        href="/pengantaran"
+                        className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+                    >
+                        Kelola Pengantaran &rarr;
+                    </Link>
+                </div>
+
+                {transaksi.riwayat_pengantaran.length === 0 ? (
+                    <p className="mt-4 text-xs text-slate-500">
+                        Transaksi ini belum pernah dijadwalkan untuk
+                        pengantaran kurir.
+                    </p>
+                ) : (
+                    <ol className="mt-4 space-y-3">
+                        {transaksi.riwayat_pengantaran.map((item) => {
+                            const isActive =
+                                transaksi.pengantaran_aktif?.id_item_antar ===
+                                item.id_item_antar;
+
+                            return (
+                                <li
+                                    key={item.id_item_antar}
+                                    className={`rounded-xl border p-4 text-xs ${
+                                        isActive
+                                            ? 'border-sky-200 bg-sky-50/60'
+                                            : 'border-slate-200 bg-slate-50/70'
+                                    }`}
+                                >
+                                    <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            {item.pengantaran ? (
+                                                <Link
+                                                    href={`/pengantaran/${item.pengantaran.id_pengantaran}`}
+                                                    className="font-mono font-bold text-sky-700 hover:underline"
+                                                >
+                                                    Sesi #
+                                                    {
+                                                        item.pengantaran
+                                                            .id_pengantaran
+                                                    }
+                                                </Link>
+                                            ) : (
+                                                <span className="font-mono font-bold text-slate-700">
+                                                    Sesi #{item.id_pengantaran}
+                                                </span>
+                                            )}
+                                            <ItemPengantaranStatusBadge
+                                                status={
+                                                    item.status_terima_pelanggan
+                                                }
+                                            />
+                                            {item.pengantaran && (
+                                                <PengantaranStatusBadge
+                                                    status={
+                                                        item.pengantaran
+                                                            .status_pengantaran
+                                                    }
+                                                />
+                                            )}
+                                            {isActive && (
+                                                <StatusBadge tone="sky">
+                                                    Aktif
+                                                </StatusBadge>
+                                            )}
+                                        </div>
+                                        <span className="text-[11px] tabular-nums text-slate-500">
+                                            Update:{' '}
+                                            {formatTanggal(item.waktu_update, {
+                                                withTime: true,
+                                            })}
+                                        </span>
+                                    </div>
+
+                                    {item.pengantaran && (
+                                        <p className="mt-1.5 text-slate-600">
+                                            Kurir:{' '}
+                                            <strong className="text-slate-900">
+                                                {
+                                                    item.pengantaran
+                                                        .nama_petugas_antar
+                                                }
+                                            </strong>{' '}
+                                            &bull; Tanggal Jadwal:{' '}
+                                            {formatTanggal(
+                                                item.pengantaran
+                                                    .tanggal_pengantaran,
+                                            )}
+                                        </p>
+                                    )}
+
+                                    {item.alasan_gagal && (
+                                        <p className="mt-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-rose-900">
+                                            <strong>Alasan gagal:</strong>{' '}
+                                            {item.alasan_gagal}
+                                        </p>
+                                    )}
+                                </li>
+                            );
+                        })}
+                    </ol>
                 )}
             </section>
 
@@ -1839,6 +2095,21 @@ export default function TransaksiShow({
             <KonfirmasiKompensasiModal
                 target={konfirmasiTarget}
                 onClose={() => setKonfirmasiTarget(null)}
+            />
+
+            {/* Modal Pelunasan Tagihan */}
+            <PelunasanModal
+                target={pelunasanModalOpen ? transaksi : null}
+                onClose={() => setPelunasanModalOpen(false)}
+                redirectTo="transaksi.show"
+            />
+
+            {/* Modal Serah Terima Loket (KK-06) */}
+            <SerahTerimaModal
+                target={serahTerimaModalOpen ? transaksi : null}
+                onClose={() => setSerahTerimaModalOpen(false)}
+                onSwitchToPelunasan={() => setPelunasanModalOpen(true)}
+                redirectTo="transaksi.show"
             />
         </AppLayout>
     );

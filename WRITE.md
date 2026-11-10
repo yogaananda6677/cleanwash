@@ -600,7 +600,49 @@
   1. Lakukan cross-agent review & Squash Merge `feature/p3-03-settlement-handover-audit` ke `main` sesuai `napkin/PR_REVIEW_LIFECYCLE.md`.
   2. Lanjutkan **`P3-04`** (`frontend-developer`) untuk membangun UI Kurir (`Pengantaran/{Index,Show}.tsx`), `SerahTerima/Index.tsx`, `Audit/Index.tsx`, modal Pelunasan & Serah Terima di `Transaksi/Show.tsx`, kartu KPI Phase 3 di `Dashboard/Index.tsx`, navigasi `AppLayout.tsx`, `StatusBadge.tsx`, `lib/format.ts`, `types/index.ts`, dan cleanup `centsToDecimalString()` di `LaporkanInsidenModal.tsx`.
 
-
-
-
+### [#020] 2026-11-10 18:48 — Frontend Developer (`P3-04`) — Phase 3 (`P3-04`)
+- **Status:** `READY_FOR_REVIEW`
+- **Ringkasan Kegiatan:**
+  - Melakukan Context Sync (`MEMORY.md`, `WRITE.md` `#017`–`#019`, `.claude/napkin.md`, `PRD.md`, `AGENTS.md`, `docs/phases/PHASE_1_CONTRACTS.md`, `docs/phases/PHASE_3_CONTRACTS.md` §1.2, §2.0 #3, §3.1, §3.4, §3.5, `AC-P3-10`), membaca panduan `modern-web-guidance` (`html`, `accessibility`, `forms`, `responsive-table`, `platform-controls-dismiss-dialog`, `prevent-page-scroll-under-modal-dialog`, `validate-input-after-interaction`), dan menginspeksi seluruh controller/service backend terkait secara read-only.
+  - Membuat branch fitur `feature/p3-04-frontend-ui` dari `main` (`10cafd7`) tanpa menyentuh `app/`, `database/`, `routes/`, `tests/`, maupun `Archive/`.
+  - **Kontrak TypeScript, Formatter, Badge & Cleanup Phase 2:**
+    - Melengkapi `resources/js/types/index.ts` persis §3.4 (`StatusPengantaran`, `StatusItemPengantaran`, `KurirOption`, `ItemPengantaranSummary`, `ItemPengantaranDetail`, `PengantaranSummary`, `EligiblePengantaranTransaksiOption`, `PengantaranIndexProps`, `PengantaranShowProps`, `SerahTerimaIndexProps`, `PiutangTransaksiItem`, `AuditIndexProps`, `TransaksiDetailPhase3Additions` pada `TransaksiDetail`, serta pembaruan `DashboardPetugasSummary` & `DashboardPengantarSummary`).
+    - Memperbarui `resources/js/lib/format.ts` (`formatStatusPengantaran`, `formatStatusItemPengantaran`, `getTodayJakartaDateString`, serta `AUDIT_ACTION_LABELS` untuk `PENGANTARAN_CREATED`, `PENGANTARAN_STARTED`, `ITEM_PENGANTARAN_UPDATED`, dan `PENGANTARAN_RESCHEDULED`).
+    - Memperbarui `resources/js/Components/StatusBadge.tsx` (`PengantaranStatusBadge`, `ItemPengantaranStatusBadge`) dan mengganti `(compensationPreview.basisCents / 100).toFixed(2)` pada `resources/js/Components/LaporkanInsidenModal.tsx` dengan `centsToDecimalString(compensationPreview.basisCents)`.
+  - **Komponen Modal & Navigasi:**
+    - Membuat `resources/js/Components/PelunasanModal.tsx` (`POST /transaksi/{nota}/pembayaran`, tombol cepat isi lunas penuh, validasi nominal integer cents > 0 & <= `sisa_tagihan`, dukungan `redirectTo`).
+    - Membuat `resources/js/Components/SerahTerimaModal.tsx` (`POST /transaksi/{nota}/serah-terima`, evaluasi `KK-06` memblokir konfirmasi + tombol beralih ke Pelunasan bila `sisa_tagihan > 0 && !boleh_bayar_akhir`, badge peringatan piutang bila `boleh_bayar_akhir = true`, peringatan konflik kurir & auto-tutup item `MENUNGGU`, catatan opsional, `redirectTo`).
+    - Memperbarui `resources/js/Layouts/AppLayout.tsx` mengaktifkan menu `PETUGAS` (`/pengantaran`, `/serah-terima`, `/audit`) dan `PENGANTAR` (`/pengantaran` `"Jadwal Pengantaran"`), serta menghapus seluruh `disabled: true` / `badge: 'Phase 3'`.
+  - **Halaman Baru & Pembaruan Halaman Eksisting:**
+    - Membuat `resources/js/Pages/Pengantaran/Index.tsx` (status cards interaktif `DIJADWALKAN`/`BERJALAN`/`SELESAI`, `<search>` filter + `id_petugas_antar` untuk `PETUGAS`, tabel aksesibel, dan Modal Buat Jadwal Multi-Pelanggan dengan indikator `has_previous_failed_delivery` & `insiden_pending_count`).
+    - Membuat `resources/js/Pages/Pengantaran/Show.tsx` (header progress & tombol `Mulai Pengantaran`, kartu detail tiap `ItemPengantaranDetail`, tombol aksi berurutan `DIAMBIL`/`DALAM_PERJALANAN`/`DITERIMA` beserta peringatan `KK-06`, Modal Tandai Gagal `alasan_gagal` min 5 karakter, dan Modal Jadwalkan Ulang `KK-07` untuk `PETUGAS` & `PENGANTAR`).
+    - Membuat `resources/js/Pages/SerahTerima/Index.tsx` (4 kartu ringkasan, 3 tab mode `SIAP_AMBIL`/`PIUTANG`/`RIWAYAT_DIAMBIL`, pencarian, dan integrasi cepat `PelunasanModal` & `SerahTerimaModal`).
+    - Membuat `resources/js/Pages/Audit/Index.tsx` (ringkasan piutang `boleh_bayar_akhir` + tautan nota, tabel log audit terpaginasi dengan filter `search`, `action`, `actor_role`, dan payload JSON).
+    - Memperbarui `resources/js/Pages/Transaksi/Show.tsx` (tombol/modal `Catat Pelunasan` & `Serah Terima Loket`, indikator `sedang_diantar_kurir`, kartu `Riwayat Pengantaran`, serta ringkasan audit Phase 3) dan `resources/js/Pages/Dashboard/Index.tsx` (KPI & shortcut Phase 3 `PETUGAS` serta penggantian banner placeholder `PENGANTAR` menjadi 4 kartu KPI nyata & quick action ke `/pengantaran`).
+- **File Dibuat / Diubah:**
+  - `resources/js/types/index.ts` — Kontrak strict TypeScript Phase 3 (§3.4)
+  - `resources/js/lib/format.ts` — Formatter status pengantaran, `getTodayJakartaDateString()`, & `AUDIT_ACTION_LABELS` Phase 3
+  - `resources/js/Components/StatusBadge.tsx` — `PengantaranStatusBadge` & `ItemPengantaranStatusBadge`
+  - `resources/js/Components/LaporkanInsidenModal.tsx` — Cleanup `centsToDecimalString(compensationPreview.basisCents)`
+  - `resources/js/Components/PelunasanModal.tsx` — Modal pembayaran pelunasan kasir (`POST /transaksi/{nota}/pembayaran`)
+  - `resources/js/Components/SerahTerimaModal.tsx` — Modal serah terima loket `KK-06` (`POST /transaksi/{nota}/serah-terima`)
+  - `resources/js/Layouts/AppLayout.tsx` — Aktivasi navigasi Phase 3 `PETUGAS` & `PENGANTAR`
+  - `resources/js/Pages/Pengantaran/{Index,Show}.tsx` — Daftar sesi, buat jadwal multi-pelanggan, workspace kurir, fail modal, & reschedule `KK-07`
+  - `resources/js/Pages/SerahTerima/Index.tsx` — Workspace loket serah terima & piutang kasir
+  - `resources/js/Pages/Audit/Index.tsx` — Viewer ringkasan piutang `KK-06` & audit log terpaginasi
+  - `resources/js/Pages/Transaksi/Show.tsx` — Pelunasan, Serah Terima Loket, indikator kurir, & kartu `Riwayat Pengantaran`
+  - `resources/js/Pages/Dashboard/Index.tsx` — KPI Phase 3 `PETUGAS` & KPI nyata `PENGANTAR`
+  - `MEMORY.md`, `WRITE.md` — Update `[x] P3-04` dan Entry `#020`
+- **Verifikasi / Bukti Uji:**
+  - `npx tsc --noEmit` -> `0 errors` (`exit code 0`)
+  - `npm run build` -> Vite production build (`680 modules transformed`, `public/build/manifest.json`, aset `Pengantaran/{Index,Show}`, `SerahTerima/Index`, `Audit/Index`, `Transaksi/Show`, `Dashboard/Index` terbangun bersih dalam `2.08s`) (`exit code 0`)
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` (`exit code 0`)
+  - `php artisan test` -> `111 passed (3408 assertions)` pada MySQL 8.4 port `3307` (`cleanwash_testing`) dalam `18.31s` (`exit code 0`)
+  - Audit hygiene (`rg` `console.log`, `: any`, `disabled: true`, `toFixed(` di `LaporkanInsidenModal.tsx` & `AppLayout.tsx`) -> `0` temuan; `git status` mengonfirmasi tidak ada file `app/`, `database/`, `routes/`, `tests/`, atau `Archive/` yang dimodifikasi.
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Seluruh halaman TSX Phase 3 (`Pengantaran/Index.tsx`, `Pengantaran/Show.tsx`, `SerahTerima/Index.tsx`, `Audit/Index.tsx`) kini tersedia di filesystem & manifest Vite sehingga `shouldExist: false` sementara di `PengantaranOperationTest.php`, `PembayaranAndSerahTerimaTest.php`, dan `AuditAndDashboardPhase3Test.php` siap dibersihkan di `P3-05`.
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  1. Lakukan cross-agent review & Squash Merge `feature/p3-04-frontend-ui` ke `main` sesuai `napkin/PR_REVIEW_LIFECYCLE.md`.
+  2. Delegasikan **`P3-05`** (`fullstack-developer` + `product-manager`) untuk menghapus `shouldExist: false` & `$this->withoutVite()`, menyusun `Phase3EndToEndTest.php`, menjalankan audit keamanan/NFR (RBAC, CSRF, N+1, decimal precision, backup/restore MySQL 8.4), memverifikasi Matriks UAT 14 Use Case & 9 Kondisi Khusus, dan menandatangani **Phase 3 Closing Gate**.
 

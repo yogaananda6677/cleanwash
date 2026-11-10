@@ -1,8 +1,10 @@
 import type {
     EligibleInsidenTransaksiOption,
     JenisInsiden,
+    StatusItemPengantaran,
     StatusKonfirmasiInsiden,
     StatusPembayaran,
+    StatusPengantaran,
     TahapProduksiCode,
     TransaksiDetail,
 } from '@/types';
@@ -278,6 +280,49 @@ export function formatTahapProduksi(tahap: TahapProduksiCode | string): string {
     return TAHAP_PRODUKSI_LABELS[tahap as TahapProduksiCode] ?? tahap;
 }
 
+const STATUS_PENGANTARAN_LABELS: Record<StatusPengantaran, string> = {
+    DIJADWALKAN: 'Dijadwalkan',
+    BERJALAN: 'Berjalan',
+    SELESAI: 'Selesai',
+};
+
+export function formatStatusPengantaran(
+    status: StatusPengantaran | string,
+): string {
+    return (
+        STATUS_PENGANTARAN_LABELS[status as StatusPengantaran] ?? status
+    );
+}
+
+const STATUS_ITEM_PENGANTARAN_LABELS: Record<StatusItemPengantaran, string> = {
+    MENUNGGU: 'Menunggu',
+    DIAMBIL: 'Diambil',
+    DALAM_PERJALANAN: 'Dalam Perjalanan',
+    DITERIMA: 'Diterima',
+    GAGAL: 'Gagal',
+};
+
+export function formatStatusItemPengantaran(
+    status: StatusItemPengantaran | string,
+): string {
+    return (
+        STATUS_ITEM_PENGANTARAN_LABELS[status as StatusItemPengantaran] ??
+        status
+    );
+}
+
+/**
+ * Return today's YYYY-MM-DD calendar date in Asia/Jakarta timezone for date inputs.
+ */
+export function getTodayJakartaDateString(): string {
+    return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Jakarta',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).format(new Date());
+}
+
 const AUDIT_ACTION_LABELS: Record<string, string> = {
     TRANSAKSI_CREATED: 'Transaksi Dibuat',
     TIMBANG_ULANG: 'Penimbangan Ulang (KK-01)',
@@ -288,6 +333,10 @@ const AUDIT_ACTION_LABELS: Record<string, string> = {
     KOMPENSASI_CONFIRMED: 'Kompensasi Dikonfirmasi',
     PELUNASAN_RECORDED: 'Pelunasan Dicatat',
     SERAH_TERIMA: 'Serah Terima Pakaian',
+    PENGANTARAN_CREATED: 'Jadwal Pengantaran Dibuat',
+    PENGANTARAN_STARTED: 'Pengantaran Dimulai',
+    ITEM_PENGANTARAN_UPDATED: 'Status Item Pengantaran',
+    PENGANTARAN_RESCHEDULED: 'Pengantaran Dijadwalkan Ulang (KK-07)',
 };
 
 export function formatAuditAction(action: string): string {

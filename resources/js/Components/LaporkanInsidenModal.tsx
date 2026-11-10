@@ -2,6 +2,7 @@ import { useForm } from '@inertiajs/react';
 import { useEffect, useId, type FormEvent } from 'react';
 import Modal from '@/Components/Modal';
 import {
+    centsToDecimalString,
     estimateCompensationPreview,
     formatRupiah,
 } from '@/lib/format';
@@ -404,9 +405,9 @@ export default function LaporkanInsidenModal({
                                 {formatRupiah(activeTransaksi.subtotal_layanan)}{' '}
                                 (basis{' '}
                                 {formatRupiah(
-                                    (
-                                        compensationPreview.basisCents / 100
-                                    ).toFixed(2),
+                                    centsToDecimalString(
+                                        compensationPreview.basisCents,
+                                    ),
                                 )}
                                 ). Nilai resmi dihitung server saat penyimpanan.
                             </p>

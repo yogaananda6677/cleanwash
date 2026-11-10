@@ -50,6 +50,9 @@ export interface DashboardPetugasSummary {
     transaksi_belum_lunas: number;
     insiden_menunggu_konfirmasi: number;
     transaksi_selesai_siap_ambil: number;
+    pengantaran_aktif: number;
+    piutang_belum_lunas: number;
+    piutang_nominal_total: string;
 }
 
 export interface DashboardPegawaiSummary {
@@ -64,6 +67,8 @@ export interface DashboardPengantarSummary {
     role: 'PENGANTAR';
     jadwal_pengantaran_aktif: number;
     item_pengantaran_aktif: number;
+    item_terkirim_hari_ini: number;
+    item_gagal_perlu_tindak_lanjut: number;
 }
 
 export type DashboardSummary =
@@ -266,7 +271,15 @@ export interface AuditLogItem {
     } | null;
 }
 
-export interface TransaksiDetail {
+export interface TransaksiDetailPhase3Additions {
+    bisa_pelunasan: boolean;
+    bisa_serah_terima_loket: boolean;
+    sedang_diantar_kurir: boolean;
+    pengantaran_aktif: ItemPengantaranSummary | null;
+    riwayat_pengantaran: ItemPengantaranSummary[];
+}
+
+export interface TransaksiDetail extends TransaksiDetailPhase3Additions {
     nomor_nota: string;
     tanggal_penerimaan: string;
     berat_atau_jumlah: string;
@@ -364,4 +377,159 @@ export interface InsidenIndexProps extends SharedPageProps {
     };
     pendingCount: number;
     eligibleTransaksiOptions: EligibleInsidenTransaksiOption[];
+}
+
+export type StatusPengantaran = 'DIJADWALKAN' | 'BERJALAN' | 'SELESAI';
+export type StatusItemPengantaran =
+    | 'MENUNGGU'
+    | 'DIAMBIL'
+    | 'DALAM_PERJALANAN'
+    | 'DITERIMA'
+    | 'GAGAL';
+
+export interface KurirOption {
+    id_petugas_antar: number;
+    nama_petugas_antar: string;
+    is_active: boolean;
+}
+
+export interface ItemPengantaranSummary {
+    id_item_antar: number;
+    id_pengantaran: number;
+    nomor_nota: string;
+    status_terima_pelanggan: StatusItemPengantaran;
+    alasan_gagal: string | null;
+    waktu_update: string | null;
+    pengantaran?: {
+        id_pengantaran: number;
+        id_petugas_antar: number;
+        tanggal_pengantaran: string;
+        status_pengantaran: StatusPengantaran;
+        nama_petugas_antar: string;
+    } | null;
+}
+
+export interface ItemPengantaranDetail extends ItemPengantaranSummary {
+    bisa_jadwalkan_ulang: boolean;
+    status_berikutnya: StatusItemPengantaran[];
+    transaksi: {
+        nomor_nota: string;
+        status_transaksi: StatusTransaksi;
+        status_pembayaran: StatusPembayaran;
+        total_harga: string;
+        total_dibayar: string;
+        sisa_tagihan: string;
+        diambil_pada: string | null;
+        pelanggan: Pick<
+            PelangganItem,
+            'id_pelanggan' | 'nama' | 'no_telepon' | 'alamat' | 'boleh_bayar_akhir'
+        >;
+        layanan: Pick<
+            JenisLayananItem,
+            'id_layanan' | 'nama_layanan' | 'tingkat_kecepatan' | 'satuan'
+        >;
+        berat_atau_jumlah: string;
+        detail_pakaian_count: number;
+    };
+}
+
+export interface PengantaranSummary {
+    id_pengantaran: number;
+    id_petugas_antar: number;
+    tanggal_pengantaran: string;
+    status_pengantaran: StatusPengantaran;
+    created_at: string;
+    updated_at: string;
+    petugas_pengantaran: {
+        id_petugas_antar: number;
+        nama_petugas_antar: string;
+    };
+    total_item: number;
+    item_selesai_count: number;
+    item_gagal_count: number;
+    items: ItemPengantaranDetail[];
+}
+
+export interface EligiblePengantaranTransaksiOption {
+    nomor_nota: string;
+    tanggal_penerimaan: string;
+    total_harga: string;
+    total_dibayar: string;
+    sisa_tagihan: string;
+    status_pembayaran: StatusPembayaran;
+    insiden_pending_count: number;
+    has_previous_failed_delivery: boolean;
+    pelanggan: Pick<
+        PelangganItem,
+        'id_pelanggan' | 'nama' | 'no_telepon' | 'alamat' | 'boleh_bayar_akhir'
+    >;
+    layanan: Pick<
+        JenisLayananItem,
+        'id_layanan' | 'nama_layanan' | 'tingkat_kecepatan' | 'satuan'
+    >;
+    berat_atau_jumlah: string;
+}
+
+export interface PengantaranIndexProps extends SharedPageProps {
+    pengantaran: Paginated<PengantaranSummary>;
+    filters: {
+        search: string;
+        status_pengantaran: StatusPengantaran | '';
+        tanggal_pengantaran: string;
+        id_petugas_antar: string;
+    };
+    kurirOptions: KurirOption[];
+    eligibleTransaksiOptions: EligiblePengantaranTransaksiOption[];
+    statusCounts: Record<StatusPengantaran, number>;
+}
+
+export interface PengantaranShowProps extends SharedPageProps {
+    pengantaran: PengantaranSummary;
+    kurirOptions: KurirOption[];
+}
+
+export interface SerahTerimaIndexProps extends SharedPageProps {
+    transaksi: Paginated<TransaksiDetail>;
+    filters: {
+        search: string;
+        mode: 'SIAP_AMBIL' | 'PIUTANG' | 'RIWAYAT_DIAMBIL';
+    };
+    summary: {
+        siap_ambil_count: number;
+        sedang_diantar_count: number;
+        piutang_count: number;
+        total_piutang_nominal: string;
+    };
+}
+
+export interface PiutangTransaksiItem {
+    nomor_nota: string;
+    diambil_pada: string;
+    total_harga: string;
+    total_dibayar: string;
+    sisa_tagihan: string;
+    status_pembayaran: StatusPembayaran;
+    pelanggan: Pick<
+        PelangganItem,
+        'id_pelanggan' | 'nama' | 'no_telepon' | 'boleh_bayar_akhir'
+    >;
+    layanan: Pick<
+        JenisLayananItem,
+        'id_layanan' | 'nama_layanan' | 'tingkat_kecepatan'
+    >;
+}
+
+export interface AuditIndexProps extends SharedPageProps {
+    logs: Paginated<AuditLogItem>;
+    filters: {
+        search: string;
+        action: string;
+        actor_role: UserRole | '';
+    };
+    availableActions: string[];
+    piutangSummary: {
+        total_nota_piutang: number;
+        total_nominal_piutang: string;
+        items: PiutangTransaksiItem[];
+    };
 }
