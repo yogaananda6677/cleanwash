@@ -64,6 +64,8 @@ Dilarang mencatat log kronologis harian di file ini — **catat log aktivitas di
    Do instead: Jalankan `VoucherService::validasiDanKunci()` (`lockForUpdate()`) lebih dulu sebelum `generateNomorNota()` agar proses pesaing pada voucher yang sama langsung antre di row lock voucher dan rollback bersih tanpa contention gap lock pada `transaksi`; serta selesaikan `audit_logs.user_id` lewat `$actor?->id ?? $petugas->user_id` agar service tetap bekerja di worker/CLI test.
 9. **[2026-11-10] Pembatalan transaksi di tahap `DITERIMA` membiarkan `transaksi.nomor_voucher` terisi sehingga voucher yang dilepas gagal dipakai ulang karena `UNIQUE(nomor_voucher)`**
    Do instead: Saat membatalkan transaksi pada tahap `DITERIMA`, kunci `Voucher` dengan `lockForUpdate()`, kembalikan statusnya ke `TERSEDIA` (atau `KEDALUWARSA` jika melewati `masa_berlaku`), dan set `transaksi.nomor_voucher = null` + `nilai_voucher_snapshot = '0.00'` sambil mencatat kode voucher asal ke `audit_logs`.
+10. **[2026-11-10] Filter/hitung tahap produksi dengan `whereHas('riwayatStatusProduksi', ...)` mencocokkan riwayat tahap lama atau terbentur `ONLY_FULL_GROUP_BY` di MySQL 8.4**
+    Do instead: Selalu evaluasi tahap produksi terakhir memakai subquery berkorelasi `ORDER BY waktu_update DESC, id_status_produksi DESC LIMIT 1` (atau `DB::query()->fromSub(...)` untuk agregasi `stageCounts` dan `TransaksiService::resolveLatestRiwayatStatus()` pada koleksi model yang sudah ter-load) agar konsisten saat beberapa transisi terjadi di detik yang sama.
 
 ---
 

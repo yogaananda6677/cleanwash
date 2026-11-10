@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JenisLayananController;
 use App\Http\Controllers\PelangganController;
+use App\Http\Controllers\ProduksiController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\VoucherController;
 use Illuminate\Http\Request;
@@ -43,5 +44,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/transaksi', [TransaksiController::class, 'store'])->name('transaksi.store');
         Route::get('/transaksi/{nota}/nota', [TransaksiController::class, 'nota'])->name('transaksi.nota');
         Route::get('/transaksi/{nota}', [TransaksiController::class, 'show'])->name('transaksi.show');
+    });
+
+    Route::middleware('role:PEGAWAI')->group(function () {
+        Route::get('/produksi', [ProduksiController::class, 'index'])->name('produksi.index');
+        Route::post('/produksi/{nota}/timbang-ulang', [ProduksiController::class, 'timbangUlang'])->name('produksi.timbang-ulang');
+        Route::post('/produksi/{nota}/status', [ProduksiController::class, 'ubahStatus'])->name('produksi.status');
     });
 });

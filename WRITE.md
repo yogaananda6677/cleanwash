@@ -308,3 +308,37 @@
   - Tidak ada blocker.
 - **Next Exact Action:**
   - Delegasikan **`P2-02`** ke `cw-backend-dev` pada branch `feature/p2-02-produksi-service` dari `main` untuk mengimplementasikan `ProduksiService` (`timbangUlang` `KK-01`, `ubahStatusProduksi` state machine sesuai `TahapLayanan`), `ProduksiPolicy`, `TimbangUlangRequest`, `UpdateStatusProduksiRequest`, `ProduksiController`, pembaruan `TransaksiService::detailRelations()` / `formatTransaksiDetail()`, dan TDD automated tests (`AC-P2-01` s.d. `AC-P2-05`).
+
+### [#011] 2026-11-10 16:54 — Backend Developer (`cw-backend-dev`) — Phase 2 (`P2-02`)
+- **Status:** `READY_FOR_REVIEW`
+- **Ringkasan Kegiatan:**
+  - Melakukan Context Sync (`PRD.md` §7.2/§8 `FR-06`–`FR-07`/§9.2, `AGENTS.md`, `MEMORY.md`, `WRITE.md` `#008`–`#010`, `.claude/napkin.md`, `napkin/PR_REVIEW_LIFECYCLE.md`, `docs/phases/PHASE_1_CONTRACTS.md`, dan `docs/phases/PHASE_2_CONTRACTS.md` §2.0–§2.2, §3.1–§3.3, §4 `AC-P2-01`..`AC-P2-05`) serta membuat branch `feature/p2-02-produksi-service` dari `main`.
+  - Menerapkan TDD (**Red $\rightarrow$ Green $\rightarrow$ Refactor**): menulis unit tests baru di `tests/Unit/DecimalMoneyTest.php` (`percentage()` & `prorateAndMultiply()`), `tests/Unit/ProduksiServiceTest.php`, dan `tests/Feature/ProduksiOperationTest.php` (memakai `$this->withoutVite()` dan `shouldExist: false` karena `Produksi/Index.tsx` baru dibuat di `P2-05`) yang gagal di fase Red sebelum implementasi kode.
+  - Memperbarui `app/Support/DecimalMoney.php` dengan `percentage()` dan `prorateAndMultiply()` berbasis integer skala 100 dengan pembulatan *half-up* dan *overflow guards* (bebas `float` dan `bcmath`).
+  - Memperbarui `app/Services/PembayaranService.php` dengan helper terpusat `hitungTotalDibayar(Transaksi)` (zero extra query saat `pembayaran` sudah ter-load) dan `resolveStatusPembayaranSetelahPenyesuaian()` sesuai §2.0.C untuk dipakai lintas `P2-02`, `P2-03`, dan `P2-04`.
+  - Memperbarui `app/Services/TransaksiService.php`: mengekspos `detailRelations()` dengan eager-loading `riwayatStatusProduksi.pegawai`, `laporanKerusakanKehilangan.detailPakaian`, `laporanKerusakanKehilangan.petugas`, dan `laporanKerusakanKehilangan.pegawaiPelapor`; menambahkan `resolveLatestRiwayatStatus()` & `resolveOrderedTahapStages()`; serta melengkapi `formatTransaksiDetail()` dengan seluruh properti turunan Phase 2 (§3.3) tanpa merusak kontrak Phase 1.
+  - Mengimplementasikan `app/Services/ProduksiService.php` (`paginateQueue()`, `getStageCounts()`, `timbangUlang()` dengan `DB::transaction()` + `lockForUpdate()`, `KK-01` + `KK-09` snapshot + `AuditLog` `TIMBANG_ULANG` berflag `weight_changed`, dan `ubahStatusProduksi()` dengan validasi urutan `TahapLayanan`, larangan `DISETRIKA` jika `perlu_setrika = false`, `id_pegawai` non-null, `waktu_update` WIB, update `Transaksi.status_transaksi = SELESAI`, & `AuditLog` `PRODUKSI_STATUS_UPDATED`).
+  - Membuat `AuthorizesPegawaiRequest`, `TimbangUlangRequest`, `UpdateStatusProduksiRequest`, `ChecksPegawaiRole`, `ProduksiPolicy` (terdaftar di `AppServiceProvider` untuk `RiwayatStatusProduksi` dan `Gate` `produksi.*`), `ProduksiController`, dan route `/produksi`, `/produksi/{nota}/timbang-ulang`, `/produksi/{nota}/status` di bawah `middleware(['auth', 'role:PEGAWAI'])`, tanpa menyentuh `resources/js/` atau `resources/css/`.
+- **File Dibuat / Diubah:**
+  - `app/Support/DecimalMoney.php` — Penambahan `percentage()` & `prorateAndMultiply()` integer-safe
+  - `app/Services/PembayaranService.php` — Penambahan `hitungTotalDibayar()` & `resolveStatusPembayaranSetelahPenyesuaian()`
+  - `app/Services/TransaksiService.php` — Eager-loading Phase 2, helper tahap layanan, & properti turunan §3.3 di `formatTransaksiDetail()`
+  - `app/Services/ProduksiService.php` — Service antrean produksi, `getStageCounts()`, `timbangUlang()`, & state machine `ubahStatusProduksi()`
+  - `app/Http/Requests/Concerns/AuthorizesPegawaiRequest.php`, `app/Http/Requests/Produksi/{TimbangUlangRequest,UpdateStatusProduksiRequest}.php` — Otorisasi & validasi FormRequest produksi
+  - `app/Policies/Concerns/ChecksPegawaiRole.php`, `app/Policies/ProduksiPolicy.php`, `app/Providers/AppServiceProvider.php` — Policy & registrasi `Gate` produksi (`PEGAWAI` aktif)
+  - `app/Http/Controllers/ProduksiController.php`, `routes/web.php` — Endpoint `produksi.index`, `produksi.timbang-ulang`, & `produksi.status`
+  - `tests/Unit/DecimalMoneyTest.php`, `tests/Unit/ProduksiServiceTest.php`, `tests/Feature/ProduksiOperationTest.php` — Automated unit & feature tests `AC-P2-01` s.d. `AC-P2-05`
+  - `MEMORY.md`, `.claude/napkin.md`, `WRITE.md` — Update `[x] P2-02`, aturan #10 query tahap produksi terakhir MySQL 8.4, & Entry `#011`
+- **Verifikasi / Bukti Uji:**
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` (`exit code 0`)
+  - `php artisan test` -> `67 passed (1743 assertions)` pada MySQL 8.4 port `3307` (`cleanwash_testing`), termasuk seluruh unit & feature tests Phase 1 + `AC-P2-01` s.d. `AC-P2-05` (`exit code 0`)
+  - `npx tsc --noEmit` -> `0 errors` (`exit code 0`)
+  - `npm run build` -> Vite production build (`670 modules transformed`, `public/build/manifest.json`) (`exit code 0`)
+  - `php artisan migrate --no-interaction && php artisan migrate:rollback --no-interaction && php artisan migrate --seed --no-interaction` -> 18 migrasi rollback & re-migrate + seed bersih (`exit code 0`)
+  - Hygiene check (`grep` `dd`/`dump`/`var_dump`/`bcmath`/`(float)` di `app/` & `routes/`) -> `0` temuan; `resources/js/` & `resources/css/` tidak tersentuh.
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Ditambahkan catatan #10 di `.claude/napkin.md` mengenai subquery berkorelasi `(ORDER BY waktu_update DESC, id_status_produksi DESC LIMIT 1)` untuk membaca tahap produksi terakhir di MySQL 8.4 (`ONLY_FULL_GROUP_BY`) dan mengecualikan `DIAMBIL`/`DIBATALKAN` dari hitungan `stageCounts`.
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  1. Lakukan cross-agent review & Squash Merge `feature/p2-02-produksi-service` ke `main` sesuai `napkin/PR_REVIEW_LIFECYCLE.md`.
+  2. Delegasikan **`P2-03`** ke `cw-backend-dev` pada branch `feature/p2-03-ubah-batal` dari `main` untuk mengimplementasikan `TransaksiAdjustmentService` (`ubahLayanan` `KK-02` & `batalkanTransaksi` `KK-08` dengan pelepasan atomik `nomor_voucher`), `UbahLayananRequest`, `BatalkanTransaksiRequest`, pembaruan `TransaksiPolicy` & `TransaksiController::show()` (`layananOptions`, `auditLogs`), `TransaksiAdjustmentController`, serta automated tests `AC-P2-06` s.d. `AC-P2-08`.

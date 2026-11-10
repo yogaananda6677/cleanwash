@@ -90,4 +90,61 @@ class DecimalMoneyTest extends TestCase
             }
         }
     }
+
+    public function test_calculates_percentage_with_half_up_rounding_and_validation(): void
+    {
+        $this->assertSame('10000.00', DecimalMoney::percentage('20000.00', 50));
+        $this->assertSame('0.00', DecimalMoney::percentage('15000.00', 0));
+        $this->assertSame('0.00', DecimalMoney::percentage('0.00', 50));
+
+        // Half-up rounding boundaries: 1001 cents * 50% = 500.50 -> 501 cents (5.01)
+        $this->assertSame('5.01', DecimalMoney::percentage('10.01', 50));
+        // 1001 cents * 49% = 490.49 -> 490 cents (4.90)
+        $this->assertSame('4.90', DecimalMoney::percentage('10.01', 49));
+        // 1001 cents * 51% = 510.51 -> 511 cents (5.11)
+        $this->assertSame('5.11', DecimalMoney::percentage('10.01', 51));
+        $this->assertSame('-5.01', DecimalMoney::percentage('-10.01', 50));
+
+        $this->expectException(InvalidArgumentException::class);
+        DecimalMoney::percentage('1000.00', -1);
+    }
+
+    public function test_percentage_guards_against_integer_overflow(): void
+    {
+        $maxDecimal = DecimalMoney::toDecimalString(PHP_INT_MAX);
+
+        $this->expectException(InvalidArgumentException::class);
+        DecimalMoney::percentage($maxDecimal, 2);
+    }
+
+    public function test_prorates_and_multiplies_with_half_up_rounding_and_guards(): void
+    {
+        // CleanWash compensation basis: subtotal 25000.00, 2 of 5 pcs, 5x RUSAK / 10x HILANG
+        $this->assertSame('10000.00', DecimalMoney::prorateAndMultiply('25000.00', 2, 5, 1));
+        $this->assertSame('50000.00', DecimalMoney::prorateAndMultiply('25000.00', 2, 5, 5));
+        $this->assertSame('100000.00', DecimalMoney::prorateAndMultiply('25000.00', 2, 5, 10));
+
+        // Half-up rounding checks on basis per unit
+        $this->assertSame('0.33', DecimalMoney::prorateAndMultiply('1.00', 1, 3, 1));
+        $this->assertSame('0.67', DecimalMoney::prorateAndMultiply('1.00', 2, 3, 1));
+        $this->assertSame('0.02', DecimalMoney::prorateAndMultiply('0.03', 1, 2, 1));
+        $this->assertSame('0.10', DecimalMoney::prorateAndMultiply('0.03', 1, 2, 5));
+        $this->assertSame('0.00', DecimalMoney::prorateAndMultiply('25000.00', 0, 5, 5));
+        $this->assertSame('0.00', DecimalMoney::prorateAndMultiply('25000.00', 2, 5, 0));
+
+        foreach ([
+            ['100.00', 1, 0, 1],
+            ['100.00', 1, -2, 1],
+            ['100.00', -1, 2, 1],
+            ['100.00', 1, 2, -1],
+            ['invalid', 1, 2, 1],
+        ] as [$amount, $numerator, $denominator, $multiplier]) {
+            try {
+                DecimalMoney::prorateAndMultiply($amount, $numerator, $denominator, $multiplier);
+                $this->fail('Expected InvalidArgumentException for invalid proration input.');
+            } catch (InvalidArgumentException) {
+                $this->addToAssertionCount(1);
+            }
+        }
+    }
 }

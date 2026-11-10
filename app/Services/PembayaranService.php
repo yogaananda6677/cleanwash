@@ -84,6 +84,50 @@ class PembayaranService
     }
 
     /**
+     * Sum all payment ledger records for a transaction using DecimalMoney without N+1 when preloaded.
+     */
+    public function hitungTotalDibayar(Transaksi $transaksi): string
+    {
+        $records = $transaksi->relationLoaded('pembayaran')
+            ? $transaksi->pembayaran
+            : $transaksi->pembayaran()->get(['nominal_bayar']);
+
+        $total = '0.00';
+
+        foreach ($records as $pembayaran) {
+            $total = DecimalMoney::add($total, (string) $pembayaran->nominal_bayar);
+        }
+
+        return $total;
+    }
+
+    /**
+     * Resolve payment status uniformly after re-weighing, service change, cancellation, or compensation.
+     */
+    public function resolveStatusPembayaranSetelahPenyesuaian(
+        StatusPembayaran $currentStatus,
+        string $totalHargaBaru,
+        string $totalDibayar
+    ): StatusPembayaran {
+        $totalBaru = $this->normalizeMoney($totalHargaBaru, 'total_harga');
+        $dibayar = $this->normalizeMoney($totalDibayar, 'total_dibayar');
+
+        if (DecimalMoney::lte($totalBaru, $dibayar)) {
+            return StatusPembayaran::LUNAS;
+        }
+
+        if (DecimalMoney::eq($dibayar, '0.00')) {
+            return StatusPembayaran::BELUM_BAYAR;
+        }
+
+        if (in_array($currentStatus, [StatusPembayaran::LUNAS, StatusPembayaran::BELUM_LUNAS], true)) {
+            return StatusPembayaran::BELUM_LUNAS;
+        }
+
+        return StatusPembayaran::DP;
+    }
+
+    /**
      * @throws ValidationException
      */
     private function normalizeMoney(string $amount, string $field): string

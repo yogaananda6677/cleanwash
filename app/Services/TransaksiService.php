@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\JenisInsiden;
 use App\Enums\MetodeHitung;
 use App\Enums\StatusPembayaran;
 use App\Enums\StatusTransaksi;
@@ -10,6 +11,7 @@ use App\Enums\UserRole;
 use App\Models\AuditLog;
 use App\Models\DetailPakaian;
 use App\Models\JenisLayanan;
+use App\Models\LaporanKerusakanKehilangan;
 use App\Models\Pelanggan;
 use App\Models\Pembayaran;
 use App\Models\Petugas;
@@ -228,7 +230,7 @@ class TransaksiService
     }
 
     /**
-     * Serialize a Transaksi model into the Phase 1 TransaksiDetail contract shape.
+     * Serialize a Transaksi model into the TransaksiDetail contract shape (Phase 1 + Phase 2).
      *
      * @return array<string, mixed>
      */
@@ -241,19 +243,63 @@ class TransaksiService
             (string) $transaksi->harga_satuan_snapshot
         );
 
-        $totalDibayar = '0.00';
-        foreach ($transaksi->pembayaran as $pembayaran) {
-            $totalDibayar = DecimalMoney::add($totalDibayar, (string) $pembayaran->nominal_bayar);
-        }
+        $totalDibayar = $this->pembayaranService->hitungTotalDibayar($transaksi);
 
         $sisaTagihan = DecimalMoney::maxZero(
             DecimalMoney::subtract((string) $transaksi->total_harga, $totalDibayar)
         );
 
+        $tagihanDasar = $transaksi->status_transaksi === StatusTransaksi::DIBATALKAN
+            ? (string) $transaksi->biaya_pembatalan
+            : DecimalMoney::maxZero(
+                DecimalMoney::subtract($subtotalLayanan, (string) $transaksi->nilai_voucher_snapshot)
+            );
+
+        $kelebihanBayarTunai = DecimalMoney::maxZero(
+            DecimalMoney::subtract($totalDibayar, $tagihanDasar)
+        );
+
+        $totalKelebihanGantiRugi = '0.00';
+        foreach ($transaksi->laporanKerusakanKehilangan as $laporan) {
+            $totalKelebihanGantiRugi = DecimalMoney::add(
+                $totalKelebihanGantiRugi,
+                (string) $laporan->kelebihan_ganti_rugi
+            );
+        }
+
+        $totalPengembalianPelanggan = DecimalMoney::add($kelebihanBayarTunai, $totalKelebihanGantiRugi);
+
         $pelanggan = $transaksi->pelanggan;
         $petugas = $transaksi->petugas;
         $layanan = $transaksi->layanan;
         $voucher = $transaksi->voucher;
+
+        $latestRiwayat = $this->resolveLatestRiwayatStatus($transaksi);
+        $tahapTerakhir = $latestRiwayat !== null
+            ? $this->enumValue($latestRiwayat->tahap_status)
+            : null;
+        $tahapBerikutnya = $this->resolveNextProductionStage($transaksi, $layanan, $latestRiwayat);
+
+        $isAktif = $transaksi->status_transaksi === StatusTransaksi::AKTIF;
+        $bisaTimbangUlang = $isAktif
+            && $layanan->metode_hitung === MetodeHitung::BERAT
+            && $tahapTerakhir === TahapProduksi::DITERIMA->value;
+        $bisaUbahLayanan = $isAktif
+            && in_array($tahapTerakhir, [TahapProduksi::DITERIMA->value, TahapProduksi::DICUCI->value], true);
+        $bisaBatalkan = $isAktif && $tahapTerakhir !== TahapProduksi::SELESAI->value;
+        $perluBiayaPembatalan = $bisaBatalkan && in_array($tahapTerakhir, [
+            TahapProduksi::DICUCI->value,
+            TahapProduksi::DIKERINGKAN->value,
+            TahapProduksi::DISETRIKA->value,
+        ], true);
+        $estimasiBiayaPembatalan = $perluBiayaPembatalan
+            ? DecimalMoney::percentage($subtotalLayanan, 50)
+            : '0.00';
+
+        $totalPotongNota = max(1, (int) $transaksi->detailPakaian->sum('jumlah_potong'));
+        $insidenPendingCount = $transaksi->laporanKerusakanKehilangan
+            ->filter(fn (LaporanKerusakanKehilangan $laporan): bool => $laporan->id_petugas === null)
+            ->count();
 
         return [
             'nomor_nota' => $transaksi->nomor_nota,
@@ -268,9 +314,20 @@ class TransaksiService
             'total_harga' => (string) $transaksi->total_harga,
             'total_dibayar' => $totalDibayar,
             'sisa_tagihan' => $sisaTagihan,
+            'kelebihan_bayar_tunai' => $kelebihanBayarTunai,
+            'total_kelebihan_ganti_rugi' => $totalKelebihanGantiRugi,
+            'total_pengembalian_pelanggan' => $totalPengembalianPelanggan,
             'status_pembayaran' => $this->enumValue($transaksi->status_pembayaran),
             'status_transaksi' => $this->enumValue($transaksi->status_transaksi),
             'diambil_pada' => $transaksi->diambil_pada?->toISOString(),
+            'tahap_produksi_terakhir' => $tahapTerakhir,
+            'tahap_produksi_berikutnya' => $tahapBerikutnya,
+            'bisa_timbang_ulang' => $bisaTimbangUlang,
+            'bisa_ubah_layanan' => $bisaUbahLayanan,
+            'bisa_batalkan' => $bisaBatalkan,
+            'perlu_biaya_pembatalan' => $perluBiayaPembatalan,
+            'estimasi_biaya_pembatalan' => $estimasiBiayaPembatalan,
+            'insiden_pending_count' => $insidenPendingCount,
             'pelanggan' => [
                 'id_pelanggan' => $pelanggan->id_pelanggan,
                 'nama' => $pelanggan->nama,
@@ -345,7 +402,19 @@ class TransaksiService
                     'tahap_status' => $this->enumValue($riwayat->tahap_status),
                     'waktu_update' => $riwayat->waktu_update?->toISOString(),
                     'catatan' => $riwayat->catatan,
+                    'pegawai' => $riwayat->pegawai !== null ? [
+                        'id_pegawai' => $riwayat->pegawai->id_pegawai,
+                        'nama_pegawai' => $riwayat->pegawai->nama_pegawai,
+                    ] : null,
                 ])
+                ->all(),
+            'laporan_insiden' => $transaksi->laporanKerusakanKehilangan
+                ->values()
+                ->map(fn (LaporanKerusakanKehilangan $laporan): array => $this->formatLaporanInsiden(
+                    $laporan,
+                    $subtotalLayanan,
+                    $totalPotongNota
+                ))
                 ->all(),
         ];
     }
@@ -527,9 +596,11 @@ class TransaksiService
     }
 
     /**
+     * Eager-load relations required for full TransaksiDetail serialization without N+1 queries.
+     *
      * @return array<int|string, mixed>
      */
-    private function detailRelations(): array
+    public function detailRelations(): array
     {
         return [
             'pelanggan',
@@ -540,7 +611,151 @@ class TransaksiService
             'pembayaran' => fn ($query) => $query->orderBy('tanggal_bayar')->orderBy('id_pembayaran'),
             'pembayaran.petugas',
             'riwayatStatusProduksi',
+            'riwayatStatusProduksi.pegawai',
+            'laporanKerusakanKehilangan' => fn ($query) => $query->orderBy('id_laporan'),
+            'laporanKerusakanKehilangan.detailPakaian',
+            'laporanKerusakanKehilangan.petugas',
+            'laporanKerusakanKehilangan.pegawaiPelapor',
         ];
+    }
+
+    /**
+     * Resolve the latest RiwayatStatusProduksi record ordered by waktu_update and id_status_produksi.
+     */
+    public function resolveLatestRiwayatStatus(Transaksi $transaksi): ?RiwayatStatusProduksi
+    {
+        $records = $transaksi->relationLoaded('riwayatStatusProduksi')
+            ? $transaksi->riwayatStatusProduksi
+            : $transaksi->riwayatStatusProduksi()->get();
+
+        if ($records->isEmpty()) {
+            return null;
+        }
+
+        return $records
+            ->sort(function (RiwayatStatusProduksi $left, RiwayatStatusProduksi $right): int {
+                $timeCompare = ($left->waktu_update?->getTimestamp() ?? 0)
+                    <=> ($right->waktu_update?->getTimestamp() ?? 0);
+
+                if ($timeCompare !== 0) {
+                    return $timeCompare;
+                }
+
+                return $left->id_status_produksi <=> $right->id_status_produksi;
+            })
+            ->last();
+    }
+
+    /**
+     * Resolve ordered production stage enums for a service.
+     *
+     * @return list<TahapProduksi>
+     */
+    public function resolveOrderedTahapStages(JenisLayanan $layanan): array
+    {
+        $layanan->loadMissing(['tahapLayanan' => fn ($query) => $query->orderBy('urutan')]);
+
+        $stages = $layanan->tahapLayanan
+            ->sortBy('urutan')
+            ->values()
+            ->map(fn (TahapLayanan $tahap): TahapProduksi => $tahap->nama_tahap)
+            ->all();
+
+        return $stages !== []
+            ? $stages
+            : TahapProduksi::canonicalSequence((bool) $layanan->perlu_setrika);
+    }
+
+    private function resolveNextProductionStage(
+        Transaksi $transaksi,
+        JenisLayanan $layanan,
+        ?RiwayatStatusProduksi $latestRiwayat
+    ): ?string {
+        if ($transaksi->status_transaksi !== StatusTransaksi::AKTIF || $latestRiwayat === null) {
+            return null;
+        }
+
+        $stages = $this->resolveOrderedTahapStages($layanan);
+        $currentIndex = array_search($latestRiwayat->tahap_status, $stages, true);
+
+        if ($currentIndex === false || ! isset($stages[$currentIndex + 1])) {
+            return null;
+        }
+
+        return $stages[$currentIndex + 1]->value;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function formatLaporanInsiden(
+        LaporanKerusakanKehilangan $laporan,
+        string $subtotalLayanan,
+        int $totalPotongNota
+    ): array {
+        $detail = $laporan->detailPakaian;
+        $jenisInsiden = $laporan->jenis_insiden instanceof JenisInsiden
+            ? $laporan->jenis_insiden
+            : JenisInsiden::from((string) $laporan->jenis_insiden);
+
+        return [
+            'id_laporan' => $laporan->id_laporan,
+            'nomor_nota' => $laporan->nomor_nota,
+            'id_detail' => $laporan->id_detail,
+            'id_petugas' => $laporan->id_petugas,
+            'id_pegawai_pelapor' => $laporan->id_pegawai_pelapor,
+            'jenis_insiden' => $jenisInsiden->value,
+            'keterangan' => $laporan->keterangan,
+            'nilai_kompensasi' => (string) $laporan->nilai_kompensasi,
+            'kelebihan_ganti_rugi' => (string) $laporan->kelebihan_ganti_rugi,
+            'estimasi_kompensasi' => $this->estimateIncidentCompensation(
+                $subtotalLayanan,
+                $totalPotongNota,
+                $detail,
+                $jenisInsiden
+            ),
+            'status_konfirmasi' => $laporan->id_petugas !== null ? 'TERKONFIRMASI' : 'MENUNGGU_KONFIRMASI',
+            'created_at' => $laporan->created_at?->toISOString(),
+            'updated_at' => $laporan->updated_at?->toISOString(),
+            'detail_pakaian' => $detail !== null ? [
+                'id_detail' => $detail->id_detail,
+                'nomor_nota' => $detail->nomor_nota,
+                'jenis_pakaian' => $detail->jenis_pakaian,
+                'jumlah_potong' => (int) $detail->jumlah_potong,
+                'kondisi_pakaian' => $detail->kondisi_pakaian,
+            ] : null,
+            'petugas' => $laporan->petugas !== null ? [
+                'id_petugas' => $laporan->petugas->id_petugas,
+                'nama_petugas' => $laporan->petugas->nama_petugas,
+            ] : null,
+            'pegawai_pelapor' => $laporan->pegawaiPelapor !== null ? [
+                'id_pegawai' => $laporan->pegawaiPelapor->id_pegawai,
+                'nama_pegawai' => $laporan->pegawaiPelapor->nama_pegawai,
+            ] : null,
+        ];
+    }
+
+    private function estimateIncidentCompensation(
+        string $subtotalLayanan,
+        int $totalPotongNota,
+        ?DetailPakaian $detail,
+        JenisInsiden $jenisInsiden
+    ): string {
+        $itemPotong = max(1, (int) ($detail?->jumlah_potong ?? 1));
+        $prorated = DecimalMoney::prorateAndMultiply(
+            $subtotalLayanan,
+            $itemPotong,
+            max(1, $totalPotongNota),
+            1
+        );
+        $basisCents = max(100, DecimalMoney::toCents($prorated));
+        $multiplier = $jenisInsiden === JenisInsiden::HILANG ? 10 : 5;
+
+        if ($basisCents > intdiv(PHP_INT_MAX, $multiplier)) {
+            throw new InvalidArgumentException('Incident compensation calculation exceeds integer bounds.');
+        }
+
+        return DecimalMoney::toDecimalString($basisCents * $multiplier);
     }
 
     /**

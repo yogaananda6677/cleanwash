@@ -160,6 +160,79 @@ final class DecimalMoney
     }
 
     /**
+     * Calculate a non-negative integer percentage of an amount using half-up rounding.
+     */
+    public static function percentage(string $amount, int $percent): string
+    {
+        if ($percent < 0) {
+            throw new InvalidArgumentException("Percentage [{$percent}] cannot be negative.");
+        }
+
+        $amountCents = self::toCents($amount);
+
+        if ($amountCents === 0 || $percent === 0) {
+            return '0.00';
+        }
+
+        $negative = $amountCents < 0;
+        $abs = abs($amountCents);
+
+        if ($abs > intdiv(PHP_INT_MAX - 50, $percent)) {
+            throw new InvalidArgumentException('Percentage calculation exceeds integer bounds.');
+        }
+
+        $result = intdiv(($abs * $percent) + 50, 100);
+
+        if ($result === 0) {
+            return '0.00';
+        }
+
+        return self::toDecimalString($negative ? -$result : $result);
+    }
+
+    /**
+     * Prorate an amount by numerator/denominator (half-up) and multiply by an integer multiplier.
+     */
+    public static function prorateAndMultiply(string $amount, int $numerator, int $denominator, int $multiplier): string
+    {
+        if ($denominator <= 0) {
+            throw new InvalidArgumentException("Denominator [{$denominator}] must be greater than zero.");
+        }
+
+        if ($numerator < 0 || $multiplier < 0) {
+            throw new InvalidArgumentException('Numerator and multiplier cannot be negative.');
+        }
+
+        $amountCents = self::toCents($amount);
+
+        if ($amountCents === 0 || $numerator === 0 || $multiplier === 0) {
+            return '0.00';
+        }
+
+        $negative = $amountCents < 0;
+        $abs = abs($amountCents);
+        $halfDenom = intdiv($denominator, 2);
+
+        if ($abs > intdiv(PHP_INT_MAX - $halfDenom, $numerator)) {
+            throw new InvalidArgumentException('Proration calculation exceeds integer bounds.');
+        }
+
+        $basisCents = intdiv(($abs * $numerator) + $halfDenom, $denominator);
+
+        if ($basisCents === 0) {
+            return '0.00';
+        }
+
+        if ($basisCents > intdiv(PHP_INT_MAX, $multiplier)) {
+            throw new InvalidArgumentException('Proration multiplication exceeds integer bounds.');
+        }
+
+        $totalCents = $basisCents * $multiplier;
+
+        return self::toDecimalString($negative ? -$totalCents : $totalCents);
+    }
+
+    /**
      * Clamp negative amounts to "0.00".
      */
     public static function maxZero(string $amount): string
