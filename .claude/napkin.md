@@ -18,6 +18,8 @@ Dilarang mencatat log kronologis harian di file ini — **catat log aktivitas di
    Do instead: Jalankan seluruh quality gate (`./vendor/bin/pint --test`, `npx tsc --noEmit`, `php artisan test`, `npm run build`) dan pastikan exit code 0 sebelum menandai task selesai atau membuka review.
 3. **[2026-11-10] Migrasi database gagal saat di-rollback atau bentrok foreign key di MySQL 8.4**
    Do instead: Uji setiap migrasi baru dengan `php artisan migrate && php artisan migrate:rollback && php artisan migrate` secara berurutan pada database testing MySQL 8.4 sebelum commit.
+4. **[2026-11-10] PHP 8.4 lokal tidak memiliki ekstensi `pdo_sqlite` sehingga PHPUnit default SQLite `:memory:` gagal**
+   Do instead: Selalu konfigurasi `phpunit.xml` dan `.env.testing` memakai MySQL 8.4 terisolasi pada port `3307` (port `3306` dipakai container proyek lain), bukan SQLite `:memory:`.
 
 ---
 
@@ -42,6 +44,8 @@ Dilarang mencatat log kronologis harian di file ini — **catat log aktivitas di
    Do instead: Validasi perpindahan status `RiwayatStatusProduksi` terhadap daftar `TahapLayanan` milik `JenisLayanan` (cek `perlu_setrika`) dan catat `waktu_update` serta `id_pegawai`.
 5. **[2026-11-10] Penyerahan pakaian belum lunas atau penjadwalan ulang merusak pengantaran pelanggan lain (KK-06 & KK-07)**
    Do instead: Panggil `cekHakBayarAkhir()` sebelum serah terima (tolak bila sisa > 0 dan `boleh_bayar_akhir === false`), serta kelola status antar & `jadwalkanUlang()` pada level `ItemPengantaran` per `nomor_nota`, bukan level header `Pengantaran`.
+6. **[2026-11-10] PHP 8.4 lokal tidak memiliki ekstensi `bcmath` sehingga `bcadd`/`bcmul` fatal error**
+   Do instead: Hindari fungsi `bcmath` dan `float` untuk nominal uang/kuantitas; gunakan helper aritmatika integer-scaled decimal (`App\Support\DecimalMoney` skala 100 / sen) bersama kolom MySQL `DECIMAL(12,2)`.
 
 ---
 
@@ -54,3 +58,5 @@ Dilarang mencatat log kronologis harian di file ini — **catat log aktivitas di
    Do instead: Selalu lakukan *cross-agent review* (`fullstack-developer` / `product-manager`) sesuai `napkin/PR_REVIEW_LIFECYCLE.md` sebelum menandai task atau phase sebagai `DONE`.
 4. **[2026-11-10] Pendaftaran ulang `define_subagent` gagal dengan error "already exists"**
    Do instead: Definisi subagent di `.agents/agents/*.md` (`product-manager`, `backend-developer`, `frontend-developer`, `fullstack-developer`) otomatis ditemukan oleh Antigravity; langsung panggil `invoke_subagent` menggunakan `TypeName` tersebut tanpa memanggil `define_subagent` ulang.
+5. **[2026-11-10] Subagent auto-discovered dari `.agents/agents/*.md` hanya memiliki tool baca tanpa write/shell**
+   Do instead: Untuk tugas yang membutuhkan tulis file dan eksekusi CLI (`fullstack-developer`, `backend-developer`, `frontend-developer`), daftarkan subagent bernama unik via `define_subagent(..., enable_write_tools=true)` atau teruskan draf terstruktur ke Primary Agent untuk ditulis/dieksekusi.

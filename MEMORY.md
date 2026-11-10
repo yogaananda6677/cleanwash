@@ -13,9 +13,9 @@ Dokumen ini adalah memori status arsitektur proyek **CleanWash** untuk manusia d
 | **Product** | CleanWash — Sistem Informasi Manajemen Operasional Laundry |
 | **SRS Reference** | [UTS.pdf](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/Outputtts/UTS.pdf) & [2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx) |
 | **Current Phase** | Phase 1 — Fondasi Sistem, Master Data & Penerimaan Transaksi |
-| **Current Status** | `NOT_STARTED` (Dokumen PRD, AGENTS.md, 4 Subagent, & Napkin System sudah siap) |
+| **Current Status** | `IN_PROGRESS` (Phase 1 dimulai: `P1-01` kontrak & AC dikunci di `docs/phases/PHASE_1_CONTRACTS.md`) |
 | **Last Updated** | 2026-11-10 |
-| **Updated By** | Software Analyst / System Architect (Initial Planning & Setup) |
+| **Updated By** | Product Manager (`product-manager`) + Primary Agent — P1-01 Scoping & Contracts |
 
 ---
 
@@ -63,7 +63,7 @@ Status yang diizinkan: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 | Phase | Scope | Status | Started | Completed | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | **Phase 0 (Docs)** | PRD, AGENTS.md, 4 Subagent, Napkin & Context Ledger | `DONE` | 2026-11-10 | 2026-11-10 | [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#001` |
-| **Phase 1** | Fondasi Sistem, Master Data & Penerimaan Transaksi (DP & Voucher) | `NOT_STARTED` | — | — | Menunggu eksekusi `P1-01` |
+| **Phase 1** | Fondasi Sistem, Master Data & Penerimaan Transaksi (DP & Voucher) | `IN_PROGRESS` | 2026-11-10 | — | [PHASE_1_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_1_CONTRACTS.md) & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#002` |
 | **Phase 2** | Operasional Produksi, Timbang Ulang, Ubah/Batal & Kompensasi Insiden | `NOT_STARTED` | — | — | Menunggu Phase 1 `DONE` |
 | **Phase 3** | Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening | `NOT_STARTED` | — | — | Menunggu Phase 2 `DONE` |
 
@@ -72,7 +72,7 @@ Status yang diizinkan: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 ## 6. Detailed 3-Phase Checklist
 
 ### Phase 1 — Fondasi Sistem, Master Data & Penerimaan Transaksi (DP & Voucher)
-- [ ] `P1-01` (`product-manager`): Breakdown task detail & kontrak payload Inertia/Request Phase 1.
+- [x] `P1-01` (`product-manager`): Breakdown task detail & kontrak payload Inertia/Request Phase 1 ([PHASE_1_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_1_CONTRACTS.md)).
 - [ ] `P1-02` (`fullstack-developer`): Scaffolding Laravel 12 + MySQL 8.4 + Inertia React TS + Tailwind + CI Workflow.
 - [ ] `P1-03` (`backend-developer`): Migrasi seluruh tabel MySQL 8.4, seeder aktor/role (`Petugas`, `Pegawai`, `PetugasPengantaran`), Auth & RBAC Policy.
 - [ ] `P1-04` (`backend-developer`): CRUD Master `Pelanggan` (`boleh_bayar_akhir`), `JenisLayanan` + `TahapLayanan`, dan `Voucher`.

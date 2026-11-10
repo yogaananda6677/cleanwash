@@ -61,3 +61,23 @@
 - **Next Exact Action:**
   1. Mulai **Phase 1**: delegasikan **`P1-01`** ke subagent `product-manager` untuk memecah task detail & kontrak props/payload Phase 1.
   2. Setelah kontrak siap, delegasikan **`P1-02`** ke subagent `fullstack-developer` pada branch `feature/p1-02-scaffolding` untuk inisialisasi proyek Laravel 12 + MySQL 8.4 + Inertia React TS + Pint + CI.
+
+### [#002] 2026-11-10 13:00 — Product Manager (`product-manager`) + Primary Agent — Phase 1 (`P1-01`)
+- **Status:** `DONE`
+- **Ringkasan Kegiatan:**
+  - Melakukan Context Sync terhadap `PRD.md`, `AGENTS.md`, `MEMORY.md`, `WRITE.md` (`#001`), `.claude/napkin.md`, serta audit ulang diagram `Archive/Outputtts/UTS.pdf` dan `Archive/Use Case.xmi`.
+  - Menyusun dokumen kontrak `docs/phases/PHASE_1_CONTRACTS.md` pada branch `docs/p1-01-contracts` mencakup breakdown `P1-01` s.d. `P1-07`, cetak biru skema 16 tabel MySQL 8.4 (`DECIMAL(12,2)`, port `3307`, tanpa `bcmath`/`pdo_sqlite`), kontrak route/FormRequest/TypeScript Props Phase 1, serta `AC-P1-01` s.d. `AC-P1-12` (`UC-01` DP, `UC-03..UC-09`, `KK-03`, `KK-09`).
+  - Memperbarui `MEMORY.md` (Phase 1 `IN_PROGRESS`, `[x] P1-01`) dan menambahkan catatan gotcha PHP 8.4 / MySQL `3307` / runtime subagent di `.claude/napkin.md`.
+- **File Dibuat / Diubah:**
+  - `docs/phases/PHASE_1_CONTRACTS.md` — Kontrak skema, route, FormRequest, TS types, & 12 Acceptance Criteria Phase 1
+  - `MEMORY.md` — Status Phase 1 menjadi `IN_PROGRESS` dan checklist `P1-01` selesai
+  - `.claude/napkin.md` — Penambahan gotcha `pdo_sqlite`, `bcmath`, MySQL port `3307`, dan tool runtime subagent
+  - `WRITE.md` — Penambahan Entry `#002`
+- **Verifikasi / Bukti Uji:**
+  - Audit silang kontrak terhadap `PRD.md` (§5, §8, §9, §10, §11) dan `Archive/Outputtts/UTS.pdf` (*Class Diagram*, *Activity 1*, *Sequence 1*) -> konsisten 100%.
+  - Commit & merge branch `docs/p1-01-contracts` -> `main` bersih.
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Subagent `product-manager` auto-discovered dari `.agents/agents/product-manager.md` hanya memiliki tool baca/cari di runtime sesi ini sehingga penyusunan kontrak dilakukan oleh `product-manager` dan penulisan/commit dieksekusi oleh Primary Agent; untuk `P1-02` dan seterusnya, gunakan subagent bernama unik via `define_subagent(..., enable_write_tools=true)`.
+  - Aritmatika keuangan PHP dikunci memakai integer skala 100 (`App\Support\DecimalMoney`) tanpa `ext-bcmath`, dan test DB memakai MySQL 8.4 port `3307` tanpa `ext-pdo_sqlite`.
+- **Next Exact Action:**
+  - Delegasikan **`P1-02`** ke subagent fullstack (`cw-fullstack-dev` dengan `enable_write_tools=true`) pada branch `feature/p1-02-scaffolding` dari `main` untuk inisialisasi proyek Laravel 12 + MySQL 8.4 (`3307`) + `App\Support\DecimalMoney` + Inertia React TS + Pint + CI workflow.
