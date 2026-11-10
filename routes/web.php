@@ -1,12 +1,15 @@
 <?php
 
+use App\Http\Controllers\AuditController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InsidenController;
 use App\Http\Controllers\JenisLayananController;
 use App\Http\Controllers\PelangganController;
+use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PengantaranController;
 use App\Http\Controllers\ProduksiController;
+use App\Http\Controllers\SerahTerimaController;
 use App\Http\Controllers\TransaksiAdjustmentController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\VoucherController;
@@ -48,7 +51,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/transaksi/{nota}/nota', [TransaksiController::class, 'nota'])->name('transaksi.nota');
         Route::post('/transaksi/{nota}/ubah-layanan', [TransaksiAdjustmentController::class, 'ubahLayanan'])->name('transaksi.ubah-layanan');
         Route::post('/transaksi/{nota}/batalkan', [TransaksiAdjustmentController::class, 'batalkan'])->name('transaksi.batalkan');
+        Route::post('/transaksi/{nota}/pembayaran', [PembayaranController::class, 'store'])->name('transaksi.pembayaran.store');
+        Route::post('/transaksi/{nota}/serah-terima', [SerahTerimaController::class, 'store'])->name('transaksi.serah-terima');
         Route::get('/transaksi/{nota}', [TransaksiController::class, 'show'])->name('transaksi.show');
+
+        Route::get('/serah-terima', [SerahTerimaController::class, 'index'])->name('serah-terima.index');
+        Route::get('/audit', [AuditController::class, 'index'])->name('audit.index');
 
         Route::post('/insiden/{laporan}/konfirmasi', [InsidenController::class, 'konfirmasi'])->name('insiden.konfirmasi');
 

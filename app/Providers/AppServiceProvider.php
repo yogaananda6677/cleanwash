@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
+use App\Enums\UserRole;
 use App\Models\JenisLayanan;
 use App\Models\LaporanKerusakanKehilangan;
 use App\Models\Pelanggan;
 use App\Models\Pengantaran;
 use App\Models\RiwayatStatusProduksi;
 use App\Models\Transaksi;
+use App\Models\User;
 use App\Models\Voucher;
 use App\Policies\JenisLayananPolicy;
 use App\Policies\LaporanKerusakanPolicy;
@@ -45,5 +47,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('produksi.viewAny', [ProduksiPolicy::class, 'viewAny']);
         Gate::define('produksi.timbangUlang', [ProduksiPolicy::class, 'timbangUlang']);
         Gate::define('produksi.ubahStatus', [ProduksiPolicy::class, 'ubahStatus']);
+        Gate::define('audit.viewAny', fn (User $user): bool => $user->is_active && $user->role === UserRole::PETUGAS);
+        Gate::define('serahTerima.viewAny', fn (User $user): bool => $user->is_active && $user->role === UserRole::PETUGAS);
     }
 }

@@ -34,4 +34,14 @@ class TransaksiPolicy
     {
         return $this->isActivePetugas($user);
     }
+
+    public function pelunasan(User $user, Transaksi $transaksi): bool
+    {
+        return $this->isActivePetugas($user);
+    }
+
+    public function serahTerima(User $user, Transaksi $transaksi): bool
+    {
+        return $this->isActivePetugas($user);
+    }
 }

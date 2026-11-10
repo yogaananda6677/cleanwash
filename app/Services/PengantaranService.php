@@ -465,6 +465,14 @@ class PengantaranService
      */
     public function syncStatusPengantaran(Pengantaran $pengantaran): StatusPengantaran
     {
+        return self::syncSessionStatus($pengantaran);
+    }
+
+    /**
+     * Synchronize parent Pengantaran header status statically so sibling services avoid circular DI.
+     */
+    public static function syncSessionStatus(Pengantaran $pengantaran): StatusPengantaran
+    {
         $items = $pengantaran->itemPengantaran()->get(['id_item_antar', 'status_terima_pelanggan']);
 
         if ($items->isNotEmpty() && $items->every(fn (ItemPengantaran $item): bool => in_array(

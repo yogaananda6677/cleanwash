@@ -13,9 +13,9 @@ Dokumen ini adalah memori status arsitektur proyek **CleanWash** untuk manusia d
 | **Product** | CleanWash — Sistem Informasi Manajemen Operasional Laundry |
 | **SRS Reference** | [UTS.pdf](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/Outputtts/UTS.pdf) & [2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx) |
 | **Current Phase** | Phase 3 — Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening |
-| **Current Status** | `IN_PROGRESS` (`P3-02` selesai & siap review; lanjut **`P3-03`** oleh `cw-backend-dev`) |
+| **Current Status** | `IN_PROGRESS` (`P3-03` selesai & siap review; lanjut **`P3-04`** oleh `frontend-developer`) |
 | **Last Updated** | 2026-11-10 |
-| **Updated By** | Backend Developer (`cw-backend-dev`) — Task `P3-02` |
+| **Updated By** | Backend Developer (`cw-backend-dev`) — Task `P3-03` |
 
 ---
 
@@ -92,6 +92,6 @@ Status yang diizinkan: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 ### Phase 3 — Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening
 - [x] `P3-01` (`product-manager`): Matriks UAT lengkap 14 Use Case & 9 Kondisi Khusus + spesifikasi Dashboard/Audit view ([PHASE_3_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_3_CONTRACTS.md)).
 - [x] `P3-02` (`backend-developer`): `PengantaranService` (`Pengantaran` + `ItemPengantaran` `*..*`, status berurutan, `jadwalkanUlang` independen `KK-07`).
-- [ ] `P3-03` (`backend-developer`): `SerahTerimaService` (`cekHakBayarAkhir` `KK-06`, `catatPelunasan`, `updateStatusLunas`) & endpoint Dashboard/Audit Log.
+- [x] `P3-03` (`backend-developer`): `SerahTerimaService` (`cekHakBayarAkhir` `KK-06`, `catatPelunasan`, `updateStatusLunas`) & endpoint Dashboard/Audit Log.
 - [ ] `P3-04` (`frontend-developer`): UI Kurir (`PetugasPengantaran`), modal Pelunasan & Serah Terima Kasir, Dashboard & Audit Trail viewer.
 - [ ] `P3-05` (`fullstack-developer` + `product-manager`): Security & NFR audit (RBAC, CSRF, N+1, decimal precision, backup/restore check), UAT 14 Use Case & 9 Kondisi Khusus, & Final Release Sign-off.

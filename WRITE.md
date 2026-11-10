@@ -566,6 +566,41 @@
   1. Lakukan cross-agent review & Squash Merge `feature/p3-02-pengantaran-service` ke `main` sesuai `napkin/PR_REVIEW_LIFECYCLE.md`.
   2. Delegasikan **`P3-03`** ke `cw-backend-dev` pada branch `feature/p3-03-settlement-handover-audit` dari `main` untuk mengimplementasikan `PembayaranService::catatPelunasan()` + `updateStatusLunas()`, melengkapi `SerahTerimaService` (`ambilPakaian`, `serahkanPakaian` `KK-06` + penutupan item `MENUNGGU -> GAGAL` via `PengantaranService::syncStatusPengantaran()`), `AuditLogService`, `DashboardController` KPI Phase 3, `SerahTerimaController`/`PembayaranController`/`AuditController`, serta TDD tests (`AC-P3-06`..`AC-P3-09`).
 
+### [#019] 2026-11-10 18:15 — Backend Developer (`cw-backend-dev`) — Phase 3 (`P3-03`)
+- **Status:** `READY_FOR_REVIEW`
+- **Ringkasan Kegiatan:**
+  - Melakukan Context Sync (`MEMORY.md`, `WRITE.md` `#016`–`#018`, `.claude/napkin.md`, `PRD.md`, `AGENTS.md`, `napkin/PR_REVIEW_LIFECYCLE.md`, `docs/phases/PHASE_1_CONTRACTS.md`, dan `docs/phases/PHASE_3_CONTRACTS.md` §1.2, §2.0, §2.2–§2.4, §3.1–§3.4, `AC-P3-06`..`AC-P3-09`), serta membuat branch fitur `feature/p3-03-settlement-handover-audit` dari `main` (`3849afa`).
+  - **Anti-Circular DI Refactor (`PengantaranService`):** Mengekstrak `PengantaranService::syncSessionStatus(Pengantaran $pengantaran): StatusPengantaran` (static) dan mendelegasikan `syncStatusPengantaran()` ke method tersebut sehingga `SerahTerimaService` dapat menyinkronkan sesi pengantaran tanpa menginjeksi `PengantaranService` melalui constructor.
+  - **`PembayaranService`:** Mengimplementasikan `catatPelunasan()` (`DB::transaction()` + `lockForUpdate()`, validasi nominal > 0 dan <= `sisa_tagihan` pasca penyesuaian Phase 2 memakai `DecimalMoney`, mendukung nota `AKTIF`, `SELESAI`, piutang `DIAMBIL`, dan sisa `biaya_pembatalan` `DIBATALKAN`, menolak nota sudah lunas/gratis `422`, mencatat `Pembayaran(PELUNASAN)` + `AuditLog(PELUNASAN_RECORDED)`), `updateStatusLunas()`, dan `summarizePiutangMetrics()` bebas N+1.
+  - **`SerahTerimaService` (`KK-06`):** Melanjutkan `cekHakBayarAkhir()` dengan menambahkan `ambilPakaian()`, `serahkanPakaian()` (wajib `SELESAI`, tolak `422` item kurir `DIAMBIL`/`DALAM_PERJALANAN`, auto-tutup item `MENUNGGU -> GAGAL` + `AuditLog(ITEM_PENGANTARAN_UPDATED)` + `PengantaranService::syncSessionStatus()`, gerbang `KK-06` blokir non-paylater atau catat piutang `BELUM_LUNAS`, set `DIAMBIL` + `diambil_pada` WIB + `AuditLog(SERAH_TERIMA)` `kanal='LOKET'`), serta helper antrean loket `paginateQueue()` (`SIAP_AMBIL` | `PIUTANG` | `RIWAYAT_DIAMBIL`, `SqlLike::contains`) & `getSummary()` tanpa N+1.
+  - **`AuditLogService` & `DashboardController` KPI Phase 3:** Mengimplementasikan `AuditLogService` (`paginateLogs` dengan eager-load `user:id,name`, filter `search`/`action`/`actor_role`, `getAvailableActions()` 13 aksi Phase 1–3, dan `getPiutangSummary()` tanpa N+1 dengan `DecimalMoney::add()`); memperluas `DashboardController::index()` secara non-breaking untuk `PETUGAS` (`pengantaran_aktif`, `piutang_belum_lunas`, `piutang_nominal_total`) dan `PENGANTAR` (`item_terkirim_hari_ini` berbasis rentang hari `Asia/Jakarta`, `item_gagal_perlu_tindak_lanjut` berbasis `NOT EXISTS` item lebih baru & transaksi masih `SELESAI`).
+  - **Policies, Gates, FormRequests, Controllers & Routes:** Menambahkan `TransaksiPolicy::{pelunasan,serahTerima}`, mendaftarkan Gate `audit.viewAny` & `serahTerima.viewAny` di `AppServiceProvider`, membuat `StorePelunasanRequest`, `SerahTerimaRequest`, trait `HandlesPetugasTransaksiAction`, `PembayaranController`, `SerahTerimaController`, `AuditController`, dan mendaftarkan 4 route di group `role:PETUGAS` pada `routes/web.php`.
+  - **TDD Tests:** Menulis dan meluluskan `tests/Unit/{PembayaranServiceTest,SerahTerimaServiceTest}.php` serta `tests/Feature/{PembayaranAndSerahTerimaTest,AuditAndDashboardPhase3Test}.php` (`AC-P3-06`..`AC-P3-09`, RBAC `403`, budget query `<= 20`, SQL LIKE escaping, `KK-01`..`KK-09`, batas hari WIB).
+- **File Dibuat / Diubah:**
+  - `app/Services/PengantaranService.php` — Ekstraksi `public static function syncSessionStatus(Pengantaran $pengantaran)`
+  - `app/Services/PembayaranService.php` — `catatPelunasan()`, `updateStatusLunas()`, & `summarizePiutangMetrics()`
+  - `app/Services/SerahTerimaService.php` — `ambilPakaian()`, `serahkanPakaian()`, `paginateQueue()`, & `getSummary()`
+  - `app/Services/AuditLogService.php` — `paginateLogs()`, `getAvailableActions()`, & `getPiutangSummary()`
+  - `app/Policies/TransaksiPolicy.php`, `app/Providers/AppServiceProvider.php` — Policy `pelunasan`/`serahTerima` & Gate `audit.viewAny`/`serahTerima.viewAny`
+  - `app/Http/Requests/Transaksi/{StorePelunasanRequest,SerahTerimaRequest}.php` — Validasi & normalisasi payload
+  - `app/Http/Controllers/Concerns/HandlesPetugasTransaksiAction.php`, `app/Http/Controllers/{PembayaranController,SerahTerimaController,AuditController,DashboardController}.php`, `routes/web.php` — Endpoint `/serah-terima`, `/transaksi/{nota}/pembayaran`, `/transaksi/{nota}/serah-terima`, `/audit`, dan KPI Dashboard Phase 3
+  - `tests/Unit/{PembayaranServiceTest,SerahTerimaServiceTest}.php`, `tests/Feature/{PembayaranAndSerahTerimaTest,AuditAndDashboardPhase3Test}.php` — Automated unit & feature tests `AC-P3-06`..`AC-P3-09`
+  - `MEMORY.md`, `WRITE.md` — Update `[x] P3-03` dan Entry `#019`
+- **Verifikasi / Bukti Uji:**
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` (`exit code 0`)
+  - `npx tsc --noEmit` -> `0 errors` (`exit code 0`)
+  - `npm run build` -> Vite production build (`674 modules transformed`, `public/build/manifest.json`, `built in 2.01s`) (`exit code 0`)
+  - `php artisan test` -> `111 passed (3408 assertions)` pada MySQL 8.4 port `3307` (`cleanwash_testing`) (`exit code 0`)
+  - `php artisan migrate --no-interaction && php artisan migrate:rollback --no-interaction && php artisan migrate --seed --no-interaction` -> 18 migrasi rollback & re-migrate + `CleanWashSeeder` bersih (`exit code 0`)
+  - `php artisan route:list --except-vendor` -> `Showing [42] routes`; audit hygiene (`dd`/`dump`/`var_dump`/`bcmath`/`(float)`/`floatval`) -> `HYGIENE_CLEAN`.
+- **Keputusan / Blocker / Catatan Napkin:**
+  - `PembayaranAndSerahTerimaTest.php` dan `AuditAndDashboardPhase3Test.php` menggunakan `$this->withoutVite()` dan `shouldExist: false` sementara pada `SerahTerima/Index` dan `Audit/Index` (`// Temporary shouldExist: false until P3-04 creates SerahTerima/Index.tsx and Audit/Index.tsx`) untuk dibersihkan pada `P3-05`.
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  1. Lakukan cross-agent review & Squash Merge `feature/p3-03-settlement-handover-audit` ke `main` sesuai `napkin/PR_REVIEW_LIFECYCLE.md`.
+  2. Lanjutkan **`P3-04`** (`frontend-developer`) untuk membangun UI Kurir (`Pengantaran/{Index,Show}.tsx`), `SerahTerima/Index.tsx`, `Audit/Index.tsx`, modal Pelunasan & Serah Terima di `Transaksi/Show.tsx`, kartu KPI Phase 3 di `Dashboard/Index.tsx`, navigasi `AppLayout.tsx`, `StatusBadge.tsx`, `lib/format.ts`, `types/index.ts`, dan cleanup `centsToDecimalString()` di `LaporkanInsidenModal.tsx`.
+
+
 
 
 
