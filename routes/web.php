@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InsidenController;
 use App\Http\Controllers\JenisLayananController;
 use App\Http\Controllers\PelangganController;
+use App\Http\Controllers\PengantaranController;
 use App\Http\Controllers\ProduksiController;
 use App\Http\Controllers\TransaksiAdjustmentController;
 use App\Http\Controllers\TransaksiController;
@@ -50,6 +51,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/transaksi/{nota}', [TransaksiController::class, 'show'])->name('transaksi.show');
 
         Route::post('/insiden/{laporan}/konfirmasi', [InsidenController::class, 'konfirmasi'])->name('insiden.konfirmasi');
+
+        Route::post('/pengantaran', [PengantaranController::class, 'store'])->name('pengantaran.store');
     });
 
     Route::middleware('role:PEGAWAI')->group(function () {
@@ -62,5 +65,24 @@ Route::middleware('auth')->group(function () {
         Route::get('/insiden', [InsidenController::class, 'index'])->name('insiden.index');
         Route::post('/insiden', [InsidenController::class, 'store'])->name('insiden.store');
         Route::post('/transaksi/{nota}/insiden', [InsidenController::class, 'storeForTransaksi'])->name('transaksi.insiden.store');
+    });
+
+    Route::middleware('role:PENGANTAR')->group(function () {
+        Route::post('/pengantaran/item/{item}/status', [PengantaranController::class, 'updateItemStatus'])
+            ->whereNumber('item')
+            ->name('pengantaran.item.status');
+        Route::post('/pengantaran/{pengantaran}/mulai', [PengantaranController::class, 'mulai'])
+            ->whereNumber('pengantaran')
+            ->name('pengantaran.mulai');
+    });
+
+    Route::middleware('role:PETUGAS,PENGANTAR')->group(function () {
+        Route::get('/pengantaran', [PengantaranController::class, 'index'])->name('pengantaran.index');
+        Route::post('/pengantaran/item/{item}/jadwalkan-ulang', [PengantaranController::class, 'jadwalkanUlang'])
+            ->whereNumber('item')
+            ->name('pengantaran.item.jadwalkan-ulang');
+        Route::get('/pengantaran/{pengantaran}', [PengantaranController::class, 'show'])
+            ->whereNumber('pengantaran')
+            ->name('pengantaran.show');
     });
 });

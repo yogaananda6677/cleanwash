@@ -147,4 +147,12 @@ class DecimalMoneyTest extends TestCase
             }
         }
     }
+
+    public function test_formats_rupiah_consistently_without_float_drift(): void
+    {
+        $this->assertSame('Rp 0', DecimalMoney::formatRupiah('0.00'));
+        $this->assertSame('Rp 25.000', DecimalMoney::formatRupiah('25000.00'));
+        $this->assertSame('Rp 15.250,50', DecimalMoney::formatRupiah('15250.50'));
+        $this->assertSame('-Rp 1.250,05', DecimalMoney::formatRupiah('-1250.05'));
+    }
 }

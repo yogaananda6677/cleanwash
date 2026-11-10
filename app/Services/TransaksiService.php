@@ -4,12 +4,14 @@ namespace App\Services;
 
 use App\Enums\JenisInsiden;
 use App\Enums\MetodeHitung;
+use App\Enums\StatusItemPengantaran;
 use App\Enums\StatusPembayaran;
 use App\Enums\StatusTransaksi;
 use App\Enums\TahapProduksi;
 use App\Enums\UserRole;
 use App\Models\AuditLog;
 use App\Models\DetailPakaian;
+use App\Models\ItemPengantaran;
 use App\Models\JenisLayanan;
 use App\Models\LaporanKerusakanKehilangan;
 use App\Models\Pelanggan;
@@ -356,6 +358,43 @@ class TransaksiService
             ->filter(fn (LaporanKerusakanKehilangan $laporan): bool => $laporan->id_petugas === null)
             ->count();
 
+        $riwayatPengantaranItems = $transaksi->itemPengantaran
+            ->sortBy('id_item_antar')
+            ->values();
+
+        $sedangDiantarKurir = $riwayatPengantaranItems->contains(
+            fn (ItemPengantaran $item): bool => in_array(
+                $item->status_terima_pelanggan,
+                [StatusItemPengantaran::DIAMBIL, StatusItemPengantaran::DALAM_PERJALANAN],
+                true
+            )
+        );
+
+        $bisaPelunasan = DecimalMoney::gt($sisaTagihan, '0.00')
+            && in_array($transaksi->status_transaksi, [
+                StatusTransaksi::AKTIF,
+                StatusTransaksi::SELESAI,
+                StatusTransaksi::DIAMBIL,
+                StatusTransaksi::DIBATALKAN,
+            ], true);
+
+        $hakBayarAkhir = DecimalMoney::eq($sisaTagihan, '0.00') || (bool) $pelanggan->boleh_bayar_akhir;
+        $bisaSerahTerimaLoket = $transaksi->status_transaksi === StatusTransaksi::SELESAI
+            && ! $sedangDiantarKurir
+            && $hakBayarAkhir;
+
+        $pengantaranAktifItem = $riwayatPengantaranItems->last(
+            fn (ItemPengantaran $item): bool => in_array(
+                $item->status_terima_pelanggan,
+                [
+                    StatusItemPengantaran::MENUNGGU,
+                    StatusItemPengantaran::DIAMBIL,
+                    StatusItemPengantaran::DALAM_PERJALANAN,
+                ],
+                true
+            )
+        );
+
         return [
             'nomor_nota' => $transaksi->nomor_nota,
             'tanggal_penerimaan' => $transaksi->tanggal_penerimaan?->toISOString(),
@@ -383,6 +422,15 @@ class TransaksiService
             'perlu_biaya_pembatalan' => $perluBiayaPembatalan,
             'estimasi_biaya_pembatalan' => $estimasiBiayaPembatalan,
             'insiden_pending_count' => $insidenPendingCount,
+            'bisa_pelunasan' => $bisaPelunasan,
+            'bisa_serah_terima_loket' => $bisaSerahTerimaLoket,
+            'sedang_diantar_kurir' => $sedangDiantarKurir,
+            'pengantaran_aktif' => $pengantaranAktifItem !== null
+                ? $this->formatItemPengantaranSummary($pengantaranAktifItem)
+                : null,
+            'riwayat_pengantaran' => $riwayatPengantaranItems
+                ->map(fn (ItemPengantaran $item): array => $this->formatItemPengantaranSummary($item))
+                ->all(),
             'pelanggan' => [
                 'id_pelanggan' => $pelanggan->id_pelanggan,
                 'nama' => $pelanggan->nama,
@@ -682,6 +730,8 @@ class TransaksiService
             'laporanKerusakanKehilangan.detailPakaian',
             'laporanKerusakanKehilangan.petugas',
             'laporanKerusakanKehilangan.pegawaiPelapor',
+            'itemPengantaran' => fn ($query) => $query->orderBy('id_item_antar'),
+            'itemPengantaran.pengantaran.petugasPengantaran',
         ];
     }
 
@@ -797,6 +847,32 @@ class TransaksiService
             'pegawai_pelapor' => $laporan->pegawaiPelapor !== null ? [
                 'id_pegawai' => $laporan->pegawaiPelapor->id_pegawai,
                 'nama_pegawai' => $laporan->pegawaiPelapor->nama_pegawai,
+            ] : null,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function formatItemPengantaranSummary(ItemPengantaran $item): array
+    {
+        $pengantaran = $item->pengantaran;
+
+        return [
+            'id_item_antar' => $item->id_item_antar,
+            'id_pengantaran' => $item->id_pengantaran,
+            'nomor_nota' => $item->nomor_nota,
+            'status_terima_pelanggan' => $this->enumValue($item->status_terima_pelanggan),
+            'alasan_gagal' => $item->alasan_gagal,
+            'waktu_update' => $item->waktu_update?->toISOString(),
+            'pengantaran' => $pengantaran !== null ? [
+                'id_pengantaran' => $pengantaran->id_pengantaran,
+                'id_petugas_antar' => $pengantaran->id_petugas_antar,
+                'tanggal_pengantaran' => $pengantaran->tanggal_pengantaran instanceof CarbonInterface
+                    ? $pengantaran->tanggal_pengantaran->toDateString()
+                    : (string) $pengantaran->tanggal_pengantaran,
+                'status_pengantaran' => $this->enumValue($pengantaran->status_pengantaran),
+                'nama_petugas_antar' => $pengantaran->petugasPengantaran?->nama_petugas_antar ?? '',
             ] : null,
         ];
     }

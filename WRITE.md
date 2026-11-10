@@ -532,5 +532,40 @@
 - **Next Exact Action:**
   - Delegasikan **`P3-02`** ke `cw-backend-dev` pada branch `feature/p3-02-pengantaran-service` untuk mengimplementasikan `PengantaranService`, `SerahTerimaService::cekHakBayarAkhir()`, `PengantaranPolicy`, `StorePengantaranRequest`/`UpdateItemPengantaranStatusRequest`/`JadwalkanUlangRequest`, `PengantaranController`, route pengantaran di `routes/web.php`, penambahan properti pengantaran di `TransaksiService`, serta unit & feature test (`AC-P3-01`..`AC-P3-05`).
 
+### [#018] 2026-11-10 18:00 — Backend Developer (`cw-backend-dev`) — Phase 3 (`P3-02`)
+- **Status:** `READY_FOR_REVIEW`
+- **Ringkasan Kegiatan:**
+  - Melakukan Context Sync (`MEMORY.md`, `WRITE.md` `#015`–`#017`, `.claude/napkin.md`, `PRD.md`, `AGENTS.md`, `napkin/PR_REVIEW_LIFECYCLE.md`, `docs/phases/PHASE_1_CONTRACTS.md`, dan `docs/phases/PHASE_3_CONTRACTS.md` §1.2, §2.0, §2.1, §2.3, §3.1–§3.4, `AC-P3-01`..`AC-P3-05`) serta membuat branch fitur `feature/p3-02-pengantaran-service` dari `main` (`6d6a824`).
+  - Menambahkan `DecimalMoney::formatRupiah()` untuk pemformatan nominal `Rp` berbasis integer skala 100 tanpa `float`/`bcmath`, lalu mengimplementasikan `SerahTerimaService::cekHakBayarAkhir(Transaksi $transaksi): array` sebagai sumber kebenaran tunggal pengecekan hak bayar akhir (`KK-06`).
+  - Mengimplementasikan `PengantaranService`: `buatJadwal()` multi-pelanggan dengan row lock deterministik `Transaksi::orderBy('nomor_nota')->lockForUpdate()`, `mulaiPengantaran()` (`DIJADWALKAN -> BERJALAN`), `updateStatusItem()` dengan state machine ketat (`MENUNGGU -> DIAMBIL -> DALAM_PERJALANAN -> DITERIMA | GAGAL`), gerbang `cekHakBayarAkhir()` saat `DITERIMA` (`KK-06`, update `DIAMBIL`, `diambil_pada` WIB, `BELUM_LUNAS`/`LUNAS`, `AuditLog('SERAH_TERIMA')`), `syncStatusPengantaran()`, `jadwalkanUlang()` independen (`KK-07` dengan isolasi mutlak item lain + Anti-Double-Reschedule Guard), serta query helper bebas N+1 (`paginatePengantaran`, `getStatusCounts` terisolasi per kurir untuk `PENGANTAR`, `getKurirOptions`, `getEligibleTransaksiOptions`, `formatPengantaranDetail`, `formatItemDetail`).
+  - Memperbarui `TransaksiService`: eager-load `'itemPengantaran'` (urut `id_item_antar`) + `'itemPengantaran.pengantaran.petugasPengantaran'` di `detailRelations()` serta menambahkan `bisa_pelunasan`, `bisa_serah_terima_loket`, `sedang_diantar_kurir`, `pengantaran_aktif`, dan `riwayat_pengantaran` pada `formatTransaksiDetail()`.
+  - Menambahkan `ChecksPengantarRole`, `PengantaranPolicy` (terdaftar di `AppServiceProvider`), `AuthorizesPengantarRequest`, FormRequest (`StorePengantaranRequest`, `UpdateItemPengantaranStatusRequest`, `JadwalkanUlangRequest` dengan pengecekan kepemilikan kurir dan normalisasi input), `PengantaranController` (redirect sukses ke `pengantaran.show` sesi baru & error ke `pengantaran.index` / `pengantaran.show` sesi asal), dan mendaftarkan 6 route `/pengantaran*` di `routes/web.php` (`/pengantaran/item/*` sebelum `/pengantaran/{pengantaran}` dengan `whereNumber`).
+  - Menulis dan menjalankan TDD unit & feature test (`tests/Unit/PengantaranServiceTest.php`, `tests/Feature/PengantaranOperationTest.php`, dan `tests/Unit/DecimalMoneyTest.php`) mencakup seluruh `AC-P3-01` s.d. `AC-P3-05`, proteksi N+1 (`<= 18` queries), `SqlLike`, `403`/`404`/`422`, serta kepatuhan larangan menyentuh `resources/js/`, `resources/css/`, `Archive/`, maupun file eksklusif `P3-03`.
+- **File Dibuat / Diubah:**
+  - `app/Support/DecimalMoney.php` — Helper `formatRupiah()` berbasis integer cents
+  - `app/Services/SerahTerimaService.php` — Single source of truth `cekHakBayarAkhir(Transaksi $transaksi): array` (`KK-06`)
+  - `app/Services/PengantaranService.php` — Domain service pengantaran multi-pelanggan, state machine item, `syncStatusPengantaran()`, `jadwalkanUlang()` (`KK-07`), & query helper bebas N+1
+  - `app/Services/TransaksiService.php` — Eager-load `itemPengantaran` & field `TransaksiDetailPhase3Additions`
+  - `app/Policies/Concerns/ChecksPengantarRole.php`, `app/Policies/PengantaranPolicy.php`, `app/Providers/AppServiceProvider.php` — Otorisasi peran `PETUGAS` & kepemilikan kurir `PENGANTAR`
+  - `app/Http/Requests/Concerns/AuthorizesPengantarRequest.php`, `app/Http/Requests/Pengantaran/{StorePengantaranRequest,UpdateItemPengantaranStatusRequest,JadwalkanUlangRequest}.php` — Validasi & normalisasi payload
+  - `app/Http/Controllers/PengantaranController.php`, `routes/web.php` — Endpoint `pengantaran.{index,store,show,mulai,item.status,item.jadwalkan-ulang}`
+  - `tests/Unit/{DecimalMoneyTest,PengantaranServiceTest}.php`, `tests/Feature/PengantaranOperationTest.php` — Unit & feature test `AC-P3-01`..`AC-P3-05`
+  - `MEMORY.md`, `WRITE.md` — Update `[x] P3-02` dan Entry `#018`
+- **Verifikasi / Bukti Uji:**
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` (`exit code 0`)
+  - `npx tsc --noEmit` -> `0 errors` (`exit code 0`)
+  - `npm run build` -> Vite production build (`674 modules transformed`, `public/build/manifest.json`, `built in 1.92s`) (`exit code 0`)
+  - `php artisan test` -> `95 passed (3105 assertions)` pada MySQL 8.4 port `3307` (`cleanwash_testing`), termasuk `PengantaranServiceTest` & `PengantaranOperationTest` (`exit code 0`)
+  - `php artisan migrate --no-interaction && php artisan migrate:rollback --no-interaction && php artisan migrate --seed --no-interaction` -> 18 migrasi rollback & re-migrate + `CleanWashSeeder` bersih (`exit code 0`)
+  - `php artisan route:list --except-vendor` -> `Showing [38] routes` termasuk 6 route `/pengantaran*`; audit hygiene (`dd`/`dump`/`var_dump`/`bcmath`/`(float)`/`floatval`) -> `HYGIENE_CLEAN`.
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Pada `PengantaranSummary`, `item_selesai_count` menghitung item yang sudah berstatus terminal (`DITERIMA` atau `GAGAL`) pada sesi tersebut sehingga `item_selesai_count === total_item` saat `Pengantaran` berstatus `SELESAI`, sedangkan `item_gagal_count` menghitung item `GAGAL` secara terpisah.
+  - `PengantaranOperationTest.php` memakai `$this->withoutVite()` dan `shouldExist: false` sementara pada `Pengantaran/Index` dan `Pengantaran/Show` (`// Temporary shouldExist: false until P3-04 creates Pengantaran UI`); wajib dibersihkan pada `P3-05` setelah `P3-04` membuat komponen TSX-nya.
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  1. Lakukan cross-agent review & Squash Merge `feature/p3-02-pengantaran-service` ke `main` sesuai `napkin/PR_REVIEW_LIFECYCLE.md`.
+  2. Delegasikan **`P3-03`** ke `cw-backend-dev` pada branch `feature/p3-03-settlement-handover-audit` dari `main` untuk mengimplementasikan `PembayaranService::catatPelunasan()` + `updateStatusLunas()`, melengkapi `SerahTerimaService` (`ambilPakaian`, `serahkanPakaian` `KK-06` + penutupan item `MENUNGGU -> GAGAL` via `PengantaranService::syncStatusPengantaran()`), `AuditLogService`, `DashboardController` KPI Phase 3, `SerahTerimaController`/`PembayaranController`/`AuditController`, serta TDD tests (`AC-P3-06`..`AC-P3-09`).
+
+
 
 

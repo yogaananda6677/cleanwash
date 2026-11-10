@@ -274,4 +274,23 @@ final class DecimalMoney
     {
         return self::compare($left, $right) === 0;
     }
+
+    /**
+     * Format a decimal money string into Indonesian Rupiah (e.g. "Rp 12.500" or "Rp 12.500,50").
+     */
+    public static function formatRupiah(string $amount): string
+    {
+        $cents = self::toCents($amount);
+        $negative = $cents < 0 ? '-' : '';
+        $absCents = abs($cents);
+        $whole = intdiv($absCents, self::SCALE);
+        $fraction = $absCents % self::SCALE;
+
+        $wholeFormatted = number_format($whole, 0, ',', '.');
+        $formatted = $fraction === 0
+            ? "Rp {$wholeFormatted}"
+            : sprintf('Rp %s,%02d', $wholeFormatted, $fraction);
+
+        return $negative.$formatted;
+    }
 }

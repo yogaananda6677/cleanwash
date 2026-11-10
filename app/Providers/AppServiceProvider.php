@@ -5,12 +5,14 @@ namespace App\Providers;
 use App\Models\JenisLayanan;
 use App\Models\LaporanKerusakanKehilangan;
 use App\Models\Pelanggan;
+use App\Models\Pengantaran;
 use App\Models\RiwayatStatusProduksi;
 use App\Models\Transaksi;
 use App\Models\Voucher;
 use App\Policies\JenisLayananPolicy;
 use App\Policies\LaporanKerusakanPolicy;
 use App\Policies\PelangganPolicy;
+use App\Policies\PengantaranPolicy;
 use App\Policies\ProduksiPolicy;
 use App\Policies\TransaksiPolicy;
 use App\Policies\VoucherPolicy;
@@ -38,6 +40,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Transaksi::class, TransaksiPolicy::class);
         Gate::policy(RiwayatStatusProduksi::class, ProduksiPolicy::class);
         Gate::policy(LaporanKerusakanKehilangan::class, LaporanKerusakanPolicy::class);
+        Gate::policy(Pengantaran::class, PengantaranPolicy::class);
 
         Gate::define('produksi.viewAny', [ProduksiPolicy::class, 'viewAny']);
         Gate::define('produksi.timbangUlang', [ProduksiPolicy::class, 'timbangUlang']);
