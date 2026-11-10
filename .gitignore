@@ -1,0 +1,40 @@
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# PHP / Laravel
+/vendor/
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+/storage/*.key
+/storage/logs/*
+!/storage/logs/.gitignore
+/public/hot
+/public/build/
+.phpunit.result.cache
+auth.json
+
+# Node / Frontend / Vite
+/node_modules/
+/npm-debug.log
+/yarn-error.log
+dist/
+.vite/
+
+# IDE, OS & Office Lock Files
+.DS_Store
+Thumbs.db
+.~lock.*
+*.bak
+__pycache__/
+*.pyc
+.idea/
+.vscode/
+!.vscode/extensions.json
+
+# Read-only SRS Archive (233MB UTS documents & diagrams)
+/Archive/
+
