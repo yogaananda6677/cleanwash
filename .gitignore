@@ -31,6 +31,9 @@ database/*.sqlite
 /yarn-error.log
 dist/
 .vite/
+/playwright-report/
+/test-results/
+/blob-report/
 
 # IDE, OS & Office Lock Files
 .DS_Store

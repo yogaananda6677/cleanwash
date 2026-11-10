@@ -26,6 +26,10 @@ Dilarang mencatat log kronologis harian di file ini — **catat log aktivitas di
    Do instead: Panggil `$this->withoutVite()` pada feature test Inertia dan gunakan `$page->component('Nama/Halaman', shouldExist: false)` jika halaman React (`resources/js/Pages/...`) baru dibuat pada task FE berikutnya.
 7. **[2026-11-10] Test E2E tanpa `withoutVite()` gagal di CI jika `php artisan test` dijalankan sebelum `npm run build`**
    Do instead: Setelah seluruh halaman `.tsx` selesai dibuat, hapus parameter `shouldExist: false` agar `config('inertia.testing.ensure_pages_exist') === true` aktif penuh, serta pastikan `npx tsc --noEmit` dan `npm run build` dijalankan sebelum `php artisan test` (baik lokal maupun di `.github/workflows/ci.yml`) agar `public/build/manifest.json` selalu up-to-date.
+8. **[2026-11-10] Playwright strict-mode bentrok dengan `<details><pre>` AuditLog JSON, `<select><option>` hidden, `/nota` tanpa `AppLayout`, dan `waitForURL` pada URL pengantaran lama**
+   Do instead: Gunakan `{ exact: true }` atau container spesifik saat mengasesmen badge visible (`AuditLog` `<details>` dan `<option>` dapat cocok di DOM), kembali ke `/transaksi/{nota}` via tautan `← Kembali ke Detail` sebelum `logout()` dari halaman cetak `/nota`, dan gunakan predikat URL (`match[1] !== oldSessionId`) saat menunggu redirect sesudah reschedule `KK-07`.
+9. **[2026-11-10] Negative test HTTP `403`/`422` memicu native Chromium `console.error` (`Failed to load resource`) dan serah terima loket otomatis menggeser sesi kurir ke `BERJALAN`**
+   Do instead: Isolasi blok negative-test (`403`/`422`) memakai `RuntimeMonitor.runAllowingHttpStatuses(...)` sambil tetap memblokir `419`/`>=500`/JS error/`pageerror`, serta periksa transisi otomatis sesi kurir ke `BERJALAN` (`1 Item Gagal`) tanpa menunggu tombol `Mulai Pengantaran` ketika salah satu item `MENUNGGU` ditutup otomatis saat serah terima loket.
 
 ---
 

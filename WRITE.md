@@ -697,5 +697,47 @@
 - **Next Exact Action:**
   - Siap diserahterimakan / dijalankan langsung oleh pengguna atau reviewer pada environment MySQL 8.4 terisolasi (`cleanwash-mysql`, port `3307`).
 
+### [#023] 2026-11-10 21:16 — QA Engineer Subagent (`qa-engineer`) — Live Browser Playwright Regression Suite (`REG-00`–`REG-05`)
+- **Status:** `DONE` (`PASS` — `6 / 6` Live Browser Scenarios, `0` Blocker/Major/Functional Defects)
+- **Ringkasan Kegiatan:**
+  - Membangun dan mengeksekusi suite regresi Playwright TypeScript nyata melawan server live `http://127.0.0.1:8000` (`public/build/manifest.json` produksi aktif, tanpa `public/hot`) dan database MySQL 8.4 `cleanwash` (port `3307`, `cleanwash-mysql`) tanpa mocking pada cabang `feat/qa-subagent-playwright-regression`.
+  - Menguji seluruh **14 Use Case (`UC-01`–`UC-14`)** dan **9 Kondisi Khusus (`KK-01`–`KK-09`)** lintas peran (`Petugas`, `Pegawai`, `PetugasPengantaran`, serta Guest & RBAC cross-role negative checks) melalui 6 skenario serial berantai (`REG-00` s.d. `REG-05`), termasuk penangkapan **28 screenshot sekuensial (`01`–`28`)** dan verifikasi responsif viewport mobile `390×844` (`scrollWidth <= innerWidth` & drawer navigasi).
+  - Melakukan inspeksi visual langsung atas screenshot hasil eksekusi serta mengaudit runtime browser melalui `RuntimeMonitor` (`0` uncaught `pageerror`, `0` JS/React `console.error`, `0` HTTP `419`, `0` HTTP `>= 500`), menyusun laporan `docs/qa/QA_REGRESSION_REPORT.md`, dan memperbarui `.claude/napkin.md`.
+- **File Dibuat / Diubah:**
+  - `playwright.config.ts` — Konfigurasi Playwright `workers: 1`, `fullyParallel: false`, `1440×900`, `Asia/Jakarta`, `id-ID`, `baseURL: http://127.0.0.1:8000`
+  - `tests/e2e/helpers/qa-harness.ts` — Helper DB reset/seed (`CleanWashSeeder`), `RuntimeMonitor` (audit `console.error`, `pageerror`, HTTP `419`/`>=500`), login/logout UI, helper pembuatan transaksi, kemajuan tahap produksi, & tangkap screenshot
+  - `tests/e2e/regression-cleanwash.spec.ts` — Suite serial 6 skenario end-to-end (`REG-00` s.d. `REG-05`) mencakup seluruh `UC-01`–`UC-14` & `KK-01`–`KK-09` serta responsive viewport `390×844`
+  - `docs/qa/screenshots/01-login-invalid-password.png` .. `28-mobile-viewport-pengantaran.png` — 28 bukti tangkapan layar berurutan langkah bisnis
+  - `docs/qa/QA_REGRESSION_REPORT.md` — Laporan regresi QA, matriks cakupan `UC`/`KK`, daftar temuan, tabel bukti 28 screenshot, & verifikasi DB live akhir
+  - `.claude/napkin.md` — Menambahkan 2 catatan gotcha Playwright/Inertia (`AuditLog` `<pre>`/`<option>` strict mode, standalone `/nota`, & `waitForURL` reschedule)
+  - `WRITE.md` — Menambahkan Entry `#023`
+- **Verifikasi / Bukti Uji:**
+  - `npx playwright test --reporter=list` -> **`6 passed (1.3m)`** (`REG-00` `6.3s`, `REG-01` `17.9s`, `REG-02` `8.7s`, `REG-03` `8.6s`, `REG-04` `13.7s`, `REG-05` `14.9s`; `28` screenshot di `docs/qa/screenshots/`)
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` (`exit code 0`)
+  - `npx tsc --noEmit` -> `0 errors` (`exit code 0`)
+  - `php artisan test` -> **`114 passed (4149 assertions)`** (`39.51s`, `0` failed, `0` skipped)
+  - Verifikasi DB live `cleanwash` pasca-uji (`php artisan tinker`): voucher `REGRESI10K` berstatus `TERSEDIA` (`nominal: 10000.00`, berlaku s.d. `2027-01-09`), `9` transaksi (`CW-20261110-0001`..`0009`), `4` sesi pengantaran (`SELESAI`), `66` entri `audit_logs`, `4` pelanggan, `4` layanan.
+- **Keputusan / Blocker / Catatan Napkin:**
+  - `0` Blocker, `0` Major, `0` Functional Defects; source code aplikasi (`app/`, `database/`, `resources/js/`, `routes/`) dan `Archive/` tidak dimodifikasi sama sekali.
+  - 1 catatan observasi Minor non-blocking pada `01-login-invalid-password.png`: pesan validasi default Laravel `"These credentials do not match our records."` masih berbahasa Inggris pada form login berbahasa Indonesia (aman & mengembalikan `HTTP 422`).
+- **Next Exact Action:**
+  - Primary Agent meninjau hasil [QA_REGRESSION_REPORT.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/qa/QA_REGRESSION_REPORT.md), menimbang terjemahan opsional `lang/en/auth.php` (`failed`) jika diinginkan pada backlog polish, lalu melakukan review/merge cabang `feat/qa-subagent-playwright-regression` ke `main`.
 
+### [#024] 2026-11-10 21:20 — Primary Agent (`Cross-Review & Merge QA Regression`) — Continuous QA
+- **Status:** `DONE` (`APPROVED` & Squash-Merged ke `main`)
+- **Ringkasan Kegiatan:**
+  - Meninjau hasil implementasi `qa-engineer` (`playwright.config.ts`, `tests/e2e/helpers/qa-harness.ts`, `tests/e2e/regression-cleanwash.spec.ts`, `docs/qa/QA_REGRESSION_REPORT.md`), memverifikasi langsung gambar tangkapan layar (`01`, `05`, `09`, `11`, `14`, `16`, `17`, `22`, `24`, `25`, `27`, `28`) via `view_file`, serta memastikan 0 defect blocker/major dan `0` perubahan pada kode produksi (`app/`, `database/`, `resources/js/`, `routes/`).
+  - Memperbarui `MEMORY.md` (`ADR-008` menjadi 5 subagent, menambahkan `ADR-011` untuk suite regresi Playwright live browser, serta baris status `Live Browser QA -> DONE`), menyalin 28 tangkapan layar ke direktori artifact untuk laporan user-facing (`qa_regression_report.md`), melakukan **Squash & Merge** cabang `feat/qa-subagent-playwright-regression` ke `main`, lalu memverifikasi ulang seluruh suite pada `main` sambil menjaga server live `http://127.0.0.1:8000` tetap berjalan untuk pemeriksaan pengguna.
+- **File Dibuat / Diubah:**
+  - `.agents/agents/qa-engineer.md`, `.claude/agents/qa-engineer.md` — Spesifikasi permanen subagent `qa-engineer`
+  - `AGENTS.md`, `CLAUDE.md` — Pendaftaran `qa-engineer` sebagai subagent ke-5
+  - `package.json`, `package-lock.json`, `.gitignore` — `@playwright/test`, skrip `test:e2e`/`test:e2e:headed`, ignore `/playwright-report/`, `/test-results/`, `/blob-report/`
+  - `playwright.config.ts`, `tests/e2e/*`, `docs/qa/QA_REGRESSION_REPORT.md`, `docs/qa/screenshots/*.png` — Suite E2E & laporan 28 screenshot
+  - `MEMORY.md`, `WRITE.md` — `ADR-011`, status `Live Browser QA -> DONE`, & Entry `#024`
+- **Verifikasi / Bukti Uji:**
+  - Dijalankan ulang bersih pada `main`: `./vendor/bin/pint --test`, `npx tsc --noEmit`, `npm run build`, `php artisan test` (`114 passed, 4149 assertions`), `npx playwright test --reporter=list` (`6 passed`), `curl http://127.0.0.1:8000/login` (`200`), serta `git status --short` bersih.
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Server live `http://127.0.0.1:8000` dan MySQL `3307` (`cleanwash`) tetap dibiarkan aktif dengan data hasil skenario QA (`CW-20261110-0001`..`0009`, voucher `REGRESI10K` `TERSEDIA`) agar pengguna bisa langsung mengecek di browser.
+- **Next Exact Action:**
+  - Selesai; siap menindaklanjuti masukan pengguna atau menerjemahkan pesan `auth.failed` ke bahasa Indonesia bila diminta.
 
