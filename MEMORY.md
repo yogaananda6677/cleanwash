@@ -13,9 +13,9 @@ Dokumen ini adalah memori status arsitektur proyek **CleanWash** untuk manusia d
 | **Product** | CleanWash — Sistem Informasi Manajemen Operasional Laundry |
 | **SRS Reference** | [UTS.pdf](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/Outputtts/UTS.pdf) & [2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx) |
 | **Current Phase** | Phase 1 — Fondasi Sistem, Master Data & Penerimaan Transaksi |
-| **Current Status** | `IN_PROGRESS` (Phase 1 dimulai: `P1-01` kontrak & AC dikunci di `docs/phases/PHASE_1_CONTRACTS.md`) |
+| **Current Status** | `IN_PROGRESS` (`P1-01` & `P1-02` selesai; siap masuk `P1-03` Full Schema, Seeder, Auth & RBAC) |
 | **Last Updated** | 2026-11-10 |
-| **Updated By** | Product Manager (`product-manager`) + Primary Agent — P1-01 Scoping & Contracts |
+| **Updated By** | Fullstack Developer (`cw-fullstack-dev`) — P1-02 Project Scaffolding & CI |
 
 ---
 
@@ -53,6 +53,7 @@ Membangun sistem informasi operasional laundry **CleanWash** berbasis web (**Lar
 | **ADR-007** | **Arsitektur Memori 3 Lapis (`WRITE.md` + `MEMORY.md` + `.claude/napkin.md`)** | ACCEPTED | Mengatasi celah `napkin.md` yang bukan log kronologis sehingga tidak ada kehilangan konteks antar sesi dan antar subagent. |
 | **ADR-008** | **Orkestrasi 4 Subagent Terspesialisasi (`.agents/agents/*.md`)** | ACCEPTED | Memisahkan tanggung jawab `product-manager`, `backend-developer`, `frontend-developer`, dan `fullstack-developer` beserta *cross-agent review gate*. |
 | **ADR-009** | **6 Gerbang Kualitas Adaptasi `napkin/PR_REVIEW_LIFECYCLE.md`** | ACCEPTED | Menggantikan gate Golang/Flutter dari acuan `PTT_app` menjadi gate Laravel Pint, TypeScript, PHPUnit/Pest, MySQL rollback, dan wajib isi `WRITE.md`. |
+| **ADR-010** | **`App\Support\DecimalMoney` (skala 100 integer) & MySQL `3307` Terisolasi** | ACCEPTED | Runtime PHP 8.4 lokal tidak memiliki `ext-bcmath` maupun `ext-pdo_sqlite`, serta port `3306` dipakai proyek lain; seluruh aritmatika uang memakai integer skala 100 dan DB dev/test terisolasi di MySQL 8.4 port `3307`. |
 
 ---
 
@@ -63,7 +64,7 @@ Status yang diizinkan: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 | Phase | Scope | Status | Started | Completed | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | **Phase 0 (Docs)** | PRD, AGENTS.md, 4 Subagent, Napkin & Context Ledger | `DONE` | 2026-11-10 | 2026-11-10 | [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#001` |
-| **Phase 1** | Fondasi Sistem, Master Data & Penerimaan Transaksi (DP & Voucher) | `IN_PROGRESS` | 2026-11-10 | — | [PHASE_1_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_1_CONTRACTS.md) & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#002` |
+| **Phase 1** | Fondasi Sistem, Master Data & Penerimaan Transaksi (DP & Voucher) | `IN_PROGRESS` | 2026-11-10 | — | [PHASE_1_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_1_CONTRACTS.md) & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#002`, `#003` |
 | **Phase 2** | Operasional Produksi, Timbang Ulang, Ubah/Batal & Kompensasi Insiden | `NOT_STARTED` | — | — | Menunggu Phase 1 `DONE` |
 | **Phase 3** | Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening | `NOT_STARTED` | — | — | Menunggu Phase 2 `DONE` |
 
@@ -73,7 +74,7 @@ Status yang diizinkan: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 
 ### Phase 1 — Fondasi Sistem, Master Data & Penerimaan Transaksi (DP & Voucher)
 - [x] `P1-01` (`product-manager`): Breakdown task detail & kontrak payload Inertia/Request Phase 1 ([PHASE_1_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_1_CONTRACTS.md)).
-- [ ] `P1-02` (`fullstack-developer`): Scaffolding Laravel 12 + MySQL 8.4 + Inertia React TS + Tailwind + CI Workflow.
+- [x] `P1-02` (`fullstack-developer`): Scaffolding Laravel 12 + MySQL 8.4 + Inertia React TS + Tailwind + CI Workflow.
 - [ ] `P1-03` (`backend-developer`): Migrasi seluruh tabel MySQL 8.4, seeder aktor/role (`Petugas`, `Pegawai`, `PetugasPengantaran`), Auth & RBAC Policy.
 - [ ] `P1-04` (`backend-developer`): CRUD Master `Pelanggan` (`boleh_bayar_akhir`), `JenisLayanan` + `TahapLayanan`, dan `Voucher`.
 - [ ] `P1-05` (`backend-developer`): Engine Penerimaan `Transaksi` + `DetailPakaian`, `harga_satuan_snapshot` (`KK-09`), validasi/lock atomik `Voucher` (`KK-03`), DP `Pembayaran`, & automated tests.

@@ -20,6 +20,8 @@ Dilarang mencatat log kronologis harian di file ini — **catat log aktivitas di
    Do instead: Uji setiap migrasi baru dengan `php artisan migrate && php artisan migrate:rollback && php artisan migrate` secara berurutan pada database testing MySQL 8.4 sebelum commit.
 4. **[2026-11-10] PHP 8.4 lokal tidak memiliki ekstensi `pdo_sqlite` sehingga PHPUnit default SQLite `:memory:` gagal**
    Do instead: Selalu konfigurasi `phpunit.xml` dan `.env.testing` memakai MySQL 8.4 terisolasi pada port `3307` (port `3306` dipakai container proyek lain), bukan SQLite `:memory:`.
+5. **[2026-11-10] `inertiajs/inertia-laravel` v3 default `pages.paths` mencari `resources/js/pages` (huruf kecil) sehingga `assertInertia()` gagal di Linux**
+   Do instead: Publish `config/inertia.php`, ubah `'paths' => [resource_path('js/Pages')]`, dan atur `INERTIA_SSR_ENABLED` default `false` untuk mode CSR Vite.
 
 ---
 
@@ -30,6 +32,10 @@ Dilarang mencatat log kronologis harian di file ini — **catat log aktivitas di
    Do instead: Selalu bekerja pada branch fitur (`feature/<task-id>-<slug>` atau `fix/<task-id>-<slug>`) dari `main`, dan pastikan `.env`, `vendor/`, `node_modules/`, serta file `.~lock.*` masuk ke `.gitignore`.
 3. **[2026-11-10] Menjalankan skrip atau artisan dari direktori yang salah**
    Do instead: Verifikasi working directory berada di root proyek `/home/yoga/Data/Kuliah/Sistem Informasi` sebelum menjalankan `php artisan`, `composer`, atau `npm`.
+4. **[2026-11-10] `composer create-project laravel/laravel` tanpa constraint versi menginstal Laravel 13 (`^13.17`)**
+   Do instead: Kunci eksplisit `"laravel/laravel:^12.0"` saat membuat skeleton baru agar tetap pada baseline Laravel 12.
+5. **[2026-11-10] `@vitejs/plugin-react` terbaru (`^6.x`) mensyaratkan Vite 8 dan bentrok dengan Vite 7 bawaan Laravel 12**
+   Do instead: Pasang `"@vitejs/plugin-react": "^5.2.0"` yang mendukung Vite 7, serta beri tipe generik `<ResolvedComponent>` pada `import.meta.glob` dan `resolvePageComponent` agar lolos `tsc --strict`.
 
 ---
 

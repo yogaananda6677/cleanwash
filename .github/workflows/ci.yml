@@ -1,0 +1,84 @@
+name: CleanWash CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+      - 'fix/**'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  quality-gate:
+    name: Laravel Pint, PHPUnit (MySQL 8.4), TypeScript & Vite Build
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: cleanwash_root_secret
+          MYSQL_DATABASE: cleanwash_testing
+          MYSQL_USER: cleanwash
+          MYSQL_PASSWORD: cleanwash_secret
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u cleanwash -pcleanwash_secret --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4 (without bcmath or pdo_sqlite)
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_mysql, xml, ctype, json, openssl, tokenizer, fileinfo
+          coverage: none
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --no-interaction
+
+      - name: Run Laravel Pint check
+        run: ./vendor/bin/pint --test
+
+      - name: Verify database migrations and rollback on MySQL 8.4
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3307
+          DB_DATABASE: cleanwash_testing
+          DB_USERNAME: cleanwash
+          DB_PASSWORD: cleanwash_secret
+        run: |
+          php artisan migrate --force --no-interaction
+          php artisan migrate:rollback --force --no-interaction
+
+      - name: Run PHPUnit test suite
+        run: php artisan test
+
+      - name: Run TypeScript type check
+        run: npx tsc --noEmit
+
+      - name: Build production frontend assets
+        run: npm run build

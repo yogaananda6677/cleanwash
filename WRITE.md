@@ -81,3 +81,34 @@
   - Aritmatika keuangan PHP dikunci memakai integer skala 100 (`App\Support\DecimalMoney`) tanpa `ext-bcmath`, dan test DB memakai MySQL 8.4 port `3307` tanpa `ext-pdo_sqlite`.
 - **Next Exact Action:**
   - Delegasikan **`P1-02`** ke subagent fullstack (`cw-fullstack-dev` dengan `enable_write_tools=true`) pada branch `feature/p1-02-scaffolding` dari `main` untuk inisialisasi proyek Laravel 12 + MySQL 8.4 (`3307`) + `App\Support\DecimalMoney` + Inertia React TS + Pint + CI workflow.
+
+### [#003] 2026-11-10 13:10 — Fullstack Developer (`cw-fullstack-dev`) — Phase 1 (`P1-02`)
+- **Status:** `READY_FOR_REVIEW`
+- **Ringkasan Kegiatan:**
+  - Melakukan Context Sync (`PRD.md`, `AGENTS.md`, `MEMORY.md`, `WRITE.md`, `.claude/napkin.md`, `napkin/PR_REVIEW_LIFECYCLE.md`, `docs/phases/PHASE_1_CONTRACTS.md`) dan membuat branch `feature/p1-02-scaffolding` dari `main`.
+  - Melakukan scaffolding **Laravel 12** (`laravel/laravel:^12.0` -> `laravel/framework v12.71.0`) secara non-destruktif melalui `/tmp/cleanwash_scaffold` tanpa menimpa dokumen governance, arsip `Archive/`, maupun `.git/`, serta menggabungkan `.gitignore` dan menghapus folder sementara.
+  - Menyiapkan container MySQL 8.4 terisolasi (`cleanwash-mysql` via `docker-compose.yml` + `docker/mysql/init.sql`) pada `127.0.0.1:3307:3306` (tanpa menyentuh `pesenhub-mysql-1` di port `3306`), membuat database `cleanwash` dan `cleanwash_testing`, mengonfigurasi `.env.example`, `.env`, `.env.testing` (ter-ignore), `phpunit.xml`, `config/database.php`, dan timezone `Asia/Jakarta` di `config/app.php`.
+  - Memasang `inertiajs/inertia-laravel` (`v3.7.0`), `react`, `react-dom`, `@inertiajs/react` (`3.11.0`), `typescript`, `@types/react`, `@types/react-dom`, dan `@vitejs/plugin-react` (`^5.2.0` kompatibel Vite 7), mengonfigurasi `HandleInertiaRequests`, `bootstrap/app.php`, `config/inertia.php` (`resources/js/Pages`), `tsconfig.json` (`strict: true`), `vite.config.js`, `resources/css/app.css` (Tailwind v4), `resources/views/app.blade.php`, `resources/js/app.tsx`, `resources/js/types/index.ts`, halaman smoke `resources/js/Pages/Welcome.tsx`, `pint.json` (`laravel` preset), dan `.github/workflows/ci.yml`.
+  - Mengimplementasikan `App\Support\DecimalMoney` berbasis integer skala 100 (tanpa `ext-bcmath` dan tanpa `float`) beserta unit tests `tests/Unit/DecimalMoneyTest.php` dengan alur TDD (Red -> Green), serta memperbarui `tests/Feature/ExampleTest.php` untuk memverifikasi Inertia `Welcome`, timezone `Asia/Jakarta`, dan koneksi MySQL 8.4 port `3307` (`cleanwash_testing`).
+- **File Dibuat / Diubah:**
+  - `docker-compose.yml`, `docker/mysql/init.sql` — Container MySQL 8.4 terisolasi port `3307` (`cleanwash` & `cleanwash_testing`)
+  - `.gitignore`, `.env.example`, `phpunit.xml`, `config/app.php`, `config/database.php`, `config/inertia.php` — Konfigurasi environment MySQL `3307`, timezone `Asia/Jakarta`, dan path Inertia `resources/js/Pages`
+  - `bootstrap/app.php`, `app/Http/Middleware/HandleInertiaRequests.php`, `routes/web.php` — Registrasi middleware Inertia & shared props (`auth.user`, `flash`)
+  - `composer.json`, `composer.lock`, `package.json`, `package-lock.json`, `vite.config.js`, `tsconfig.json`, `pint.json`, `.github/workflows/ci.yml` — Dependensi Laravel 12 + Inertia React TS, formatter Pint, dan CI GitHub Actions
+  - `resources/css/app.css`, `resources/views/app.blade.php`, `resources/js/app.tsx`, `resources/js/types/index.ts`, `resources/js/Pages/Welcome.tsx` — Entrypoint frontend Inertia React TypeScript strict & halaman smoke
+  - `app/Support/DecimalMoney.php`, `tests/Unit/DecimalMoneyTest.php`, `tests/Feature/ExampleTest.php` — Helper aritmatika uang integer-scaled & test suite awal
+  - `MEMORY.md`, `.claude/napkin.md`, `WRITE.md` — Update status `P1-02`, ADR-010, dan gotcha runtime baru
+- **Verifikasi / Bukti Uji:**
+  - `docker compose up -d --wait` -> `cleanwash-mysql` (`mysql:8.4`) `Healthy` pada `127.0.0.1:3307->3306/tcp` -> `exit code 0`
+  - `php artisan migrate:fresh --no-interaction` -> 3 migrasi default sukses pada `cleanwash` (`3307`) -> `exit code 0`
+  - `php artisan migrate:rollback --no-interaction && php artisan migrate --no-interaction` -> rollback & migrate ulang bersih -> `exit code 0`
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` -> `exit code 0`
+  - `npx tsc --noEmit` -> 0 error (`strict: true`) -> `exit code 0`
+  - `php artisan test` -> `9 passed (63 assertions)` (6 `DecimalMoneyTest`, 1 `Unit\ExampleTest`, 2 `Feature\ExampleTest` di `cleanwash_testing` port `3307`) -> `exit code 0`
+  - `npm run build` -> Vite production build (`654 modules transformed`, `public/build/manifest.json`) -> `exit code 0`
+  - `git status` -> tidak ada `.env`, `.env.testing`, `vendor/`, `node_modules/`, `public/build/`, maupun `Archive/` yang ikut ter-stage.
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Dicatat ADR-010 di `MEMORY.md` dan 3 gotcha baru di `.claude/napkin.md` (`laravel/laravel:^12.0`, `inertia.php` `resources/js/Pages` pada v3, dan `@vitejs/plugin-react@^5.2.0` untuk Vite 7).
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  - Setelah review/merge `feature/p1-02-scaffolding` ke `main`, delegasikan **`P1-03`** ke subagent backend (`cw-backend-dev` dengan `enable_write_tools=true`) pada branch `feature/p1-03-schema-auth` dari `main` untuk membuat migrasi penuh seluruh 16 tabel domain Phase 1–3 (`DECIMAL(12,2)` di MySQL `3307`), seeder aktor (`Petugas`, `Pegawai`, `PetugasPengantaran`), Eloquent Models, Auth (`/login`, `/logout`, `/dashboard`), middleware RBAC `role:...`, dan feature tests + uji `migrate && migrate:rollback`.

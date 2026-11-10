@@ -2,6 +2,8 @@
 .env
 .env.*
 !.env.example
+.env.backup
+.env.production
 *.key
 *.pem
 
@@ -12,10 +14,16 @@
 /storage/*.key
 /storage/logs/*
 !/storage/logs/.gitignore
+/storage/pail
 /public/hot
 /public/build/
+/public/storage
+/.phpunit.cache
 .phpunit.result.cache
+.phpactor.json
 auth.json
+*.log
+database/*.sqlite
 
 # Node / Frontend / Vite
 /node_modules/
@@ -31,10 +39,12 @@ Thumbs.db
 *.bak
 __pycache__/
 *.pyc
-.idea/
-.vscode/
-!.vscode/extensions.json
+/.fleet
+/.idea/
+/.nova
+/.vscode/
+!/.vscode/extensions.json
+/.zed
 
 # Read-only SRS Archive (233MB UTS documents & diagrams)
 /Archive/
-
