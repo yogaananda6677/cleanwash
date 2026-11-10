@@ -22,6 +22,8 @@ Dilarang mencatat log kronologis harian di file ini — **catat log aktivitas di
    Do instead: Selalu konfigurasi `phpunit.xml` dan `.env.testing` memakai MySQL 8.4 terisolasi pada port `3307` (port `3306` dipakai container proyek lain), bukan SQLite `:memory:`.
 5. **[2026-11-10] `inertiajs/inertia-laravel` v3 default `pages.paths` mencari `resources/js/pages` (huruf kecil) sehingga `assertInertia()` gagal di Linux**
    Do instead: Publish `config/inertia.php`, ubah `'paths' => [resource_path('js/Pages')]`, dan atur `INERTIA_SSR_ENABLED` default `false` untuk mode CSR Vite.
+6. **[2026-11-10] `assertInertia()` atau `@vite` gagal pada test backend ketika TSX belum dibuat atau manifest Vite belum di-build di CI**
+   Do instead: Panggil `$this->withoutVite()` pada feature test Inertia dan gunakan `$page->component('Nama/Halaman', shouldExist: false)` jika halaman React (`resources/js/Pages/...`) baru dibuat pada task FE berikutnya.
 
 ---
 

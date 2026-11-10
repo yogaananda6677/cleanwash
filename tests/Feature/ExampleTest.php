@@ -11,16 +11,17 @@ class ExampleTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_the_application_returns_a_successful_inertia_welcome_response(): void
+    public function test_the_application_redirects_guests_to_login_and_shares_inertia_props(): void
     {
         $this->withoutVite();
 
-        $response = $this->get('/');
+        $this->get('/')->assertRedirect('/login');
+
+        $response = $this->get('/login');
 
         $response->assertStatus(200);
         $response->assertInertia(fn (Assert $page) => $page
-            ->component('Welcome')
-            ->where('appName', 'CleanWash')
+            ->component('Auth/Login', shouldExist: false)
             ->where('auth.user', null)
             ->has('flash')
         );

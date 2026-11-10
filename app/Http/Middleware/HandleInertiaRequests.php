@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\UserRole;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -44,9 +45,9 @@ class HandleInertiaRequests extends Middleware
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'role' => $user->getAttribute('role'),
-                    'is_active' => (bool) ($user->getAttribute('is_active') ?? true),
-                    'actor_id' => null,
+                    'role' => $user->role instanceof UserRole ? $user->role->value : $user->role,
+                    'is_active' => (bool) $user->is_active,
+                    'actor_id' => $user->actorId(),
                 ] : null,
             ],
             'flash' => [

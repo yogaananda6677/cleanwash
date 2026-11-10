@@ -112,3 +112,36 @@
   - Tidak ada blocker.
 - **Next Exact Action:**
   - Setelah review/merge `feature/p1-02-scaffolding` ke `main`, delegasikan **`P1-03`** ke subagent backend (`cw-backend-dev` dengan `enable_write_tools=true`) pada branch `feature/p1-03-schema-auth` dari `main` untuk membuat migrasi penuh seluruh 16 tabel domain Phase 1–3 (`DECIMAL(12,2)` di MySQL `3307`), seeder aktor (`Petugas`, `Pegawai`, `PetugasPengantaran`), Eloquent Models, Auth (`/login`, `/logout`, `/dashboard`), middleware RBAC `role:...`, dan feature tests + uji `migrate && migrate:rollback`.
+
+### [#004] 2026-11-10 13:30 — Backend Developer (`cw-backend-dev`) — Phase 1 (`P1-03`)
+- **Status:** `READY_FOR_REVIEW`
+- **Ringkasan Kegiatan:**
+  - Melakukan Context Sync (`PRD.md`, `AGENTS.md`, `MEMORY.md`, `WRITE.md` `#001`–`#003`, `.claude/napkin.md`, `napkin/PR_REVIEW_LIFECYCLE.md`, `docs/phases/PHASE_1_CONTRACTS.md`) dan membuat branch `feature/p1-03-schema-auth` dari `main`.
+  - Menerapkan TDD (Red $\rightarrow$ Green $\rightarrow$ Refactor) dengan menulis test skema/relasi/seeder (`tests/Unit/DomainSchemaRelationsTest.php`) dan feature test Auth/RBAC (`tests/Feature/AuthAndRbacTest.php`) terlebih dahulu sebelum implementasi.
+  - Memperbarui migrasi `users` (`role` indexed, `is_active` default `true`, drop order `down()` aman) serta membuat 15 migrasi tabel domain Phase 1–3 (`petugas`, `pegawai`, `petugas_pengantaran`, `pelanggan`, `jenis_layanan`, `tahap_layanan`, `voucher`, `transaksi`, `detail_pakaian`, `pembayaran`, `riwayat_status_produksi`, `laporan_kerusakan_kehilangan`, `pengantaran`, `item_pengantaran`, `audit_logs`) menggunakan engine `InnoDB`, `DECIMAL(12,2)` untuk seluruh nominal uang, `DECIMAL(8,2)` untuk kuantitas/berat, FK constraint ketat, dan `down()` rollback bersih.
+  - Membuat 12 PHP 8.4 backed string Enums di `app/Enums/` (+ trait `HasValues` dan `TahapProduksi::canonicalSequence()`), memperbarui `User` + `UserFactory`, serta membuat 15 Eloquent Models lainnya lengkap dengan `$table` singular, `$primaryKey`, `$incrementing = false` & `$keyType = 'string'` (`Transaksi`, `Voucher`), `$fillable`, `$casts` (`decimal:2` via `Brick\Math\BigDecimal` tanpa `bcmath` maupun `float`), dan relasi `hasOne`/`hasMany`/`belongsTo`/`belongsToMany`.
+  - Membuat `CleanWashSeeder` idempoten (3 staf aktif + profil `Petugas`, `Pegawai`, `PetugasPengantaran` dengan email `@cleanwash.local`, sampel `Pelanggan` reguler & `boleh_bayar_akhir=true`, `JenisLayanan` `Cuci Setrika` & `Cuci Sepatu` `perlu_setrika=false` tanpa tahap `DISETRIKA`, dan `Voucher` awal) serta menghubungkannya ke `DatabaseSeeder`.
+  - Mengimplementasikan `EnsureUserHasRole` (alias `'role'` di `bootstrap/app.php`, HTTP `403` untuk role tidak sesuai atau `is_active = false`), memperbarui `HandleInertiaRequests` (`auth.user` mengirim `{ id, name, email, role, is_active, actor_id }`), `LoginRequest`, `AuthController` (`showLogin`, `login`, `logout`), `DashboardController` (ringkasan role-specific aman), dan `routes/web.php` (`/` redirect `/dashboard` atau `/login`, `/login`, `/logout`, `/dashboard`).
+  - Memastikan `resources/js/` dan `resources/css/` tidak disentuh sama sekali.
+- **File Dibuat / Diubah:**
+  - `database/migrations/0001_01_01_000000_create_users_table.php` & `2026_11_10_000001` s.d. `2026_11_10_000015` — Skema penuh 16 tabel domain CleanWash MySQL 8.4
+  - `app/Enums/Concerns/HasValues.php`, `UserRole.php`, `TingkatKecepatan.php`, `MetodeHitung.php`, `SatuanLayanan.php`, `TahapProduksi.php`, `VoucherStatus.php`, `StatusPembayaran.php`, `StatusTransaksi.php`, `JenisBayar.php`, `JenisInsiden.php`, `StatusPengantaran.php`, `StatusItemPengantaran.php` — 12 Enum domain PHP 8.4 + trait helper
+  - `app/Models/{User,Petugas,Pegawai,PetugasPengantaran,Pelanggan,JenisLayanan,TahapLayanan,Voucher,Transaksi,DetailPakaian,Pembayaran,RiwayatStatusProduksi,LaporanKerusakanKehilangan,Pengantaran,ItemPengantaran,AuditLog}.php` — 16 Eloquent Models lengkap relasi & casts
+  - `database/factories/UserFactory.php`, `database/seeders/CleanWashSeeder.php`, `database/seeders/DatabaseSeeder.php` — Factory states peran & seeder idempoten
+  - `app/Http/Middleware/EnsureUserHasRole.php`, `app/Http/Middleware/HandleInertiaRequests.php`, `bootstrap/app.php` — Middleware RBAC `role:...`, shared Inertia props (`actor_id`), dan redirect auth/guest
+  - `app/Http/Requests/Auth/LoginRequest.php`, `app/Http/Controllers/Auth/AuthController.php`, `app/Http/Controllers/DashboardController.php`, `routes/web.php` — Endpoint Auth, Logout, dan Dashboard per peran
+  - `tests/Unit/DomainSchemaRelationsTest.php`, `tests/Feature/AuthAndRbacTest.php`, `tests/Feature/ExampleTest.php` — Automated tests untuk skema, presisi `DECIMAL`, relasi, seeder, login, akun nonaktif `422`, dan RBAC `403`
+  - `MEMORY.md`, `.claude/napkin.md`, `WRITE.md` — Update status `[x] P1-03`, gotcha test Inertia/CI, dan Entry `#004`
+- **Verifikasi / Bukti Uji:**
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` (`exit code 0`)
+  - `php artisan test` -> `19 passed (364 assertions)` pada MySQL 8.4 port `3307` (`cleanwash_testing`) (`exit code 0`)
+  - `php artisan migrate:fresh --seed --no-interaction` -> 18 file migrasi + `CleanWashSeeder` sukses (`exit code 0`)
+  - `php artisan migrate:rollback --no-interaction && php artisan migrate --seed --no-interaction` -> rollback 18 migrasi dengan data seed terisi & migrasi ulang + seed bersih (`exit code 0`)
+  - `npx tsc --noEmit && npm run build` -> 0 error TS, Vite production build (`654 modules transformed`) (`exit code 0`)
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Dikonfirmasi Eloquent cast `'decimal:2'` pada Laravel 12 memakai `Brick\Math\BigDecimal` tanpa memerlukan `ext-bcmath` atau `float`, tetap sinkron dengan `App\Support\DecimalMoney` untuk aritmatika bisnis.
+  - Ditambahkan gotcha #6 di `.claude/napkin.md` mengenai pemakaian `$this->withoutVite()` dan `shouldExist: false` pada `assertInertia()` sebelum halaman TSX `P1-06` dibuat.
+  - Tidak ada blocker.
+- **Next Exact Action:**
+  1. Setelah review & merge `feature/p1-03-schema-auth` ke `main`, delegasikan **`P1-04`** ke `backend-developer` pada branch `feature/p1-04-master-crud` untuk membangun `PelangganService`/`Controller`/`Policy`, `JenisLayananService`/`Controller` (sinkronisasi `TahapLayanan`), dan `VoucherService::cekValiditasPreview()` + `VoucherController` (`POST /voucher/validate`) beserta automated tests (`AC-P1-04` s.d. `AC-P1-06`).
+  2. Secara paralel setelah `P1-03` di-merge, **`P1-06`** (`frontend-developer`) dapat mulai membangun `resources/js/types/` sinkron dengan `PHASE_1_CONTRACTS.md` §3, `AppLayout` per peran, `Auth/Login.tsx`, dan `Dashboard/Index.tsx`, lalu terintegrasi dengan `P1-04` & `P1-05`.
