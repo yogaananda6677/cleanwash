@@ -1,6 +1,8 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { useState, type FormEvent } from 'react';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { useId, useState, type FormEvent } from 'react';
 import EmptyState from '@/Components/EmptyState';
+import FilterToolbar from '@/Components/FilterToolbar';
 import Modal from '@/Components/Modal';
 import Pagination from '@/Components/Pagination';
 import { PayLaterBadge } from '@/Components/StatusBadge';
@@ -11,6 +13,7 @@ export default function PelangganIndex({
     pelanggan,
     filters,
 }: PelangganIndexProps) {
+    const tableCaptionId = useId();
     const [search, setSearch] = useState(filters.search ?? '');
     const [formModalOpen, setFormModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<PelangganItem | null>(null);
@@ -119,53 +122,31 @@ export default function PelangganIndex({
                 <button
                     type="button"
                     onClick={openCreateModal}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-sky-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-sky-700"
+                    className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
                 >
-                    + Tambah Pelanggan
+                    <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    <span>
+                        <span className="sr-only">+ </span>Tambah Pelanggan
+                    </span>
                 </button>
             }
         >
             <Head title="Master Pelanggan" />
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:p-5">
-                <form
-                    onSubmit={handleSearchSubmit}
-                    className="flex flex-col gap-3 sm:flex-row sm:items-center"
-                >
-                    <div className="relative flex-1">
-                        <label htmlFor="search-pelanggan" className="sr-only">
-                            Cari pelanggan
-                        </label>
-                        <input
-                            id="search-pelanggan"
-                            type="text"
-                            value={search}
-                            onChange={(event) => setSearch(event.target.value)}
-                            placeholder="Cari nama atau nomor telepon pelanggan..."
-                            className="block w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                        />
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button
-                            type="submit"
-                            className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
-                        >
-                            Cari
-                        </button>
-                        {filters.search !== '' && (
-                            <button
-                                type="button"
-                                onClick={handleResetSearch}
-                                className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-                            >
-                                Reset
-                            </button>
-                        )}
-                    </div>
-                </form>
-            </section>
+            <FilterToolbar
+                ariaLabel="Cari data pelanggan"
+                onSubmit={handleSearchSubmit}
+                searchValue={search}
+                onSearchChange={setSearch}
+                searchId="search-pelanggan"
+                searchLabel="Cari pelanggan"
+                searchPlaceholder="Cari nama atau nomor telepon pelanggan..."
+                submitLabel="Cari"
+                onReset={handleResetSearch}
+                hasActiveFilters={filters.search !== ''}
+            />
 
-            <section className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+            <section className="mt-5 overflow-hidden rounded-2xl border border-[#D8E2E6] bg-white shadow-[0_1px_2px_rgba(15,41,51,0.04)]">
                 {pelanggan.data.length === 0 ? (
                     <div className="p-6">
                         <EmptyState
@@ -189,39 +170,64 @@ export default function PelangganIndex({
                     </div>
                 ) : (
                     <>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-                                <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <div
+                            tabIndex={0}
+                            role="region"
+                            aria-labelledby={tableCaptionId}
+                            className="overflow-x-auto"
+                        >
+                            <table className="min-w-full divide-y divide-[#D8E2E6] text-left text-sm">
+                                <caption
+                                    id={tableCaptionId}
+                                    className="sr-only"
+                                >
+                                    Daftar master pelanggan CleanWash beserta
+                                    status hak bayar akhir
+                                </caption>
+                                <thead className="border-b border-[#D8E2E6] bg-[#F8FAFC] text-[0.6875rem] font-semibold uppercase tracking-wider text-[#475569]">
                                     <tr>
-                                        <th className="px-5 py-3.5">Nama</th>
-                                        <th className="px-5 py-3.5">
+                                        <th scope="col" className="px-5 py-3.5">
+                                            Nama
+                                        </th>
+                                        <th scope="col" className="px-5 py-3.5">
                                             No. Telepon
                                         </th>
-                                        <th className="px-5 py-3.5">Alamat</th>
-                                        <th className="px-5 py-3.5">
+                                        <th scope="col" className="px-5 py-3.5">
+                                            Alamat
+                                        </th>
+                                        <th scope="col" className="px-5 py-3.5">
                                             Hak Bayar Akhir
                                         </th>
-                                        <th className="px-5 py-3.5 text-right">
+                                        <th
+                                            scope="col"
+                                            className="px-5 py-3.5 text-right"
+                                        >
                                             Transaksi
                                         </th>
-                                        <th className="px-5 py-3.5 text-right">
+                                        <th
+                                            scope="col"
+                                            className="px-5 py-3.5 text-right"
+                                        >
                                             Aksi
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 bg-white">
+                                <tbody className="divide-y divide-[#D8E2E6] bg-white">
                                     {pelanggan.data.map((item) => (
                                         <tr
                                             key={item.id_pelanggan}
-                                            className="hover:bg-slate-50/70"
+                                            className="transition hover:bg-[#F8FAFC]"
                                         >
-                                            <td className="px-5 py-3.5 font-semibold text-slate-900">
+                                            <th
+                                                scope="row"
+                                                className="px-5 py-3.5 text-left font-semibold text-[#0F172A]"
+                                            >
                                                 {item.nama}
-                                            </td>
-                                            <td className="whitespace-nowrap px-5 py-3.5 font-mono text-xs text-slate-700">
+                                            </th>
+                                            <td className="whitespace-nowrap px-5 py-3.5 font-mono text-xs text-[#475569]">
                                                 {item.no_telepon}
                                             </td>
-                                            <td className="max-w-xs px-5 py-3.5 text-xs text-slate-600">
+                                            <td className="max-w-xs px-5 py-3.5 text-xs text-[#475569]">
                                                 <p className="line-clamp-2">
                                                     {item.alamat}
                                                 </p>
@@ -231,9 +237,10 @@ export default function PelangganIndex({
                                                     allowed={
                                                         item.boleh_bayar_akhir
                                                     }
+                                                    variant="text"
                                                 />
                                             </td>
-                                            <td className="whitespace-nowrap px-5 py-3.5 text-right font-medium tabular-nums text-slate-700">
+                                            <td className="whitespace-nowrap px-5 py-3.5 text-right font-mono text-xs font-semibold tabular-nums text-[#0F172A]">
                                                 {item.transaksi_count ?? 0}
                                             </td>
                                             <td className="whitespace-nowrap px-5 py-3.5 text-right">
@@ -243,9 +250,13 @@ export default function PelangganIndex({
                                                         onClick={() =>
                                                             openEditModal(item)
                                                         }
-                                                        className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+                                                        className="inline-flex min-h-[2.25rem] items-center gap-1 rounded-xl border border-[#7C8C9D] bg-white px-3 py-1.5 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
                                                     >
-                                                        Edit
+                                                        <Pencil
+                                                            className="h-3.5 w-3.5 shrink-0"
+                                                            aria-hidden="true"
+                                                        />
+                                                        <span>Edit</span>
                                                     </button>
                                                     <button
                                                         type="button"
@@ -254,9 +265,13 @@ export default function PelangganIndex({
                                                                 item,
                                                             )
                                                         }
-                                                        className="rounded-lg border border-rose-200 px-2.5 py-1 text-xs font-semibold text-rose-700 transition hover:bg-rose-50"
+                                                        className="inline-flex min-h-[2.25rem] items-center gap-1 rounded-xl border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-[#9F1239] transition hover:bg-rose-100"
                                                     >
-                                                        Hapus
+                                                        <Trash2
+                                                            className="h-3.5 w-3.5 shrink-0"
+                                                            aria-hidden="true"
+                                                        />
+                                                        <span>Hapus</span>
                                                     </button>
                                                 </div>
                                             </td>
@@ -280,6 +295,30 @@ export default function PelangganIndex({
                 closeDisabled={processing}
                 title={editingItem ? 'Edit Pelanggan' : 'Tambah Pelanggan Baru'}
                 subtitle="Pastikan nomor telepon unik untuk setiap pelanggan."
+                footer={
+                    <>
+                        <button
+                            type="button"
+                            onClick={closeFormModal}
+                            disabled={processing}
+                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl border border-[#7C8C9D] bg-white px-4 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC] disabled:opacity-50"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            type="submit"
+                            form="pelanggan-form"
+                            disabled={processing}
+                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:opacity-60"
+                        >
+                            {processing
+                                ? 'Menyimpan...'
+                                : editingItem
+                                  ? 'Simpan Perubahan'
+                                  : 'Simpan Pelanggan'}
+                        </button>
+                    </>
+                }
             >
                 <form
                     id="pelanggan-form"
@@ -289,7 +328,7 @@ export default function PelangganIndex({
                     <div>
                         <label
                             htmlFor="pelanggan-nama"
-                            className="block text-xs font-semibold text-slate-700"
+                            className="block text-xs font-semibold text-[#0F172A]"
                         >
                             Nama Pelanggan
                         </label>
@@ -303,10 +342,10 @@ export default function PelangganIndex({
                                 setData('nama', event.target.value)
                             }
                             placeholder="mis. Siti Aminah"
-                            className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                         />
                         {errors.nama && (
-                            <p className="mt-1 text-xs font-medium text-rose-600">
+                            <p className="mt-1.5 text-xs font-medium text-rose-600">
                                 {errors.nama}
                             </p>
                         )}
@@ -315,7 +354,7 @@ export default function PelangganIndex({
                     <div>
                         <label
                             htmlFor="pelanggan-telepon"
-                            className="block text-xs font-semibold text-slate-700"
+                            className="block text-xs font-semibold text-[#0F172A]"
                         >
                             Nomor Telepon
                         </label>
@@ -329,10 +368,10 @@ export default function PelangganIndex({
                                 setData('no_telepon', event.target.value)
                             }
                             placeholder="mis. 081234567890"
-                            className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                         />
                         {errors.no_telepon && (
-                            <p className="mt-1 text-xs font-medium text-rose-600">
+                            <p className="mt-1.5 text-xs font-medium text-rose-600">
                                 {errors.no_telepon}
                             </p>
                         )}
@@ -341,7 +380,7 @@ export default function PelangganIndex({
                     <div>
                         <label
                             htmlFor="pelanggan-alamat"
-                            className="block text-xs font-semibold text-slate-700"
+                            className="block text-xs font-semibold text-[#0F172A]"
                         >
                             Alamat Lengkap
                         </label>
@@ -355,16 +394,16 @@ export default function PelangganIndex({
                                 setData('alamat', event.target.value)
                             }
                             placeholder="Alamat pengantaran / domisili pelanggan"
-                            className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                            className="mt-1.5 block min-h-[5.5rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                         />
                         {errors.alamat && (
-                            <p className="mt-1 text-xs font-medium text-rose-600">
+                            <p className="mt-1.5 text-xs font-medium text-rose-600">
                                 {errors.alamat}
                             </p>
                         )}
                     </div>
 
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5">
+                    <div className="rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] p-3.5">
                         <label
                             htmlFor="pelanggan-bayar-akhir"
                             className="flex cursor-pointer items-start gap-3"
@@ -379,16 +418,16 @@ export default function PelangganIndex({
                                         event.target.checked,
                                     )
                                 }
-                                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                                className="mt-0.5 h-4 w-4 rounded border-[#7C8C9D] accent-[#0F766E]"
                             />
                             <div>
-                                <span className="block text-xs font-semibold text-slate-900">
+                                <span className="block text-xs font-semibold text-[#0F172A]">
                                     Izinkan Bayar Akhir (boleh_bayar_akhir)
                                 </span>
-                                <span className="mt-0.5 block text-[11px] leading-relaxed text-slate-500">
-                                    Pelanggan terverifikasi dapat mengambil pakaian
-                                    sebelum pelunasan penuh dan dicatat sebagai
-                                    piutang (KK-06).
+                                <span className="mt-0.5 block text-[11px] leading-relaxed text-[#475569]">
+                                    Pelanggan terverifikasi dapat mengambil
+                                    pakaian sebelum pelunasan penuh dan dicatat
+                                    sebagai piutang (KK-06).
                                 </span>
                             </div>
                         </label>
@@ -397,28 +436,6 @@ export default function PelangganIndex({
                                 {errors.boleh_bayar_akhir}
                             </p>
                         )}
-                    </div>
-
-                    <div className="flex items-center justify-end gap-2 pt-2">
-                        <button
-                            type="button"
-                            onClick={closeFormModal}
-                            disabled={processing}
-                            className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-                        >
-                            Batal
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="rounded-xl bg-sky-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-sky-700 disabled:opacity-60"
-                        >
-                            {processing
-                                ? 'Menyimpan...'
-                                : editingItem
-                                  ? 'Simpan Perubahan'
-                                  : 'Simpan Pelanggan'}
-                        </button>
                     </div>
                 </form>
             </Modal>
@@ -436,7 +453,7 @@ export default function PelangganIndex({
                             type="button"
                             onClick={() => setDeleteTarget(null)}
                             disabled={deleting}
-                            className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl border border-[#7C8C9D] bg-white px-4 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC] disabled:opacity-50"
                         >
                             Batal
                         </button>
@@ -444,7 +461,7 @@ export default function PelangganIndex({
                             type="button"
                             onClick={handleConfirmDelete}
                             disabled={deleting}
-                            className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-700 disabled:opacity-60"
+                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl bg-[#BE123C] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-rose-800 disabled:opacity-60"
                         >
                             {deleting ? 'Menghapus...' : 'Ya, Hapus Pelanggan'}
                         </button>
@@ -452,22 +469,26 @@ export default function PelangganIndex({
                 }
             >
                 {deleteTarget && (
-                    <div className="space-y-3 text-sm text-slate-700">
+                    <div className="space-y-3 text-sm text-[#475569]">
                         <p>
                             Apakah Anda yakin ingin menghapus pelanggan{' '}
-                            <span className="font-semibold text-slate-900">
+                            <span className="font-semibold text-[#0F172A]">
                                 {deleteTarget.nama}
                             </span>{' '}
-                            ({deleteTarget.no_telepon})?
+                            (
+                            <span className="font-mono">
+                                {deleteTarget.no_telepon}
+                            </span>
+                            )?
                         </p>
                         {(deleteTarget.transaksi_count ?? 0) > 0 && (
-                            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                            <div className="rounded-xl border border-amber-300 border-l-4 border-l-[#B45309] bg-[#FFFBEB] p-3 text-xs text-[#78350F]">
                                 Pelanggan ini tercatat memiliki{' '}
-                                <span className="font-semibold">
+                                <span className="font-semibold tabular-nums">
                                     {deleteTarget.transaksi_count} transaksi
                                 </span>
-                                . Penghapusan akan ditolak oleh sistem untuk menjaga
-                                integritas riwayat nota.
+                                . Penghapusan akan ditolak oleh sistem untuk
+                                menjaga integritas riwayat nota.
                             </div>
                         )}
                     </div>

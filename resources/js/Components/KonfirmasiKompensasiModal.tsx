@@ -1,4 +1,5 @@
 import { useForm } from '@inertiajs/react';
+import { AlertCircle, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useEffect, useId, type FormEvent } from 'react';
 import Modal from '@/Components/Modal';
 import { JenisInsidenBadge } from '@/Components/StatusBadge';
@@ -132,7 +133,7 @@ export default function KonfirmasiKompensasiModal({
                         type="button"
                         onClick={handleClose}
                         disabled={processing}
-                        className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                        className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl border border-[#7C8C9D] bg-white px-4 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC] disabled:opacity-50"
                     >
                         Batal
                     </button>
@@ -140,11 +141,17 @@ export default function KonfirmasiKompensasiModal({
                         type="submit"
                         form={formId}
                         disabled={processing || !target}
-                        className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex min-h-[2.5rem] items-center justify-center gap-1.5 rounded-xl bg-emerald-700 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        {processing
-                            ? 'Memproses...'
-                            : 'Konfirmasi & Potong Saldo'}
+                        <CheckCircle2
+                            className="h-4 w-4 shrink-0"
+                            aria-hidden="true"
+                        />
+                        <span>
+                            {processing
+                                ? 'Memproses...'
+                                : 'Konfirmasi & Potong Saldo'}
+                        </span>
                     </button>
                 </>
             }
@@ -158,46 +165,51 @@ export default function KonfirmasiKompensasiModal({
                     {laporanError && (
                         <div
                             role="alert"
-                            className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-medium text-rose-800"
+                            className="flex items-start gap-2.5 rounded-xl border border-rose-200 border-l-4 border-l-[#BE123C] bg-[#FFF1F2] px-3.5 py-2.5 text-xs font-medium text-[#9F1239]"
                         >
-                            {laporanError}
+                            <AlertCircle
+                                className="mt-0.5 h-4 w-4 shrink-0 text-[#BE123C]"
+                                aria-hidden="true"
+                            />
+                            <p>{laporanError}</p>
                         </div>
                     )}
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-xs">
+
+                    <div className="rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] p-3.5 text-xs">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                            <span className="font-semibold text-slate-900">
+                            <span className="font-semibold text-[#0F172A]">
                                 {target.detail_pakaian.jenis_pakaian} (
                                 {target.detail_pakaian.jumlah_potong} pcs)
                             </span>
                             <JenisInsidenBadge jenis={target.jenis_insiden} />
                         </div>
-                        <p className="mt-1.5 text-slate-700">
+                        <p className="mt-1.5 text-[#475569]">
                             {target.keterangan}
                         </p>
                         {target.pegawai_pelapor && (
-                            <p className="mt-1.5 text-[11px] text-slate-500">
+                            <p className="mt-1.5 text-[11px] text-[#5B697A]">
                                 Dilaporkan oleh:{' '}
                                 {target.pegawai_pelapor.nama_pegawai}
                             </p>
                         )}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3 rounded-xl border border-slate-200 bg-white p-3 text-xs">
+                    <div className="grid grid-cols-1 gap-3 rounded-xl border border-[#D8E2E6] bg-white p-3.5 text-xs sm:grid-cols-3">
                         <div>
-                            <p className="text-slate-500">Total Tagihan</p>
-                            <p className="mt-0.5 font-semibold tabular-nums text-slate-900">
+                            <p className="text-[#5B697A]">Total Tagihan</p>
+                            <p className="mt-0.5 font-mono font-semibold tabular-nums text-[#0F172A]">
                                 {formatRupiah(target.total_harga)}
                             </p>
                         </div>
                         <div>
-                            <p className="text-slate-500">Sudah Dibayar</p>
-                            <p className="mt-0.5 font-semibold tabular-nums text-sky-700">
+                            <p className="text-[#5B697A]">Sudah Dibayar</p>
+                            <p className="mt-0.5 font-mono font-semibold tabular-nums text-[#0F766E]">
                                 {formatRupiah(target.total_dibayar)}
                             </p>
                         </div>
                         <div>
-                            <p className="text-slate-500">Sisa Tagihan</p>
-                            <p className="mt-0.5 font-bold tabular-nums text-amber-700">
+                            <p className="text-[#5B697A]">Sisa Tagihan</p>
+                            <p className="mt-0.5 font-mono font-bold tabular-nums text-[#78350F]">
                                 {formatRupiah(target.sisa_tagihan)}
                             </p>
                         </div>
@@ -206,7 +218,7 @@ export default function KonfirmasiKompensasiModal({
                     <div>
                         <label
                             htmlFor={nilaiFieldId}
-                            className="block text-xs font-semibold text-slate-700"
+                            className="block text-xs font-semibold text-[#0F172A]"
                         >
                             Nominal Kompensasi Disetujui (Rp){' '}
                             <span aria-hidden="true" className="text-rose-600">
@@ -232,12 +244,14 @@ export default function KonfirmasiKompensasiModal({
                                     ? nilaiErrorId
                                     : undefined
                             }
-                            className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold tabular-nums text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm font-semibold tabular-nums text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                         />
-                        <div className="mt-1.5 flex items-center justify-between text-[11px] text-slate-500">
+                        <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#5B697A]">
                             <span>
                                 Estimasi sistem:{' '}
-                                {formatRupiah(target.estimasi_kompensasi)}
+                                <span className="font-mono font-medium tabular-nums">
+                                    {formatRupiah(target.estimasi_kompensasi)}
+                                </span>
                             </span>
                             <button
                                 type="button"
@@ -247,7 +261,7 @@ export default function KonfirmasiKompensasiModal({
                                         target.estimasi_kompensasi,
                                     )
                                 }
-                                className="font-semibold text-sky-700 hover:underline"
+                                className="min-h-[1.75rem] font-semibold text-[#0F766E] hover:text-[#115E59] hover:underline"
                             >
                                 Gunakan Estimasi
                             </button>
@@ -256,19 +270,19 @@ export default function KonfirmasiKompensasiModal({
                             <p
                                 id={nilaiErrorId}
                                 role="alert"
-                                className="mt-1 text-xs font-medium text-rose-600"
+                                className="mt-1.5 text-xs font-medium text-rose-600"
                             >
                                 {errors.nilai_kompensasi}
                             </p>
                         )}
                     </div>
 
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-xs">
+                    <div className="rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] px-3.5 py-3 text-xs">
                         <div className="flex justify-between gap-4">
-                            <span className="text-slate-600">
+                            <span className="text-[#475569]">
                                 Estimasi Sisa Tagihan Setelah Potong:
                             </span>
-                            <span className="font-bold tabular-nums text-slate-900">
+                            <span className="font-mono font-bold tabular-nums text-[#0F172A]">
                                 {formatRupiah(
                                     centsToDecimalString(sisaSesudahCents),
                                 )}
@@ -279,31 +293,39 @@ export default function KonfirmasiKompensasiModal({
                     {kelebihanCents > 0 && (
                         <div
                             role="status"
-                            className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs text-amber-950"
+                            className="flex items-start gap-2.5 rounded-xl border border-amber-300 border-l-4 border-l-[#B45309] bg-[#FFFBEB] px-4 py-3 text-xs text-[#78350F]"
                         >
-                            <p className="font-bold">
-                                Kelebihan Ganti Rugi Tunai ke Pelanggan
-                            </p>
-                            <p className="mt-1 leading-relaxed">
-                                Nominal kompensasi melebihi sisa tagihan saat
-                                ini ({formatRupiah(target.sisa_tagihan)}).
-                                Kelebihan sebesar{' '}
-                                <strong className="tabular-nums">
-                                    {formatRupiah(
-                                        centsToDecimalString(kelebihanCents),
-                                    )}
-                                </strong>{' '}
-                                akan dicatat sebagai{' '}
-                                <code>kelebihan_ganti_rugi</code> yang wajib
-                                dibayarkan tunai kepada pelanggan.
-                            </p>
+                            <AlertTriangle
+                                className="mt-0.5 h-4 w-4 shrink-0 text-[#B45309]"
+                                aria-hidden="true"
+                            />
+                            <div>
+                                <p className="font-bold">
+                                    Kelebihan Ganti Rugi Tunai ke Pelanggan
+                                </p>
+                                <p className="mt-1 leading-relaxed">
+                                    Nominal kompensasi melebihi sisa tagihan
+                                    saat ini ({formatRupiah(target.sisa_tagihan)}
+                                    ). Kelebihan sebesar{' '}
+                                    <strong className="font-mono tabular-nums">
+                                        {formatRupiah(
+                                            centsToDecimalString(
+                                                kelebihanCents,
+                                            ),
+                                        )}
+                                    </strong>{' '}
+                                    akan dicatat sebagai{' '}
+                                    <code>kelebihan_ganti_rugi</code> yang wajib
+                                    dibayarkan tunai kepada pelanggan.
+                                </p>
+                            </div>
                         </div>
                     )}
 
                     <div>
                         <label
                             htmlFor={catatanFieldId}
-                            className="block text-xs font-semibold text-slate-700"
+                            className="block text-xs font-semibold text-[#0F172A]"
                         >
                             Catatan Konfirmasi Petugas (Opsional)
                         </label>
@@ -326,13 +348,13 @@ export default function KonfirmasiKompensasiModal({
                                     ? catatanErrorId
                                     : undefined
                             }
-                            className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                            className="mt-1.5 block min-h-[4.25rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                         />
                         {errors.keterangan_konfirmasi && (
                             <p
                                 id={catatanErrorId}
                                 role="alert"
-                                className="mt-1 text-xs font-medium text-rose-600"
+                                className="mt-1.5 text-xs font-medium text-rose-600"
                             >
                                 {errors.keterangan_konfirmasi}
                             </p>

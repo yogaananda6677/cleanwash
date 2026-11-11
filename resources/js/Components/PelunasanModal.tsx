@@ -1,4 +1,5 @@
 import { useForm } from '@inertiajs/react';
+import { AlertCircle, CheckCircle2, Info, Wallet } from 'lucide-react';
 import { useEffect, useId, useState, type FormEvent } from 'react';
 import Modal from '@/Components/Modal';
 import {
@@ -187,7 +188,7 @@ export default function PelunasanModal({
                         type="button"
                         onClick={handleClose}
                         disabled={processing}
-                        className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                        className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl border border-[#7C8C9D] bg-white px-4 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC] disabled:opacity-50"
                     >
                         Batal
                     </button>
@@ -195,11 +196,14 @@ export default function PelunasanModal({
                         type="submit"
                         form={formId}
                         disabled={processing || !target || sisaCents <= 0}
-                        className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex min-h-[2.5rem] items-center justify-center gap-1.5 rounded-xl bg-emerald-700 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        {processing
-                            ? 'Menyimpan...'
-                            : 'Catat Pembayaran Pelunasan'}
+                        <Wallet className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        <span>
+                            {processing
+                                ? 'Menyimpan...'
+                                : 'Catat Pembayaran Pelunasan'}
+                        </span>
                     </button>
                 </>
             }
@@ -211,8 +215,8 @@ export default function PelunasanModal({
                     className="space-y-4"
                     noValidate
                 >
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-xs">
-                        <div className="flex flex-wrap items-center gap-1.5">
+                    <div className="rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] p-3.5 text-xs">
+                        <div className="flex flex-wrap items-center gap-2">
                             <TransactionStatusBadge
                                 status={target.status_transaksi}
                             />
@@ -221,29 +225,30 @@ export default function PelunasanModal({
                             />
                             <PayLaterBadge
                                 allowed={target.pelanggan.boleh_bayar_akhir}
+                                variant="text"
                             />
                         </div>
 
                         <dl className="mt-3 space-y-1.5">
                             <div className="flex justify-between gap-4">
-                                <dt className="text-slate-500">Total Harga</dt>
-                                <dd className="font-semibold tabular-nums text-slate-900">
+                                <dt className="text-[#5B697A]">Total Harga</dt>
+                                <dd className="font-mono font-semibold tabular-nums text-[#0F172A]">
                                     {formatRupiah(target.total_harga)}
                                 </dd>
                             </div>
                             <div className="flex justify-between gap-4">
-                                <dt className="text-slate-500">
+                                <dt className="text-[#5B697A]">
                                     Sudah Dibayar
                                 </dt>
-                                <dd className="font-semibold tabular-nums text-sky-700">
+                                <dd className="font-mono font-semibold tabular-nums text-[#0F766E]">
                                     {formatRupiah(target.total_dibayar)}
                                 </dd>
                             </div>
-                            <div className="flex justify-between gap-4 border-t border-slate-200 pt-1.5">
-                                <dt className="font-semibold text-slate-800">
+                            <div className="flex justify-between gap-4 border-t border-[#D8E2E6] pt-1.5">
+                                <dt className="font-semibold text-[#0F172A]">
                                     Sisa Tagihan
                                 </dt>
-                                <dd className="text-sm font-bold tabular-nums text-amber-700">
+                                <dd className="font-mono text-sm font-bold tabular-nums text-[#78350F]">
                                     {formatRupiah(target.sisa_tagihan)}
                                 </dd>
                             </div>
@@ -251,20 +256,32 @@ export default function PelunasanModal({
                     </div>
 
                     {target.status_transaksi === 'DIBATALKAN' && (
-                        <div className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs text-rose-900">
-                            Transaksi ini berstatus <strong>DIBATALKAN</strong>{' '}
-                            pasca pencucian (KK-08). Pelunasan tetap dapat
-                            dicatat untuk melunasi sisa{' '}
-                            <strong>biaya pembatalan</strong>.
+                        <div className="flex items-start gap-2.5 rounded-xl border border-rose-200 border-l-4 border-l-[#BE123C] bg-[#FFF1F2] px-3.5 py-2.5 text-xs text-[#9F1239]">
+                            <AlertCircle
+                                className="mt-0.5 h-4 w-4 shrink-0 text-[#BE123C]"
+                                aria-hidden="true"
+                            />
+                            <p>
+                                Transaksi ini berstatus{' '}
+                                <strong>DIBATALKAN</strong> pasca pencucian
+                                (KK-08). Pelunasan tetap dapat dicatat untuk
+                                melunasi sisa <strong>biaya pembatalan</strong>.
+                            </p>
                         </div>
                     )}
 
                     {target.status_transaksi === 'DIAMBIL' && (
-                        <div className="rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2.5 text-xs text-indigo-950">
-                            Pelunasan piutang pelanggan{' '}
-                            <strong>boleh bayar akhir (KK-06)</strong>. Jika
-                            dibayar penuh, status pembayaran otomatis berubah
-                            menjadi <strong>LUNAS</strong>.
+                        <div className="flex items-start gap-2.5 rounded-xl border border-indigo-200 border-l-4 border-l-[#4338CA] bg-[#EEF2FF] px-3.5 py-2.5 text-xs text-[#3730A3]">
+                            <Info
+                                className="mt-0.5 h-4 w-4 shrink-0 text-[#4338CA]"
+                                aria-hidden="true"
+                            />
+                            <p>
+                                Pelunasan piutang pelanggan{' '}
+                                <strong>boleh bayar akhir (KK-06)</strong>. Jika
+                                dibayar penuh, status pembayaran otomatis
+                                berubah menjadi <strong>LUNAS</strong>.
+                            </p>
                         </div>
                     )}
 
@@ -272,7 +289,7 @@ export default function PelunasanModal({
                         <div className="flex flex-wrap items-center justify-between gap-2">
                             <label
                                 htmlFor={nominalInputId}
-                                className="block text-xs font-semibold text-slate-700"
+                                className="block text-xs font-semibold text-[#0F172A]"
                             >
                                 Nominal Bayar Pelunasan (Rp){' '}
                                 <span
@@ -286,7 +303,7 @@ export default function PelunasanModal({
                                 type="button"
                                 onClick={handleFillFull}
                                 disabled={sisaCents <= 0 || processing}
-                                className="rounded-lg border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700 transition hover:bg-sky-100 disabled:opacity-50"
+                                className="inline-flex min-h-[2rem] items-center rounded-lg border border-teal-200 bg-[#F0FDFA] px-2.5 py-1 text-[11px] font-semibold text-[#115E59] transition hover:bg-[#CCFBF1] disabled:opacity-50"
                             >
                                 Isi Lunas Penuh (
                                 {formatRupiah(target.sisa_tagihan)})
@@ -295,7 +312,7 @@ export default function PelunasanModal({
 
                         <p
                             id={nominalHintId}
-                            className="mt-1 text-[11px] text-slate-500"
+                            className="mt-1 text-[11px] text-[#5B697A]"
                         >
                             Masukkan nominal &gt; Rp 0 s.d.{' '}
                             {formatRupiah(target.sisa_tagihan)} (mendukung
@@ -322,14 +339,14 @@ export default function PelunasanModal({
                             onBlur={handleNominalBlur}
                             aria-invalid={Boolean(activeError)}
                             aria-describedby={describedByIds}
-                            className="mt-1.5 block w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold tabular-nums text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm font-semibold tabular-nums text-[#0F172A] placeholder-[#5B697A] transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                         />
 
                         {activeError && (
                             <p
                                 id={nominalErrorId}
                                 role="alert"
-                                className="mt-1 text-xs font-medium text-rose-600"
+                                className="mt-1.5 text-xs font-medium text-rose-600"
                             >
                                 {activeError}
                             </p>
@@ -337,26 +354,26 @@ export default function PelunasanModal({
                     </div>
 
                     {isExactValid && (
-                        <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 text-xs text-emerald-950">
-                            <p className="font-semibold">
-                                Pratinjau Setelah Pembayaran:
-                            </p>
-                            <dl className="mt-1.5 space-y-1">
+                        <div className="rounded-xl border border-emerald-200 border-l-4 border-l-[#047857] bg-[#ECFDF5] p-3.5 text-xs text-[#065F46]">
+                            <div className="flex items-center gap-1.5 font-semibold">
+                                <CheckCircle2
+                                    className="h-4 w-4 shrink-0 text-[#047857]"
+                                    aria-hidden="true"
+                                />
+                                <span>Pratinjau Setelah Pembayaran:</span>
+                            </div>
+                            <dl className="mt-2 space-y-1">
                                 <div className="flex justify-between gap-4">
-                                    <dt className="text-emerald-800">
-                                        Dibayar Sekarang
-                                    </dt>
-                                    <dd className="font-bold tabular-nums">
+                                    <dt>Dibayar Sekarang</dt>
+                                    <dd className="font-mono font-bold tabular-nums">
                                         {formatRupiah(
                                             centsToDecimalString(nominalCents),
                                         )}
                                     </dd>
                                 </div>
                                 <div className="flex justify-between gap-4">
-                                    <dt className="text-emerald-800">
-                                        Sisa Tagihan Sesudah
-                                    </dt>
-                                    <dd className="font-bold tabular-nums">
+                                    <dt>Sisa Tagihan Sesudah</dt>
+                                    <dd className="font-mono font-bold tabular-nums">
                                         {formatRupiah(
                                             centsToDecimalString(
                                                 sisaSetelahCents,
@@ -365,9 +382,7 @@ export default function PelunasanModal({
                                     </dd>
                                 </div>
                                 <div className="flex justify-between gap-4">
-                                    <dt className="text-emerald-800">
-                                        Perkiraan Status Bayar
-                                    </dt>
+                                    <dt>Perkiraan Status Bayar</dt>
                                     <dd className="font-bold">
                                         {sisaSetelahCents === 0
                                             ? 'LUNAS'

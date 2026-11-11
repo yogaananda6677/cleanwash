@@ -1,6 +1,13 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { ArrowRight, RotateCcw, Search, Wallet } from 'lucide-react';
 import { useEffect, useId, useState, type FormEvent } from 'react';
 import EmptyState from '@/Components/EmptyState';
+import FilterToolbar, {
+    FILTER_LABEL_CLASS,
+    FILTER_RESET_BUTTON_CLASS,
+    FILTER_SELECT_CLASS,
+    FILTER_SUBMIT_BUTTON_CLASS,
+} from '@/Components/FilterToolbar';
 import Pagination from '@/Components/Pagination';
 import {
     PayLaterBadge,
@@ -17,7 +24,7 @@ function renderSubjectCell(log: AuditLogItem) {
         return (
             <Link
                 href={`/transaksi/${log.subject_id}`}
-                className="font-mono text-xs font-bold text-sky-700 hover:text-sky-800 hover:underline"
+                className="font-mono text-xs font-bold text-[#0F766E] hover:text-[#115E59] hover:underline"
             >
                 {log.subject_id}
             </Link>
@@ -28,7 +35,7 @@ function renderSubjectCell(log: AuditLogItem) {
         return (
             <Link
                 href={`/pengantaran/${log.subject_id}`}
-                className="font-mono text-xs font-bold text-sky-700 hover:text-sky-800 hover:underline"
+                className="font-mono text-xs font-bold text-[#0F766E] hover:text-[#115E59] hover:underline"
             >
                 Pengantaran #{log.subject_id}
             </Link>
@@ -36,7 +43,7 @@ function renderSubjectCell(log: AuditLogItem) {
     }
 
     return (
-        <span className="font-mono text-xs font-semibold text-slate-800">
+        <span className="font-mono text-xs font-semibold text-[#0F172A]">
             {log.subject_id}
         </span>
     );
@@ -45,17 +52,26 @@ function renderSubjectCell(log: AuditLogItem) {
 function summarizeAuditEntry(log: AuditLogItem): string {
     const after = log.payload_after ?? {};
     if (log.action === 'SERAH_TERIMA') {
-        const kanal = after.kanal ? `Kanal: ${String(after.kanal)}` : 'Serah terima';
-        const piutang = after.piutang_dicatat === true ? ' • Piutang dicatat' : '';
+        const kanal = after.kanal
+            ? `Kanal: ${String(after.kanal)}`
+            : 'Serah terima';
+        const piutang =
+            after.piutang_dicatat === true ? ' • Piutang dicatat' : '';
         return `${kanal}${piutang}`;
     }
     if (log.action === 'PELUNASAN_RECORDED' && after.nominal_bayar) {
         return `Nominal: ${formatRupiah(String(after.nominal_bayar))}`;
     }
-    if (log.action === 'PENGANTARAN_CREATED' && Array.isArray(after.nomor_nota_list)) {
+    if (
+        log.action === 'PENGANTARAN_CREATED' &&
+        Array.isArray(after.nomor_nota_list)
+    ) {
         return `${after.nomor_nota_list.length} nota dijadwalkan`;
     }
-    if (log.action === 'ITEM_PENGANTARAN_UPDATED' && after.status_terima_pelanggan) {
+    if (
+        log.action === 'ITEM_PENGANTARAN_UPDATED' &&
+        after.status_terima_pelanggan
+    ) {
         return `Status item: ${String(after.status_terima_pelanggan)}`;
     }
     if (log.action === 'PENGANTARAN_RESCHEDULED' && after.new_id_pengantaran) {
@@ -132,39 +148,47 @@ export default function AuditIndex({
             headerActions={
                 <Link
                     href="/serah-terima?mode=PIUTANG"
-                    className="rounded-xl bg-amber-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-amber-700"
+                    className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl border border-amber-400 bg-amber-50 px-3.5 py-2 text-xs font-semibold text-amber-900 transition hover:bg-amber-100"
                 >
-                    Kelola Pelunasan Piutang &rarr;
+                    <Wallet
+                        className="h-4 w-4 shrink-0 text-[#B45309]"
+                        aria-hidden="true"
+                    />
+                    <span>Kelola Pelunasan Piutang</span>
+                    <ArrowRight
+                        className="h-3.5 w-3.5 shrink-0"
+                        aria-hidden="true"
+                    />
                 </Link>
             }
         >
             <Head title="Audit Trail & Piutang" />
 
             {/* Piutang Summary Section */}
-            <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
-                <div className="flex flex-col justify-between gap-4 border-b border-slate-200 bg-amber-50/60 px-5 py-4 sm:flex-row sm:items-center">
+            <section className="overflow-hidden rounded-2xl border border-[#D8E2E6] bg-white shadow-[0_1px_2px_rgba(15,41,51,0.04)]">
+                <div className="flex flex-col justify-between gap-4 border-b border-[#D8E2E6] border-l-4 border-l-[#B45309] bg-[#FFFBEB]/80 px-5 py-4 sm:flex-row sm:items-center">
                     <div>
-                        <h2 className="text-sm font-bold text-slate-900">
+                        <h2 className="text-base font-bold tracking-tight text-[#0F172A]">
                             Ringkasan Piutang Pelanggan Hak Bayar Akhir (KK-06)
                         </h2>
-                        <p className="mt-0.5 text-xs text-slate-600">
+                        <p className="mt-0.5 text-xs text-[#475569]">
                             Nota berstatus <strong>DIAMBIL</strong> yang masih
                             memiliki sisa tagihan (
                             <strong>BELUM_LUNAS</strong>).
                         </p>
                     </div>
-                    <div className="flex flex-wrap items-center gap-4 text-xs">
-                        <div className="rounded-xl border border-amber-200 bg-white px-3.5 py-2">
-                            <span className="text-slate-500">Total Nota: </span>
-                            <strong className="text-sm tabular-nums text-amber-800">
+                    <div className="flex flex-wrap items-center gap-3 text-xs">
+                        <div className="rounded-xl border border-amber-300 bg-white px-3.5 py-2">
+                            <span className="text-[#5B697A]">Total Nota: </span>
+                            <strong className="font-mono text-sm tabular-nums text-[#78350F]">
                                 {piutangSummary.total_nota_piutang}
                             </strong>
                         </div>
                         <div className="rounded-xl border border-rose-200 bg-white px-3.5 py-2">
-                            <span className="text-slate-500">
+                            <span className="text-[#5B697A]">
                                 Total Nominal:{' '}
                             </span>
-                            <strong className="text-sm tabular-nums text-rose-700">
+                            <strong className="font-mono text-sm tabular-nums text-[#9F1239]">
                                 {formatRupiah(
                                     piutangSummary.total_nominal_piutang,
                                 )}
@@ -174,7 +198,7 @@ export default function AuditIndex({
                 </div>
 
                 {piutangSummary.items.length === 0 ? (
-                    <div className="p-5 text-xs text-slate-500">
+                    <div className="p-5 text-xs text-[#5B697A]">
                         Tidak ada transaksi piutang pelanggan yang belum lunas
                         saat ini.
                     </div>
@@ -183,14 +207,14 @@ export default function AuditIndex({
                         tabIndex={0}
                         role="region"
                         aria-labelledby={piutangCaptionId}
-                        className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                        className="overflow-x-auto"
                     >
-                        <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
+                        <table className="min-w-full divide-y divide-[#D8E2E6] text-left text-sm">
                             <caption id={piutangCaptionId} className="sr-only">
                                 Daftar piutang transaksi diambil belum lunas
                                 pelanggan hak bayar akhir
                             </caption>
-                            <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            <thead className="border-b border-[#D8E2E6] bg-[#F8FAFC] text-[0.6875rem] font-semibold uppercase tracking-wider text-[#475569]">
                                 <tr>
                                     <th scope="col" className="px-5 py-3">
                                         Nomor Nota
@@ -221,11 +245,11 @@ export default function AuditIndex({
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100 bg-white text-xs">
+                            <tbody className="divide-y divide-[#D8E2E6] bg-white text-xs">
                                 {piutangSummary.items.map((item) => (
                                     <tr
                                         key={item.nomor_nota}
-                                        className="hover:bg-slate-50/70"
+                                        className="transition hover:bg-[#F8FAFC]"
                                     >
                                         <th
                                             scope="row"
@@ -233,7 +257,7 @@ export default function AuditIndex({
                                         >
                                             <Link
                                                 href={`/transaksi/${item.nomor_nota}`}
-                                                className="font-mono text-sm font-bold text-sky-700 hover:text-sky-800 hover:underline"
+                                                className="font-mono text-sm font-bold text-[#0F766E] hover:text-[#115E59] hover:underline"
                                             >
                                                 {item.nomor_nota}
                                             </Link>
@@ -246,10 +270,10 @@ export default function AuditIndex({
                                             </div>
                                         </th>
                                         <td className="px-5 py-3.5">
-                                            <p className="font-semibold text-slate-900">
+                                            <p className="font-semibold text-[#0F172A]">
                                                 {item.pelanggan.nama}
                                             </p>
-                                            <p className="font-mono text-[11px] text-slate-500">
+                                            <p className="font-mono text-[11px] text-[#5B697A]">
                                                 {item.pelanggan.no_telepon}
                                             </p>
                                             <div className="mt-1">
@@ -258,22 +282,30 @@ export default function AuditIndex({
                                                         item.pelanggan
                                                             .boleh_bayar_akhir
                                                     }
+                                                    variant="text"
                                                 />
                                             </div>
                                         </td>
                                         <td className="px-5 py-3.5">
                                             <div className="flex flex-wrap items-center gap-1.5">
-                                                <span className="font-medium text-slate-800">
+                                                <span className="font-medium text-[#0F172A]">
                                                     {item.layanan.nama_layanan}
+                                                </span>
+                                                <span
+                                                    aria-hidden="true"
+                                                    className="text-[#7C8C9D]"
+                                                >
+                                                    &bull;
                                                 </span>
                                                 <SpeedTierBadge
                                                     tier={
                                                         item.layanan
                                                             .tingkat_kecepatan
                                                     }
+                                                    variant="text"
                                                 />
                                             </div>
-                                            <p className="mt-0.5 text-[11px] text-slate-500">
+                                            <p className="mt-0.5 text-[11px] text-[#5B697A]">
                                                 Diambil:{' '}
                                                 {formatTanggal(
                                                     item.diambil_pada,
@@ -281,26 +313,30 @@ export default function AuditIndex({
                                                 )}
                                             </p>
                                         </td>
-                                        <td className="whitespace-nowrap px-5 py-3.5 text-right tabular-nums">
-                                            <p className="text-slate-700">
+                                        <td className="whitespace-nowrap px-5 py-3.5 text-right font-mono tabular-nums">
+                                            <p className="text-[#475569]">
                                                 {formatRupiah(item.total_harga)}
                                             </p>
-                                            <p className="text-[11px] text-sky-700">
+                                            <p className="text-[11px] text-[#0F766E]">
                                                 Dibayar:{' '}
                                                 {formatRupiah(
                                                     item.total_dibayar,
                                                 )}
                                             </p>
                                         </td>
-                                        <td className="whitespace-nowrap px-5 py-3.5 text-right text-sm font-bold tabular-nums text-amber-700">
+                                        <td className="whitespace-nowrap px-5 py-3.5 text-right font-mono text-sm font-bold tabular-nums text-[#78350F]">
                                             {formatRupiah(item.sisa_tagihan)}
                                         </td>
                                         <td className="whitespace-nowrap px-5 py-3.5 text-right">
                                             <Link
                                                 href={`/transaksi/${item.nomor_nota}`}
-                                                className="inline-flex items-center rounded-xl bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-700 ring-1 ring-inset ring-sky-200 transition hover:bg-sky-100"
+                                                className="inline-flex min-h-[2.25rem] items-center gap-1 rounded-xl border border-teal-200 bg-[#F0FDFA] px-3 py-1.5 text-xs font-semibold text-[#115E59] transition hover:bg-[#CCFBF1]"
                                             >
-                                                Buka Nota &rarr;
+                                                <span>Buka Nota</span>
+                                                <ArrowRight
+                                                    className="h-3.5 w-3.5 shrink-0"
+                                                    aria-hidden="true"
+                                                />
                                             </Link>
                                         </td>
                                     </tr>
@@ -312,40 +348,45 @@ export default function AuditIndex({
             </section>
 
             {/* Audit Log Filter Bar */}
-            <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:p-5">
-                <h2 className="mb-3 text-sm font-bold text-slate-900">
+            <div className="mt-6 space-y-3">
+                <h2 className="text-base font-bold tracking-tight text-[#0F172A]">
                     Log Aktivitas &amp; Audit Trail Sistem
                 </h2>
-                <search>
-                    <form
-                        method="GET"
-                        onSubmit={handleSearchSubmit}
-                        className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-12 lg:items-end"
-                    >
+                <FilterToolbar
+                    ariaLabel="Filter log aktivitas audit"
+                    onSubmit={handleSearchSubmit}
+                >
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-12 lg:items-end">
                         <div className="lg:col-span-5">
                             <label
                                 htmlFor={searchInputId}
-                                className="block text-xs font-semibold text-slate-700"
+                                className={FILTER_LABEL_CLASS}
                             >
                                 Cari Log Audit
                             </label>
-                            <input
-                                id={searchInputId}
-                                name="search"
-                                type="search"
-                                value={search}
-                                onChange={(event) =>
-                                    setSearch(event.target.value)
-                                }
-                                placeholder="Cari nomor nota/ID subjek, nama aktor, atau kode aksi..."
-                                className="mt-1 block w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                            />
+                            <div className="relative mt-1.5">
+                                <Search
+                                    className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#5B697A]"
+                                    aria-hidden="true"
+                                />
+                                <input
+                                    id={searchInputId}
+                                    name="search"
+                                    type="search"
+                                    value={search}
+                                    onChange={(event) =>
+                                        setSearch(event.target.value)
+                                    }
+                                    placeholder="Cari nomor nota/ID subjek, nama aktor, atau kode aksi..."
+                                    className="block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white py-2 pl-10 pr-3.5 text-sm text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                />
+                            </div>
                         </div>
 
                         <div className="lg:col-span-3">
                             <label
                                 htmlFor={actionSelectId}
-                                className="block text-xs font-semibold text-slate-700"
+                                className={FILTER_LABEL_CLASS}
                             >
                                 Jenis Aksi Audit
                             </label>
@@ -356,7 +397,7 @@ export default function AuditIndex({
                                 onChange={(event) =>
                                     setAction(event.target.value)
                                 }
-                                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                className={FILTER_SELECT_CLASS}
                             >
                                 <option value="">Semua Aksi</option>
                                 {availableActions.map((act) => (
@@ -370,7 +411,7 @@ export default function AuditIndex({
                         <div className="lg:col-span-2">
                             <label
                                 htmlFor={roleSelectId}
-                                className="block text-xs font-semibold text-slate-700"
+                                className={FILTER_LABEL_CLASS}
                             >
                                 Peran Aktor
                             </label>
@@ -383,7 +424,7 @@ export default function AuditIndex({
                                         event.target.value as UserRole | '',
                                     )
                                 }
-                                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                className={FILTER_SELECT_CLASS}
                             >
                                 <option value="">Semua Peran</option>
                                 <option value="PETUGAS">PETUGAS</option>
@@ -392,10 +433,10 @@ export default function AuditIndex({
                             </select>
                         </div>
 
-                        <div className="flex items-center gap-2 lg:col-span-2">
+                        <div className="flex flex-wrap items-center gap-2 lg:col-span-2">
                             <button
                                 type="submit"
-                                className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
+                                className={FILTER_SUBMIT_BUTTON_CLASS}
                             >
                                 Terapkan
                             </button>
@@ -403,18 +444,22 @@ export default function AuditIndex({
                                 <button
                                     type="button"
                                     onClick={handleResetFilters}
-                                    className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                                    className={FILTER_RESET_BUTTON_CLASS}
                                 >
-                                    Reset
+                                    <RotateCcw
+                                        className="h-3.5 w-3.5 shrink-0"
+                                        aria-hidden="true"
+                                    />
+                                    <span>Reset</span>
                                 </button>
                             )}
                         </div>
-                    </form>
-                </search>
-            </section>
+                    </div>
+                </FilterToolbar>
+            </div>
 
             {/* Audit Logs Paginated Table */}
-            <section className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+            <section className="mt-5 overflow-hidden rounded-2xl border border-[#D8E2E6] bg-white shadow-[0_1px_2px_rgba(15,41,51,0.04)]">
                 {logs.data.length === 0 ? (
                     <div className="p-6">
                         <EmptyState
@@ -440,14 +485,14 @@ export default function AuditIndex({
                             tabIndex={0}
                             role="region"
                             aria-labelledby={logsCaptionId}
-                            className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                            className="overflow-x-auto"
                         >
-                            <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
+                            <table className="min-w-full divide-y divide-[#D8E2E6] text-left text-sm">
                                 <caption id={logsCaptionId} className="sr-only">
                                     Tabel jejak audit seluruh perubahan data
                                     operasional CleanWash
                                 </caption>
-                                <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                <thead className="border-b border-[#D8E2E6] bg-[#F8FAFC] text-[0.6875rem] font-semibold uppercase tracking-wider text-[#475569]">
                                     <tr>
                                         <th scope="col" className="px-5 py-3.5">
                                             Waktu (WIB)
@@ -466,38 +511,38 @@ export default function AuditIndex({
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 bg-white text-xs">
+                                <tbody className="divide-y divide-[#D8E2E6] bg-white text-xs">
                                     {logs.data.map((log) => (
                                         <tr
                                             key={log.id}
-                                            className="align-top hover:bg-slate-50/70"
+                                            className="align-top transition hover:bg-[#F8FAFC]"
                                         >
                                             <th
                                                 scope="row"
-                                                className="whitespace-nowrap px-5 py-3.5 text-left font-normal text-slate-600 tabular-nums"
+                                                className="whitespace-nowrap px-5 py-3.5 text-left font-normal text-[#475569] tabular-nums"
                                             >
-                                                <p className="font-medium text-slate-800">
+                                                <p className="font-medium text-[#0F172A]">
                                                     {formatTanggal(
                                                         log.created_at,
                                                         { withTime: true },
                                                     )}
                                                 </p>
-                                                <p className="mt-0.5 text-[11px] text-slate-400">
+                                                <p className="mt-0.5 font-mono text-[11px] text-[#5B697A]">
                                                     Log #{log.id}
                                                 </p>
                                             </th>
                                             <td className="px-5 py-3.5">
-                                                <p className="font-semibold text-slate-900">
+                                                <p className="font-semibold text-[#0F172A]">
                                                     {formatAuditAction(
                                                         log.action,
                                                     )}
                                                 </p>
-                                                <span className="mt-1 inline-block rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-slate-700">
+                                                <span className="mt-1 inline-block rounded-md border border-[#D8E2E6] bg-[#F8FAFC] px-1.5 py-0.5 font-mono text-[10px] font-semibold text-[#475569]">
                                                     {log.action}
                                                 </span>
                                             </td>
                                             <td className="whitespace-nowrap px-5 py-3.5">
-                                                <p className="font-semibold text-slate-900">
+                                                <p className="font-semibold text-[#0F172A]">
                                                     {log.user?.name ?? 'Sistem'}
                                                 </p>
                                                 <div className="mt-1">
@@ -510,20 +555,20 @@ export default function AuditIndex({
                                                 {renderSubjectCell(log)}
                                             </td>
                                             <td className="px-5 py-3.5">
-                                                <p className="text-slate-700">
+                                                <p className="text-[#475569]">
                                                     {summarizeAuditEntry(log)}
                                                 </p>
                                                 {(log.payload_before !== null ||
                                                     log.payload_after !==
                                                         null) && (
                                                     <details className="mt-1.5">
-                                                        <summary className="cursor-pointer text-[11px] font-semibold text-sky-700 hover:underline">
+                                                        <summary className="cursor-pointer text-[11px] font-semibold text-[#0F766E] hover:text-[#115E59] hover:underline">
                                                             Lihat detail payload
                                                         </summary>
                                                         <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                                                             {log.payload_before !==
                                                                 null && (
-                                                                <pre className="max-w-xs overflow-x-auto rounded-lg border border-slate-200 bg-slate-50 p-2 font-mono text-[10px] text-slate-700">
+                                                                <pre className="max-w-xs overflow-x-auto rounded-lg border border-[#D8E2E6] bg-[#F8FAFC] p-2 font-mono text-[10px] text-[#475569]">
                                                                     {JSON.stringify(
                                                                         log.payload_before,
                                                                         null,
@@ -533,7 +578,7 @@ export default function AuditIndex({
                                                             )}
                                                             {log.payload_after !==
                                                                 null && (
-                                                                <pre className="max-w-xs overflow-x-auto rounded-lg border border-slate-200 bg-slate-50 p-2 font-mono text-[10px] text-slate-700">
+                                                                <pre className="max-w-xs overflow-x-auto rounded-lg border border-[#D8E2E6] bg-[#F8FAFC] p-2 font-mono text-[10px] text-[#475569]">
                                                                     {JSON.stringify(
                                                                         log.payload_after,
                                                                         null,

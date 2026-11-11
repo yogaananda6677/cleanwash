@@ -6,8 +6,58 @@
 @source '../**/*.{js,jsx,ts,tsx}';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    --color-canvas: #F5F7F8;
+    --color-surface: #FFFFFF;
+    --color-surface-elevated: #F8FAFC;
+    --color-border-hairline: #D8E2E6;
+    --color-border-control: #7C8C9D;
+
+    --color-petrol-950: #0F2933;
+    --color-petrol-900: #163C4A;
+    --color-petrol-800: #1A3B47;
+    --color-petrol-muted: #9FB7C0;
+
+    --color-brand-50: #F0FDFA;
+    --color-brand-100: #CCFBF1;
+    --color-brand-500: #14B8A6;
+    --color-brand-600: #0D9488;
+    --color-brand-700: #0F766E;
+    --color-brand-800: #115E59;
+}
+
+@layer base {
+    html {
+        font-size: 16px;
+        line-height: 1.5;
+        color: #0F172A;
+        background-color: #F5F7F8;
+        overflow-x: clip;
+    }
+
+    :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+        outline: 3px solid #0F766E;
+        outline-offset: 2px;
+    }
+}
+
+@media (forced-colors: active) {
+    :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+        outline: 3px solid CanvasText;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
 
 @media print {
@@ -31,4 +81,3 @@ dialog::backdrop {
     overflow: hidden;
     overscroll-behavior: contain;
 }
-

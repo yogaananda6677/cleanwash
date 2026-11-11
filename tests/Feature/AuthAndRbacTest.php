@@ -31,6 +31,7 @@ class AuthAndRbacTest extends TestCase
 
         $response = $this->get('/login');
         $response->assertOk();
+        $response->assertSee('<html lang="id">', false);
         $response->assertInertia(fn (Assert $page) => $page
             ->component('Auth/Login')
             ->where('auth.user', null)
@@ -142,6 +143,18 @@ class AuthAndRbacTest extends TestCase
 
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['email']);
+        $response->assertJsonPath('errors.email.0', 'Email atau kata sandi tidak sesuai dengan data kami.');
+        $this->assertGuest();
+
+        $webResponse = $this->from('/login')->post('/login', [
+            'email' => 'petugas@cleanwash.test',
+            'password' => 'wrong-password',
+        ]);
+
+        $webResponse->assertRedirect('/login');
+        $webResponse->assertSessionHasErrors([
+            'email' => 'Email atau kata sandi tidak sesuai dengan data kami.',
+        ]);
         $this->assertGuest();
     }
 

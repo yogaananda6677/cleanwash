@@ -1,4 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
+import { ArrowLeft, ArrowRight, Droplets, Printer } from 'lucide-react';
+import { Fragment, useId } from 'react';
+import MetadataRow from '@/Components/MetadataRow';
 import {
     JenisInsidenBadge,
     PayLaterBadge,
@@ -12,12 +15,19 @@ import {
 } from '@/Components/StatusBadge';
 import {
     formatRupiah,
+    formatTahapProduksi,
     formatTanggal,
     parseDecimalToCents,
 } from '@/lib/format';
 import type { TransaksiNotaProps } from '@/types';
 
 export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
+    const layananCaptionId = useId();
+    const pakaianCaptionId = useId();
+    const riwayatCaptionId = useId();
+    const insidenCaptionId = useId();
+    const pembayaranCaptionId = useId();
+
     const totalPotong = transaksi.detail_pakaian.reduce(
         (acc, item) => acc + item.jumlah_potong,
         0,
@@ -31,6 +41,15 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
     const completedStages = new Set(
         transaksi.riwayat_status_produksi.map((item) => item.tahap_status),
     );
+
+    const orderedPipelineStages = transaksi.layanan.tahap_layanan
+        .slice()
+        .sort((a, b) => a.urutan - b.urutan)
+        .filter(
+            (tahap) =>
+                transaksi.layanan.perlu_setrika ||
+                tahap.nama_tahap !== 'DISETRIKA',
+        );
 
     const isDibatalkan = transaksi.status_transaksi === 'DIBATALKAN';
     const voucherApplied =
@@ -50,82 +69,79 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
         parseDecimalToCents(transaksi.total_pengembalian_pelanggan) > 0;
 
     return (
-        <div className="min-h-screen bg-slate-100 px-4 py-6 text-slate-900 sm:px-6 print:min-h-0 print:bg-white print:p-0">
+        <div className="min-h-screen bg-[#F5F7F8] px-4 py-6 text-[#0F172A] sm:px-6 print:min-h-0 print:bg-white print:p-0">
             <Head title={`Cetak Nota ${transaksi.nomor_nota}`} />
 
             <div className="mx-auto max-w-4xl print:max-w-none">
                 {/* Baris aksi navigasi & cetak (disembunyikan saat print) */}
-                <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 shadow-xs print:hidden">
+                <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#D8E2E6] bg-white px-5 py-3.5 shadow-[0_1px_2px_rgba(15,41,51,0.04)] print:hidden">
                     <div className="flex flex-wrap items-center gap-2">
                         <Link
                             href={`/transaksi/${transaksi.nomor_nota}`}
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                            className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
                         >
                             &larr; Kembali ke Detail
                         </Link>
                         <Link
                             href="/transaksi"
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                            className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
                         >
                             Daftar Transaksi
                         </Link>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <span className="hidden text-xs text-slate-500 sm:inline">
+                        <span className="hidden text-xs text-[#5B697A] sm:inline">
                             Pratinjau cetak siap kertas A4
                         </span>
                         <button
                             type="button"
                             onClick={() => window.print()}
-                            className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+                            className="inline-flex min-h-[2.5rem] items-center gap-2 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
                         >
-                            <svg
-                                className="h-4 w-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth={1.75}
-                                stroke="currentColor"
+                            <Printer
+                                className="h-4 w-4 shrink-0"
                                 aria-hidden="true"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z"
-                                />
-                            </svg>
-                            Cetak Nota
+                            />
+                            <span>Cetak Nota</span>
                         </button>
                     </div>
                 </div>
 
                 {/* Lembar Nota Resmi CleanWash */}
-                <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 print:rounded-none print:border-0 print:p-0 print:shadow-none">
+                <article className="rounded-2xl border border-[#D8E2E6] bg-white p-6 shadow-[0_1px_2px_rgba(15,41,51,0.04)] sm:p-8 print:rounded-none print:border-0 print:p-0 print:shadow-none">
                     {/* Header Brand & Nomor Nota */}
-                    <header className="flex flex-col justify-between gap-4 border-b-2 border-slate-900 pb-5 sm:flex-row sm:items-start print:flex-row print:items-start">
+                    <header className="flex flex-col justify-between gap-4 border-b-2 border-[#0F2933] pb-5 sm:flex-row sm:items-start print:flex-row print:items-start">
                         <div className="flex items-start gap-3.5">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-600 text-lg font-extrabold tracking-tight text-white">
-                                CW
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0F2933] text-white ring-1 ring-[#14B8A6]/40">
+                                <Droplets
+                                    className="h-6 w-6 text-[#2DD4BF]"
+                                    aria-hidden="true"
+                                />
                             </div>
                             <div>
-                                <p className="text-[11px] font-bold uppercase tracking-widest text-sky-700">
+                                <p className="text-[11px] font-bold uppercase tracking-widest text-[#0F766E]">
                                     Nota Transaksi Resmi
                                 </p>
-                                <h1 className="text-xl font-extrabold tracking-tight text-slate-900">
+                                <h1
+                                    id="main-content"
+                                    tabIndex={-1}
+                                    className="text-xl font-extrabold tracking-tight text-[#0F172A] focus:outline-none"
+                                >
                                     CleanWash Laundry
                                 </h1>
-                                <p className="mt-0.5 text-xs text-slate-500">
+                                <p className="mt-0.5 text-xs text-[#5B697A]">
                                     Sistem Manajemen Operasional Laundry &bull;
                                     Waktu Referensi WIB (Asia/Jakarta)
                                 </p>
                             </div>
                         </div>
 
-                        <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left sm:text-right print:text-right">
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                        <div className="rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] px-4 py-3 text-left sm:text-right print:text-right">
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#5B697A]">
                                 Nomor Nota
                             </p>
-                            <p className="mt-0.5 font-mono text-lg font-extrabold text-slate-900">
+                            <p className="mt-0.5 font-mono text-lg font-extrabold tabular-nums text-[#0F172A]">
                                 {transaksi.nomor_nota}
                             </p>
                             <div className="mt-2 flex flex-wrap items-center gap-1.5 sm:justify-end print:justify-end">
@@ -141,22 +157,22 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
 
                     {/* Ringkasan Pembatalan Transaksi (KK-08) */}
                     {isDibatalkan && (
-                        <section className="mt-5 rounded-xl border border-rose-300 bg-rose-50/70 px-4 py-3 text-xs">
+                        <section className="mt-5 rounded-xl border border-rose-200 border-l-4 border-l-[#BE123C] bg-[#FFF1F2] px-4 py-3 text-xs">
                             <div className="flex flex-wrap items-center justify-between gap-2">
                                 <div className="flex flex-wrap items-center gap-2">
-                                    <h2 className="font-bold uppercase tracking-wider text-rose-900">
+                                    <h2 className="font-bold uppercase tracking-wider text-[#9F1239]">
                                         Status Pembatalan Transaksi
                                     </h2>
                                     <TransactionStatusBadge
                                         status={transaksi.status_transaksi}
                                     />
                                 </div>
-                                <span className="font-bold tabular-nums text-rose-900">
+                                <span className="font-mono font-bold tabular-nums text-[#9F1239]">
                                     Biaya Pembatalan:{' '}
                                     {formatRupiah(transaksi.biaya_pembatalan)}
                                 </span>
                             </div>
-                            <p className="mt-1.5 text-rose-950">
+                            <p className="mt-1.5 text-[#9F1239]">
                                 {hasBiayaPembatalan
                                     ? `Transaksi dibatalkan setelah proses pencucian dimulai (KK-08) dengan biaya proses sebesar ${formatRupiah(transaksi.biaya_pembatalan)}.`
                                     : 'Transaksi dibatalkan pada tahap DITERIMA sebelum proses pencucian dimulai (bebas biaya pembatalan Rp 0).'}
@@ -166,36 +182,36 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
 
                     {/* Identitas Pelanggan & Metadata Penerimaan */}
                     <section className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 print:grid-cols-2">
-                        <div className="rounded-xl border border-slate-200 p-4">
-                            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <div className="rounded-xl border border-[#D8E2E6] p-4">
+                            <h2 className="text-xs font-bold uppercase tracking-wider text-[#475569]">
                                 Identitas Pelanggan
                             </h2>
                             <dl className="mt-3 space-y-2 text-xs">
                                 <div className="flex justify-between gap-3">
-                                    <dt className="text-slate-500">Nama</dt>
-                                    <dd className="text-right font-bold text-slate-900">
+                                    <dt className="text-[#5B697A]">Nama</dt>
+                                    <dd className="text-right font-bold text-[#0F172A]">
                                         {transaksi.pelanggan.nama}
                                     </dd>
                                 </div>
                                 <div className="flex justify-between gap-3">
-                                    <dt className="text-slate-500">
+                                    <dt className="text-[#5B697A]">
                                         No. Telepon
                                     </dt>
-                                    <dd className="text-right font-mono text-slate-800">
+                                    <dd className="text-right font-mono tabular-nums text-[#0F172A]">
                                         {transaksi.pelanggan.no_telepon}
                                     </dd>
                                 </div>
                                 <div className="flex justify-between gap-3">
-                                    <dt className="shrink-0 text-slate-500">
+                                    <dt className="shrink-0 text-[#5B697A]">
                                         Alamat
                                     </dt>
-                                    <dd className="text-right text-slate-700">
+                                    <dd className="text-right text-[#475569]">
                                         {transaksi.pelanggan.alamat}
                                     </dd>
                                 </div>
                                 {transaksi.pelanggan.boleh_bayar_akhir && (
-                                    <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-2">
-                                        <dt className="text-slate-500">
+                                    <div className="flex items-center justify-between gap-3 border-t border-[#D8E2E6] pt-2">
+                                        <dt className="text-[#5B697A]">
                                             Penanda Pelanggan
                                         </dt>
                                         <dd>
@@ -206,16 +222,16 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                             </dl>
                         </div>
 
-                        <div className="rounded-xl border border-slate-200 p-4">
-                            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <div className="rounded-xl border border-[#D8E2E6] p-4">
+                            <h2 className="text-xs font-bold uppercase tracking-wider text-[#475569]">
                                 Informasi Penerimaan &amp; Status
                             </h2>
                             <dl className="mt-3 space-y-2 text-xs">
                                 <div className="flex justify-between gap-3">
-                                    <dt className="text-slate-500">
+                                    <dt className="text-[#5B697A]">
                                         Tanggal Penerimaan
                                     </dt>
-                                    <dd className="text-right font-semibold text-slate-900">
+                                    <dd className="text-right font-semibold tabular-nums text-[#0F172A]">
                                         {formatTanggal(
                                             transaksi.tanggal_penerimaan,
                                             { withTime: true },
@@ -223,15 +239,15 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                     </dd>
                                 </div>
                                 <div className="flex justify-between gap-3">
-                                    <dt className="text-slate-500">
+                                    <dt className="text-[#5B697A]">
                                         Petugas Penerima
                                     </dt>
-                                    <dd className="text-right font-semibold text-slate-900">
+                                    <dd className="text-right font-semibold text-[#0F172A]">
                                         {transaksi.petugas.nama_petugas}
                                     </dd>
                                 </div>
                                 <div className="flex items-center justify-between gap-3">
-                                    <dt className="text-slate-500">
+                                    <dt className="text-[#5B697A]">
                                         Status Pembayaran
                                     </dt>
                                     <dd>
@@ -241,7 +257,7 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                     </dd>
                                 </div>
                                 <div className="flex items-center justify-between gap-3">
-                                    <dt className="text-slate-500">
+                                    <dt className="text-[#5B697A]">
                                         Tahap Produksi Terkini
                                     </dt>
                                     <dd className="text-right">
@@ -252,14 +268,14 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                                         latestStage.tahap_status
                                                     }
                                                 />
-                                                <span className="text-[10px] text-slate-500">
+                                                <span className="text-[10px] tabular-nums text-[#5B697A]">
                                                     {formatTanggal(
                                                         latestStage.waktu_update,
                                                         { withTime: true },
                                                     )}
                                                 </span>
                                                 {latestStage.pegawai && (
-                                                    <span className="text-[10px] font-medium text-slate-600">
+                                                    <span className="text-[10px] font-medium text-[#475569]">
                                                         Pelaksana:{' '}
                                                         {
                                                             latestStage.pegawai
@@ -269,18 +285,18 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                                 )}
                                             </div>
                                         ) : (
-                                            <span className="text-slate-500">
+                                            <span className="text-[#5B697A]">
                                                 —
                                             </span>
                                         )}
                                     </dd>
                                 </div>
                                 {transaksi.diambil_pada && (
-                                    <div className="flex justify-between gap-3 border-t border-slate-100 pt-2">
-                                        <dt className="text-slate-500">
+                                    <div className="flex justify-between gap-3 border-t border-[#D8E2E6] pt-2">
+                                        <dt className="text-[#5B697A]">
                                             Waktu Serah Terima
                                         </dt>
-                                        <dd className="text-right text-slate-700">
+                                        <dd className="text-right tabular-nums text-[#475569]">
                                             {formatTanggal(
                                                 transaksi.diambil_pada,
                                                 { withTime: true },
@@ -293,93 +309,123 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                     </section>
 
                     {/* Rincian Layanan */}
-                    <section className="mt-5 rounded-xl border border-slate-200 p-4">
-                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <section className="mt-5 rounded-xl border border-[#D8E2E6] p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#D8E2E6] pb-3">
+                            <h2 className="text-xs font-bold uppercase tracking-wider text-[#475569]">
                                 Rincian Layanan
                             </h2>
-                            <div className="flex flex-wrap items-center gap-1.5">
-                                {transaksi.layanan.tahap_layanan.map(
-                                    (tahap) => {
-                                        const done = completedStages.has(
-                                            tahap.nama_tahap,
-                                        );
-                                        return (
-                                            <span
-                                                key={tahap.id_tahap}
-                                                className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 ring-inset ${
+                            <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] font-medium">
+                                {orderedPipelineStages.map((tahap, idx) => {
+                                    const done = completedStages.has(
+                                        tahap.nama_tahap,
+                                    );
+                                    return (
+                                        <Fragment key={tahap.id_tahap}>
+                                            {idx > 0 && (
+                                                <li aria-hidden="true">
+                                                    <ArrowRight className="h-3 w-3 text-[#7C8C9D]" />
+                                                </li>
+                                            )}
+                                            <li
+                                                className={
                                                     done
-                                                        ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                                                        : 'bg-slate-50 text-slate-500 ring-slate-200'
-                                                }`}
+                                                        ? 'font-semibold text-[#065F46]'
+                                                        : 'text-[#5B697A]'
+                                                }
                                             >
                                                 {tahap.urutan}.{' '}
-                                                {tahap.nama_tahap}
-                                            </span>
-                                        );
-                                    },
-                                )}
-                            </div>
+                                                {formatTahapProduksi(
+                                                    tahap.nama_tahap,
+                                                )}
+                                            </li>
+                                        </Fragment>
+                                    );
+                                })}
+                            </ol>
                         </div>
 
-                        <div className="mt-3 overflow-x-auto">
+                        <div
+                            tabIndex={0}
+                            role="region"
+                            aria-labelledby={layananCaptionId}
+                            className="mt-3 overflow-x-auto"
+                        >
                             <table className="min-w-full text-left text-xs">
-                                <thead className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                                <caption
+                                    id={layananCaptionId}
+                                    className="sr-only"
+                                >
+                                    Rincian layanan transaksi{' '}
+                                    {transaksi.nomor_nota}
+                                </caption>
+                                <thead className="text-[11px] font-semibold uppercase tracking-wide text-[#475569]">
                                     <tr>
-                                        <th className="py-1.5 pr-4">
+                                        <th scope="col" className="py-1.5 pr-4">
                                             Nama Layanan
                                         </th>
-                                        <th className="px-4 py-1.5">
+                                        <th scope="col" className="px-4 py-1.5">
                                             Kecepatan
                                         </th>
-                                        <th className="px-4 py-1.5 text-right">
+                                        <th
+                                            scope="col"
+                                            className="px-4 py-1.5 text-right"
+                                        >
                                             Volume / Kuantitas
                                         </th>
-                                        <th className="px-4 py-1.5 text-right">
+                                        <th
+                                            scope="col"
+                                            className="px-4 py-1.5 text-right"
+                                        >
                                             Tarif Satuan (Snapshot)
                                         </th>
-                                        <th className="py-1.5 pl-4 text-right">
+                                        <th
+                                            scope="col"
+                                            className="py-1.5 pl-4 text-right"
+                                        >
                                             Subtotal Layanan
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="border-t border-slate-100">
+                                <tbody className="border-t border-[#D8E2E6]">
                                     <tr>
-                                        <td className="py-2.5 pr-4">
-                                            <p className="font-bold text-slate-900">
+                                        <th
+                                            scope="row"
+                                            className="py-2.5 pr-4 text-left font-normal"
+                                        >
+                                            <p className="font-bold text-[#0F172A]">
                                                 {transaksi.layanan.nama_layanan}
                                             </p>
-                                            <p className="text-[11px] text-slate-500">
-                                                Metode hitung:{' '}
-                                                {
+                                            <MetadataRow
+                                                className="mt-0.5 text-[11px]"
+                                                items={[
+                                                    `Metode hitung: ${transaksi.layanan.metode_hitung}`,
                                                     transaksi.layanan
-                                                        .metode_hitung
-                                                }{' '}
-                                                &bull;{' '}
-                                                {transaksi.layanan.perlu_setrika
-                                                    ? 'Dengan setrika'
-                                                    : 'Tanpa setrika'}
-                                            </p>
-                                        </td>
+                                                        .perlu_setrika
+                                                        ? 'Dengan setrika'
+                                                        : 'Tanpa setrika',
+                                                ]}
+                                            />
+                                        </th>
                                         <td className="px-4 py-2.5">
                                             <SpeedTierBadge
                                                 tier={
                                                     transaksi.layanan
                                                         .tingkat_kecepatan
                                                 }
+                                                variant="text"
                                             />
                                         </td>
-                                        <td className="px-4 py-2.5 text-right font-semibold tabular-nums text-slate-900">
+                                        <td className="px-4 py-2.5 text-right font-mono font-semibold tabular-nums text-[#0F172A]">
                                             {transaksi.berat_atau_jumlah}{' '}
                                             {transaksi.layanan.satuan}
                                         </td>
-                                        <td className="px-4 py-2.5 text-right font-semibold tabular-nums text-slate-900">
+                                        <td className="px-4 py-2.5 text-right font-mono font-semibold tabular-nums text-[#0F172A]">
                                             {formatRupiah(
                                                 transaksi.harga_satuan_snapshot,
                                             )}
                                             /{transaksi.layanan.satuan}
                                         </td>
-                                        <td className="py-2.5 pl-4 text-right font-bold tabular-nums text-slate-900">
+                                        <td className="py-2.5 pl-4 text-right font-mono font-bold tabular-nums text-[#0F172A]">
                                             {formatRupiah(
                                                 transaksi.subtotal_layanan,
                                             )}
@@ -391,119 +437,183 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                     </section>
 
                     {/* Tabel DetailPakaian */}
-                    <section className="mt-5 overflow-hidden rounded-xl border border-slate-200">
-                        <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2.5">
-                            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                    <section className="mt-5 overflow-hidden rounded-xl border border-[#D8E2E6]">
+                        <div className="flex items-center justify-between border-b border-[#D8E2E6] bg-[#F8FAFC] px-4 py-2.5">
+                            <h2 className="text-xs font-bold uppercase tracking-wider text-[#475569]">
                                 Rincian Item Pakaian (
                                 {transaksi.detail_pakaian.length} baris)
                             </h2>
-                            <span className="text-xs font-bold text-slate-700">
+                            <span className="text-xs font-bold tabular-nums text-[#0F172A]">
                                 Total: {totalPotong} potong
                             </span>
                         </div>
-                        <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
-                            <thead className="bg-white text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                                <tr>
-                                    <th className="w-12 px-4 py-2">No.</th>
-                                    <th className="px-4 py-2">Jenis Pakaian</th>
-                                    <th className="px-4 py-2 text-right">
-                                        Jumlah Potong
-                                    </th>
-                                    <th className="px-4 py-2">
-                                        Kondisi Pakaian
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                                {transaksi.detail_pakaian.map((detail, idx) => (
-                                    <tr key={detail.id_detail}>
-                                        <td className="px-4 py-2.5 text-slate-500">
-                                            {idx + 1}
-                                        </td>
-                                        <td className="px-4 py-2.5 font-semibold text-slate-900">
-                                            {detail.jenis_pakaian}
-                                        </td>
-                                        <td className="px-4 py-2.5 text-right font-semibold tabular-nums text-slate-800">
-                                            {detail.jumlah_potong} pcs
-                                        </td>
-                                        <td className="px-4 py-2.5 text-slate-700">
-                                            {detail.kondisi_pakaian}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </section>
-
-                    {/* Riwayat Status Produksi + Pelaksana Pegawai */}
-                    {transaksi.riwayat_status_produksi.length > 0 && (
-                        <section className="mt-5 overflow-hidden rounded-xl border border-slate-200">
-                            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2.5">
-                                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">
-                                    Riwayat Status Produksi
-                                </h2>
-                                <span className="text-[11px] font-medium text-slate-500">
-                                    {transaksi.riwayat_status_produksi.length}{' '}
-                                    tahap tercatat
-                                </span>
-                            </div>
-                            <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
-                                <thead className="bg-white text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                        <div
+                            tabIndex={0}
+                            role="region"
+                            aria-labelledby={pakaianCaptionId}
+                            className="overflow-x-auto"
+                        >
+                            <table className="min-w-full divide-y divide-[#D8E2E6] text-left text-xs">
+                                <caption
+                                    id={pakaianCaptionId}
+                                    className="sr-only"
+                                >
+                                    Daftar rincian item pakaian nota{' '}
+                                    {transaksi.nomor_nota}
+                                </caption>
+                                <thead className="bg-white text-[11px] font-semibold uppercase tracking-wide text-[#475569]">
                                     <tr>
-                                        <th className="px-4 py-2">Tahap</th>
-                                        <th className="px-4 py-2">
-                                            Waktu Update
+                                        <th
+                                            scope="col"
+                                            className="w-12 px-4 py-2"
+                                        >
+                                            No.
                                         </th>
-                                        <th className="px-4 py-2">
-                                            Pegawai Pelaksana
+                                        <th scope="col" className="px-4 py-2">
+                                            Jenis Pakaian
                                         </th>
-                                        <th className="px-4 py-2">Catatan</th>
+                                        <th
+                                            scope="col"
+                                            className="px-4 py-2 text-right"
+                                        >
+                                            Jumlah Potong
+                                        </th>
+                                        <th scope="col" className="px-4 py-2">
+                                            Kondisi Pakaian
+                                        </th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                    {transaksi.riwayat_status_produksi.map(
-                                        (riwayat) => (
-                                            <tr
-                                                key={riwayat.id_status_produksi}
-                                            >
-                                                <td className="whitespace-nowrap px-4 py-2">
-                                                    <ProductionStageBadge
-                                                        stage={
-                                                            riwayat.tahap_status
-                                                        }
-                                                    />
+                                <tbody className="divide-y divide-[#D8E2E6]/70">
+                                    {transaksi.detail_pakaian.map(
+                                        (detail, idx) => (
+                                            <tr key={detail.id_detail}>
+                                                <td className="px-4 py-2.5 tabular-nums text-[#5B697A]">
+                                                    {idx + 1}
                                                 </td>
-                                                <td className="whitespace-nowrap px-4 py-2 text-slate-700">
-                                                    {formatTanggal(
-                                                        riwayat.waktu_update,
-                                                        { withTime: true },
-                                                    )}
+                                                <th
+                                                    scope="row"
+                                                    className="px-4 py-2.5 text-left font-semibold text-[#0F172A]"
+                                                >
+                                                    {detail.jenis_pakaian}
+                                                </th>
+                                                <td className="px-4 py-2.5 text-right font-mono font-semibold tabular-nums text-[#0F172A]">
+                                                    {detail.jumlah_potong} pcs
                                                 </td>
-                                                <td className="px-4 py-2 font-medium text-slate-800">
-                                                    {riwayat.pegawai
-                                                        ? riwayat.pegawai
-                                                              .nama_pegawai
-                                                        : riwayat.id_pegawai !==
-                                                            null
-                                                          ? `Pegawai #${riwayat.id_pegawai}`
-                                                          : 'Kasir (Penerimaan)'}
-                                                </td>
-                                                <td className="px-4 py-2 text-slate-600">
-                                                    {riwayat.catatan ?? '—'}
+                                                <td className="px-4 py-2.5 text-[#475569]">
+                                                    {detail.kondisi_pakaian}
                                                 </td>
                                             </tr>
                                         ),
                                     )}
                                 </tbody>
                             </table>
+                        </div>
+                    </section>
+
+                    {/* Riwayat Status Produksi + Pelaksana Pegawai */}
+                    {transaksi.riwayat_status_produksi.length > 0 && (
+                        <section className="mt-5 overflow-hidden rounded-xl border border-[#D8E2E6]">
+                            <div className="flex items-center justify-between border-b border-[#D8E2E6] bg-[#F8FAFC] px-4 py-2.5">
+                                <h2 className="text-xs font-bold uppercase tracking-wider text-[#475569]">
+                                    Riwayat Status Produksi
+                                </h2>
+                                <span className="text-[11px] font-medium tabular-nums text-[#5B697A]">
+                                    {transaksi.riwayat_status_produksi.length}{' '}
+                                    tahap tercatat
+                                </span>
+                            </div>
+                            <div
+                                tabIndex={0}
+                                role="region"
+                                aria-labelledby={riwayatCaptionId}
+                                className="overflow-x-auto"
+                            >
+                                <table className="min-w-full divide-y divide-[#D8E2E6] text-left text-xs">
+                                    <caption
+                                        id={riwayatCaptionId}
+                                        className="sr-only"
+                                    >
+                                        Riwayat perpindahan status produksi nota{' '}
+                                        {transaksi.nomor_nota}
+                                    </caption>
+                                    <thead className="bg-white text-[11px] font-semibold uppercase tracking-wide text-[#475569]">
+                                        <tr>
+                                            <th
+                                                scope="col"
+                                                className="px-4 py-2"
+                                            >
+                                                Tahap
+                                            </th>
+                                            <th
+                                                scope="col"
+                                                className="px-4 py-2"
+                                            >
+                                                Waktu Update
+                                            </th>
+                                            <th
+                                                scope="col"
+                                                className="px-4 py-2"
+                                            >
+                                                Pegawai Pelaksana
+                                            </th>
+                                            <th
+                                                scope="col"
+                                                className="px-4 py-2"
+                                            >
+                                                Catatan
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-[#D8E2E6]/70">
+                                        {transaksi.riwayat_status_produksi.map(
+                                            (riwayat) => (
+                                                <tr
+                                                    key={
+                                                        riwayat.id_status_produksi
+                                                    }
+                                                >
+                                                    <th
+                                                        scope="row"
+                                                        className="whitespace-nowrap px-4 py-2 text-left font-normal"
+                                                    >
+                                                        <ProductionStageBadge
+                                                            stage={
+                                                                riwayat.tahap_status
+                                                            }
+                                                        />
+                                                    </th>
+                                                    <td className="whitespace-nowrap px-4 py-2 tabular-nums text-[#475569]">
+                                                        {formatTanggal(
+                                                            riwayat.waktu_update,
+                                                            { withTime: true },
+                                                        )}
+                                                    </td>
+                                                    <td className="px-4 py-2 font-medium text-[#0F172A]">
+                                                        {riwayat.pegawai
+                                                            ? riwayat.pegawai
+                                                                  .nama_pegawai
+                                                            : riwayat.id_pegawai !==
+                                                                null
+                                                              ? `Pegawai #${riwayat.id_pegawai}`
+                                                              : 'Kasir (Penerimaan)'}
+                                                    </td>
+                                                    <td className="px-4 py-2 text-[#475569]">
+                                                        {riwayat.catatan ?? '—'}
+                                                    </td>
+                                                </tr>
+                                            ),
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </section>
                     )}
 
                     {/* Laporan Insiden & Kompensasi (KK-04, KK-05) */}
                     {transaksi.laporan_insiden.length > 0 && (
-                        <section className="mt-5 overflow-hidden rounded-xl border border-amber-200">
-                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-amber-200 bg-amber-50/70 px-4 py-2.5">
-                                <h2 className="text-xs font-bold uppercase tracking-wider text-amber-950">
+                        <section className="mt-5 overflow-hidden rounded-xl border border-amber-300">
+                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-amber-200 bg-[#FFFBEB] px-4 py-2.5">
+                                <h2 className="text-xs font-bold uppercase tracking-wider text-[#78350F]">
                                     Rincian Laporan Insiden &amp; Kompensasi (
                                     {transaksi.laporan_insiden.length})
                                 </h2>
@@ -514,31 +624,61 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                     </StatusBadge>
                                 )}
                             </div>
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
-                                    <thead className="bg-white text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                            <div
+                                tabIndex={0}
+                                role="region"
+                                aria-labelledby={insidenCaptionId}
+                                className="overflow-x-auto"
+                            >
+                                <table className="min-w-full divide-y divide-[#D8E2E6] text-left text-xs">
+                                    <caption
+                                        id={insidenCaptionId}
+                                        className="sr-only"
+                                    >
+                                        Rincian laporan insiden dan kompensasi
+                                        nota {transaksi.nomor_nota}
+                                    </caption>
+                                    <thead className="bg-white text-[11px] font-semibold uppercase tracking-wide text-[#475569]">
                                         <tr>
-                                            <th className="px-4 py-2">
+                                            <th
+                                                scope="col"
+                                                className="px-4 py-2"
+                                            >
                                                 Jenis Insiden
                                             </th>
-                                            <th className="px-4 py-2">
+                                            <th
+                                                scope="col"
+                                                className="px-4 py-2"
+                                            >
                                                 Item Pakaian
                                             </th>
-                                            <th className="px-4 py-2">
+                                            <th
+                                                scope="col"
+                                                className="px-4 py-2"
+                                            >
                                                 Keterangan
                                             </th>
-                                            <th className="px-4 py-2">
+                                            <th
+                                                scope="col"
+                                                className="px-4 py-2"
+                                            >
                                                 Status Konfirmasi
                                             </th>
-                                            <th className="px-4 py-2 text-right">
+                                            <th
+                                                scope="col"
+                                                className="px-4 py-2 text-right"
+                                            >
                                                 Nilai Kompensasi
                                             </th>
-                                            <th className="px-4 py-2 text-right">
+                                            <th
+                                                scope="col"
+                                                className="px-4 py-2 text-right"
+                                            >
                                                 Kelebihan Ganti Rugi
                                             </th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-slate-100">
+                                    <tbody className="divide-y divide-[#D8E2E6]/70">
                                         {transaksi.laporan_insiden.map(
                                             (laporan) => {
                                                 const isPending =
@@ -557,7 +697,10 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                                                 }
                                                             />
                                                         </td>
-                                                        <td className="px-4 py-2.5 font-semibold text-slate-900">
+                                                        <th
+                                                            scope="row"
+                                                            className="px-4 py-2.5 text-left font-semibold text-[#0F172A]"
+                                                        >
                                                             {
                                                                 laporan
                                                                     .detail_pakaian
@@ -570,8 +713,8 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                                                     .jumlah_potong
                                                             }{' '}
                                                             pcs)
-                                                        </td>
-                                                        <td className="px-4 py-2.5 text-slate-700">
+                                                        </th>
+                                                        <td className="px-4 py-2.5 text-[#475569]">
                                                             <p>
                                                                 {
                                                                     laporan.keterangan
@@ -579,7 +722,7 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                                             </p>
                                                             {(laporan.pegawai_pelapor ||
                                                                 laporan.petugas) && (
-                                                                <p className="mt-0.5 text-[10px] text-slate-500">
+                                                                <p className="mt-0.5 text-[10px] text-[#5B697A]">
                                                                     Pelapor:{' '}
                                                                     {laporan
                                                                         .pegawai_pelapor
@@ -597,14 +740,14 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                                                 }
                                                             />
                                                         </td>
-                                                        <td className="whitespace-nowrap px-4 py-2.5 text-right font-semibold tabular-nums text-slate-900">
+                                                        <td className="whitespace-nowrap px-4 py-2.5 text-right font-mono font-semibold tabular-nums text-[#0F172A]">
                                                             {isPending
                                                                 ? `Menunggu (Est. ${formatRupiah(laporan.estimasi_kompensasi)})`
                                                                 : formatRupiah(
                                                                       laporan.nilai_kompensasi,
                                                                   )}
                                                         </td>
-                                                        <td className="whitespace-nowrap px-4 py-2.5 text-right font-semibold tabular-nums text-amber-800">
+                                                        <td className="whitespace-nowrap px-4 py-2.5 text-right font-mono font-semibold tabular-nums text-[#78350F]">
                                                             {formatRupiah(
                                                                 laporan.kelebihan_ganti_rugi,
                                                             )}
@@ -622,11 +765,11 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                     {/* Catatan Khusus (bila ada) */}
                     {transaksi.catatan_khusus !== null &&
                         transaksi.catatan_khusus.trim() !== '' && (
-                            <section className="mt-5 rounded-xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-xs">
-                                <h2 className="font-bold uppercase tracking-wider text-amber-900">
+                            <section className="mt-5 rounded-xl border border-amber-300 border-l-4 border-l-[#B45309] bg-[#FFFBEB] px-4 py-3 text-xs">
+                                <h2 className="font-bold uppercase tracking-wider text-[#78350F]">
                                     Catatan Khusus
                                 </h2>
-                                <p className="mt-1 whitespace-pre-line text-amber-950">
+                                <p className="mt-1 whitespace-pre-line text-[#78350F]">
                                     {transaksi.catatan_khusus}
                                 </p>
                             </section>
@@ -634,76 +777,115 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
 
                     {/* Riwayat Pembayaran / DP + Ringkasan Finansial */}
                     <section className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-12 print:grid-cols-12">
-                        <div className="overflow-hidden rounded-xl border border-slate-200 md:col-span-7 print:col-span-7">
-                            <div className="border-b border-slate-200 bg-slate-50 px-4 py-2.5">
-                                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                        <div className="overflow-hidden rounded-xl border border-[#D8E2E6] md:col-span-7 print:col-span-7">
+                            <div className="border-b border-[#D8E2E6] bg-[#F8FAFC] px-4 py-2.5">
+                                <h2 className="text-xs font-bold uppercase tracking-wider text-[#475569]">
                                     Riwayat Pembayaran / DP
                                 </h2>
                             </div>
                             {transaksi.pembayaran.length === 0 ? (
-                                <div className="p-4 text-xs text-slate-500">
+                                <div className="p-4 text-xs text-[#5B697A]">
                                     Belum ada pembayaran tercatat (status{' '}
-                                    <span className="font-semibold text-slate-700">
+                                    <span className="font-semibold text-[#0F172A]">
                                         {transaksi.status_pembayaran}
                                     </span>
                                     ).
                                 </div>
                             ) : (
-                                <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
-                                    <thead className="bg-white text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                                        <tr>
-                                            <th className="px-4 py-2">
-                                                Tanggal
-                                            </th>
-                                            <th className="px-4 py-2">Jenis</th>
-                                            <th className="px-4 py-2">
-                                                Petugas
-                                            </th>
-                                            <th className="px-4 py-2 text-right">
-                                                Nominal
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100">
-                                        {transaksi.pembayaran.map((bayar) => (
-                                            <tr key={bayar.id_pembayaran}>
-                                                <td className="whitespace-nowrap px-4 py-2 text-slate-700">
-                                                    {formatTanggal(
-                                                        bayar.tanggal_bayar,
-                                                        { withTime: true },
-                                                    )}
-                                                </td>
-                                                <td className="whitespace-nowrap px-4 py-2">
-                                                    <PaymentTypeBadge
-                                                        type={bayar.jenis_bayar}
-                                                    />
-                                                </td>
-                                                <td className="px-4 py-2 text-slate-600">
-                                                    {bayar.petugas
-                                                        ?.nama_petugas ?? '—'}
-                                                </td>
-                                                <td className="whitespace-nowrap px-4 py-2 text-right font-semibold tabular-nums text-slate-900">
-                                                    {formatRupiah(
-                                                        bayar.nominal_bayar,
-                                                    )}
-                                                </td>
+                                <div
+                                    tabIndex={0}
+                                    role="region"
+                                    aria-labelledby={pembayaranCaptionId}
+                                    className="overflow-x-auto"
+                                >
+                                    <table className="min-w-full divide-y divide-[#D8E2E6] text-left text-xs">
+                                        <caption
+                                            id={pembayaranCaptionId}
+                                            className="sr-only"
+                                        >
+                                            Riwayat pembayaran nota{' '}
+                                            {transaksi.nomor_nota}
+                                        </caption>
+                                        <thead className="bg-white text-[11px] font-semibold uppercase tracking-wide text-[#475569]">
+                                            <tr>
+                                                <th
+                                                    scope="col"
+                                                    className="px-4 py-2"
+                                                >
+                                                    Tanggal
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-4 py-2"
+                                                >
+                                                    Jenis
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-4 py-2"
+                                                >
+                                                    Petugas
+                                                </th>
+                                                <th
+                                                    scope="col"
+                                                    className="px-4 py-2 text-right"
+                                                >
+                                                    Nominal
+                                                </th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody className="divide-y divide-[#D8E2E6]/70">
+                                            {transaksi.pembayaran.map(
+                                                (bayar) => (
+                                                    <tr
+                                                        key={
+                                                            bayar.id_pembayaran
+                                                        }
+                                                    >
+                                                        <td className="whitespace-nowrap px-4 py-2 tabular-nums text-[#475569]">
+                                                            {formatTanggal(
+                                                                bayar.tanggal_bayar,
+                                                                {
+                                                                    withTime: true,
+                                                                },
+                                                            )}
+                                                        </td>
+                                                        <td className="whitespace-nowrap px-4 py-2">
+                                                            <PaymentTypeBadge
+                                                                type={
+                                                                    bayar.jenis_bayar
+                                                                }
+                                                            />
+                                                        </td>
+                                                        <td className="px-4 py-2 text-[#475569]">
+                                                            {bayar.petugas
+                                                                ?.nama_petugas ??
+                                                                '—'}
+                                                        </td>
+                                                        <td className="whitespace-nowrap px-4 py-2 text-right font-mono font-semibold tabular-nums text-[#0F172A]">
+                                                            {formatRupiah(
+                                                                bayar.nominal_bayar,
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ),
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             )}
                         </div>
 
-                        <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 md:col-span-5 print:col-span-5">
-                            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                        <div className="rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] p-4 md:col-span-5 print:col-span-5">
+                            <h2 className="text-xs font-bold uppercase tracking-wider text-[#475569]">
                                 Ringkasan Finansial
                             </h2>
                             <dl className="mt-3 space-y-2 text-xs">
                                 <div className="flex justify-between gap-3">
-                                    <dt className="text-slate-600">
+                                    <dt className="text-[#475569]">
                                         Subtotal Layanan
                                     </dt>
-                                    <dd className="font-semibold tabular-nums text-slate-900">
+                                    <dd className="font-mono font-semibold tabular-nums text-[#0F172A]">
                                         {formatRupiah(
                                             transaksi.subtotal_layanan,
                                         )}
@@ -711,11 +893,11 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                 </div>
 
                                 <div className="flex items-start justify-between gap-3">
-                                    <dt className="text-slate-600">
+                                    <dt className="text-[#475569]">
                                         <span>Potongan Voucher</span>
                                         {voucherApplied &&
                                             transaksi.voucher && (
-                                                <span className="ml-1.5 inline-block rounded bg-emerald-50 px-1.5 py-0.5 font-mono text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-200">
+                                                <span className="ml-1.5 inline-block rounded bg-[#ECFDF5] px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#065F46] ring-1 ring-emerald-200">
                                                     {
                                                         transaksi.voucher
                                                             .nomor_voucher
@@ -724,10 +906,10 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                             )}
                                     </dt>
                                     <dd
-                                        className={`font-semibold tabular-nums ${
+                                        className={`font-mono font-semibold tabular-nums ${
                                             voucherApplied
-                                                ? 'text-emerald-700'
-                                                : 'text-slate-500'
+                                                ? 'text-[#065F46]'
+                                                : 'text-[#5B697A]'
                                         }`}
                                     >
                                         {voucherApplied
@@ -738,10 +920,10 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
 
                                 {hasKompensasi && (
                                     <div className="flex justify-between gap-3">
-                                        <dt className="text-slate-600">
+                                        <dt className="text-[#475569]">
                                             Total Kompensasi
                                         </dt>
-                                        <dd className="font-semibold tabular-nums text-emerald-700">
+                                        <dd className="font-mono font-semibold tabular-nums text-[#065F46]">
                                             -
                                             {formatRupiah(
                                                 transaksi.total_kompensasi,
@@ -752,10 +934,10 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
 
                                 {(hasBiayaPembatalan || isDibatalkan) && (
                                     <div className="flex justify-between gap-3">
-                                        <dt className="text-slate-600">
+                                        <dt className="text-[#475569]">
                                             Biaya Pembatalan
                                         </dt>
-                                        <dd className="font-semibold tabular-nums text-rose-700">
+                                        <dd className="font-mono font-semibold tabular-nums text-[#9F1239]">
                                             {formatRupiah(
                                                 transaksi.biaya_pembatalan,
                                             )}
@@ -763,33 +945,33 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                     </div>
                                 )}
 
-                                <div className="flex justify-between gap-3 border-t border-slate-200 pt-2 text-sm">
-                                    <dt className="font-bold text-slate-900">
+                                <div className="flex justify-between gap-3 border-t border-[#D8E2E6] pt-2 text-sm">
+                                    <dt className="font-bold text-[#0F172A]">
                                         Total Harga
                                     </dt>
-                                    <dd className="font-extrabold tabular-nums text-slate-900">
+                                    <dd className="font-mono font-extrabold tabular-nums text-[#0F172A]">
                                         {formatRupiah(transaksi.total_harga)}
                                     </dd>
                                 </div>
 
                                 <div className="flex justify-between gap-3">
-                                    <dt className="text-slate-600">
+                                    <dt className="text-[#475569]">
                                         Total Dibayar
                                     </dt>
-                                    <dd className="font-semibold tabular-nums text-sky-700">
+                                    <dd className="font-mono font-semibold tabular-nums text-[#0F766E]">
                                         {formatRupiah(transaksi.total_dibayar)}
                                     </dd>
                                 </div>
 
-                                <div className="flex justify-between gap-3 border-t border-slate-200 pt-2 text-sm">
-                                    <dt className="font-bold text-slate-900">
+                                <div className="flex justify-between gap-3 border-t border-[#D8E2E6] pt-2 text-sm">
+                                    <dt className="font-bold text-[#0F172A]">
                                         Sisa Tagihan
                                     </dt>
                                     <dd
-                                        className={`font-extrabold tabular-nums ${
+                                        className={`font-mono font-extrabold tabular-nums ${
                                             hasSisaTagihan
-                                                ? 'text-amber-700'
-                                                : 'text-emerald-700'
+                                                ? 'text-[#78350F]'
+                                                : 'text-[#065F46]'
                                         }`}
                                     >
                                         {formatRupiah(transaksi.sisa_tagihan)}
@@ -799,11 +981,11 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                 {(hasKelebihanBayarTunai ||
                                     hasKelebihanGantiRugi ||
                                     hasTotalPengembalian) && (
-                                    <div className="mt-2 space-y-1.5 rounded-lg border border-emerald-200 bg-emerald-50/70 p-2.5 text-xs">
+                                    <div className="mt-2 space-y-1.5 rounded-lg border border-emerald-200 bg-[#ECFDF5] p-2.5 text-xs">
                                         {hasKelebihanBayarTunai && (
-                                            <div className="flex justify-between gap-3 text-emerald-900">
+                                            <div className="flex justify-between gap-3 text-[#065F46]">
                                                 <dt>Kelebihan Bayar Tunai</dt>
-                                                <dd className="font-semibold tabular-nums">
+                                                <dd className="font-mono font-semibold tabular-nums">
                                                     {formatRupiah(
                                                         transaksi.kelebihan_bayar_tunai,
                                                     )}
@@ -811,11 +993,11 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                             </div>
                                         )}
                                         {hasKelebihanGantiRugi && (
-                                            <div className="flex justify-between gap-3 text-emerald-900">
+                                            <div className="flex justify-between gap-3 text-[#065F46]">
                                                 <dt>
                                                     Total Kelebihan Ganti Rugi
                                                 </dt>
-                                                <dd className="font-semibold tabular-nums">
+                                                <dd className="font-mono font-semibold tabular-nums">
                                                     {formatRupiah(
                                                         transaksi.total_kelebihan_ganti_rugi,
                                                     )}
@@ -823,11 +1005,11 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                             </div>
                                         )}
                                         {hasTotalPengembalian && (
-                                            <div className="flex justify-between gap-3 border-t border-emerald-200 pt-1.5 font-bold text-emerald-950">
+                                            <div className="flex justify-between gap-3 border-t border-emerald-200 pt-1.5 font-bold text-[#065F46]">
                                                 <dt>
                                                     Total Pengembalian Pelanggan
                                                 </dt>
-                                                <dd className="tabular-nums">
+                                                <dd className="font-mono tabular-nums">
                                                     {formatRupiah(
                                                         transaksi.total_pengembalian_pelanggan,
                                                     )}
@@ -841,10 +1023,10 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                     </section>
 
                     {/* Footer Nota Resmi & Tanda Tangan */}
-                    <footer className="mt-6 border-t border-dashed border-slate-300 pt-4 text-[11px] text-slate-500">
+                    <footer className="mt-6 border-t border-dashed border-[#7C8C9D] pt-4 text-[11px] text-[#5B697A]">
                         <div className="flex flex-col justify-between gap-4 sm:flex-row print:flex-row">
                             <div className="max-w-md space-y-1">
-                                <p className="font-semibold text-slate-700">
+                                <p className="font-semibold text-[#0F172A]">
                                     Ketentuan Layanan CleanWash:
                                 </p>
                                 <p>
@@ -856,7 +1038,7 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                     pakaian bersama petugas saat serah terima.
                                 </p>
                                 {transaksi.pelanggan.boleh_bayar_akhir && (
-                                    <p className="font-medium text-indigo-700">
+                                    <p className="font-medium text-[#3730A3]">
                                         3. Hak Bayar Akhir aktif untuk pelanggan
                                         ini; sisa piutang dicatat resmi pada
                                         nota.
@@ -866,16 +1048,16 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
 
                             <div className="grid grid-cols-2 gap-8 text-center">
                                 <div>
-                                    <p className="text-slate-500">
+                                    <p className="text-[#5B697A]">
                                         Petugas Penerima
                                     </p>
-                                    <div className="mt-10 border-t border-slate-300 pt-1 font-semibold text-slate-800">
+                                    <div className="mt-10 border-t border-[#7C8C9D] pt-1 font-semibold text-[#0F172A]">
                                         {transaksi.petugas.nama_petugas}
                                     </div>
                                 </div>
                                 <div>
-                                    <p className="text-slate-500">Pelanggan</p>
-                                    <div className="mt-10 border-t border-slate-300 pt-1 font-semibold text-slate-800">
+                                    <p className="text-[#5B697A]">Pelanggan</p>
+                                    <div className="mt-10 border-t border-[#7C8C9D] pt-1 font-semibold text-[#0F172A]">
                                         {transaksi.pelanggan.nama}
                                     </div>
                                 </div>

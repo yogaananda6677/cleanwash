@@ -30,6 +30,8 @@ Dilarang mencatat log kronologis harian di file ini — **catat log aktivitas di
    Do instead: Gunakan `{ exact: true }` atau container spesifik saat mengasesmen badge visible (`AuditLog` `<details>` dan `<option>` dapat cocok di DOM), kembali ke `/transaksi/{nota}` via tautan `← Kembali ke Detail` sebelum `logout()` dari halaman cetak `/nota`, dan gunakan predikat URL (`match[1] !== oldSessionId`) saat menunggu redirect sesudah reschedule `KK-07`.
 9. **[2026-11-10] Negative test HTTP `403`/`422` memicu native Chromium `console.error` (`Failed to load resource`) dan serah terima loket otomatis menggeser sesi kurir ke `BERJALAN`**
    Do instead: Isolasi blok negative-test (`403`/`422`) memakai `RuntimeMonitor.runAllowingHttpStatuses(...)` sambil tetap memblokir `419`/`>=500`/JS error/`pageerror`, serta periksa transisi otomatis sesi kurir ke `BERJALAN` (`1 Item Gagal`) tanpa menunggu tombol `Mulai Pengantaran` ketika salah satu item `MENUNGGU` ditutup otomatis saat serah terima loket.
+10. **[2026-11-11] Redesign UI merusak kontras WCAG AA/1.4.11, menyebabkan ghosting header sticky, atau mematahkan selector Playwright E2E**
+    Do instead: Pakai `#0F766E` (`5.47:1`) alih-alih `#0D9488` (`3.74:1`) untuk tombol teks putih, border kontrol `#7C8C9D` (`3.45:1`), header `AppLayout` solid `bg-white`, dan rujuk Matriks Pelestarian Selector E2E di `docs/design/PAGE_BLUEPRINTS.md` §3 (termasuk `form p.text-rose-600` di `Login.tsx` dan teks `'Tanpa Setrika'`/`'Reguler'`) sebelum mengubah markup/class.
 
 ---
 

@@ -14,8 +14,8 @@ Dokumen ini adalah memori status arsitektur proyek **CleanWash** untuk manusia d
 | **SRS Reference** | [UTS.pdf](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/Outputtts/UTS.pdf) & [2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx) |
 | **Current Phase** | Phase 3 — Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening |
 | **Current Status** | `FINAL RELEASE READY` (Phase 1–3 Resmi `DONE` per PM Closing Gate) |
-| **Last Updated** | 2026-11-10 |
-| **Updated By** | Product Manager & Primary Agent (`Phase 3 Closing Gate & Final Release Sign-Off`) |
+| **Last Updated** | 2026-11-11 |
+| **Updated By** | UI/UX Designer, Frontend Developer, QA Engineer & Primary Agent (`UI/UX Overhaul & Visual Sign-Off`) |
 
 ---
 
@@ -51,10 +51,11 @@ Membangun sistem informasi operasional laundry **CleanWash** berbasis web (**Lar
 | **ADR-005** | **Kolom Snapshot Tarif (`harga_satuan_snapshot`) pada `Transaksi`** | ACCEPTED | Menjamin kondisi khusus `KK-09` (perubahan tarif master tidak mengubah nota lama). |
 | **ADR-006** | **Tabel Asosiasi `ItemPengantaran` untuk relasi `*..*` `Transaksi`–`Pengantaran`** | ACCEPTED | Memenuhi `KK-07` agar satu kurir dapat membawa banyak transaksi lintas pelanggan dan menjadwalkan ulang satu nota gagal secara terpisah. |
 | **ADR-007** | **Arsitektur Memori 3 Lapis (`WRITE.md` + `MEMORY.md` + `.claude/napkin.md`)** | ACCEPTED | Mengatasi celah `napkin.md` yang bukan log kronologis sehingga tidak ada kehilangan konteks antar sesi dan antar subagent. |
-| **ADR-008** | **Orkestrasi 5 Subagent Terspesialisasi (`.agents/agents/*.md`)** | ACCEPTED | Memisahkan tanggung jawab `product-manager`, `backend-developer`, `frontend-developer`, `fullstack-developer`, dan `qa-engineer` beserta *cross-agent review gate*. |
+| **ADR-008** | **Orkestrasi 6 Subagent Terspesialisasi (`.agents/agents/*.md`)** | ACCEPTED | Memisahkan tanggung jawab `product-manager`, `ui-ux-designer`, `backend-developer`, `frontend-developer`, `fullstack-developer`, dan `qa-engineer` beserta *cross-agent review gate*. |
 | **ADR-009** | **6 Gerbang Kualitas Adaptasi `napkin/PR_REVIEW_LIFECYCLE.md`** | ACCEPTED | Menggantikan gate Golang/Flutter dari acuan `PTT_app` menjadi gate Laravel Pint, TypeScript, PHPUnit/Pest, MySQL rollback, dan wajib isi `WRITE.md`. |
 | **ADR-010** | **`App\Support\DecimalMoney` (skala 100 integer) & MySQL `3307` Terisolasi** | ACCEPTED | Runtime PHP 8.4 lokal tidak memiliki `ext-bcmath` maupun `ext-pdo_sqlite`, serta port `3306` dipakai proyek lain; seluruh aritmatika uang memakai integer skala 100 dan DB dev/test terisolasi di MySQL 8.4 port `3307`. |
 | **ADR-011** | **Live Browser Regression QA (`@playwright/test`) Tanpa Mock** | ACCEPTED | Pengujian E2E browser menggunakan `@playwright/test` (`workers: 1`, `baseURL: http://127.0.0.1:8000`) terhadap server Laravel + MySQL 8.4 nyata (tanpa mock API), menghasilkan 28 screenshot bukti sekuensial di `docs/qa/screenshots/` dan laporan resmi di `docs/qa/QA_REGRESSION_REPORT.md`. |
+| **ADR-012** | **CleanWash Design System (`Crisp Laundry-Tech Atelier`) & Bundled Fonts/Icons** | ACCEPTED | Sistem desain terpadu oleh subagent `ui-ux-designer` (`docs/design/DESIGN_SYSTEM.md`) memakai palet Deep Petrol Teal + Fresh Teal-Emerald, font lokal `@fontsource/plus-jakarta-sans` & `@fontsource/jetbrains-mono` (`tabular-nums`), dan ikon `lucide-react` tanpa ketergantungan CDN eksternal. |
 
 ---
 
@@ -69,6 +70,7 @@ Status yang diizinkan: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 | **Phase 2** | Operasional Produksi, Timbang Ulang, Ubah/Batal & Kompensasi Insiden | `DONE` | 2026-11-10 | 2026-11-10 | [PHASE_2_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_2_CONTRACTS.md), [PHASE_2_CLOSING_EVIDENCE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_2_CLOSING_EVIDENCE.md), & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#010`–`#016` |
 | **Phase 3** | Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening | `DONE` | 2026-11-10 | 2026-11-10 | [PHASE_3_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_3_CONTRACTS.md), [PHASE_3_CLOSING_EVIDENCE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_3_CLOSING_EVIDENCE.md), & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#017`–`#022` |
 | **Live Browser QA** | Subagent `qa-engineer`, Playwright E2E Regression Suite (`REG-00`–`REG-05`), & 28-Screenshot Report | `DONE` | 2026-11-10 | 2026-11-10 | [QA_REGRESSION_REPORT.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/qa/QA_REGRESSION_REPORT.md), [regression-cleanwash.spec.ts](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/tests/e2e/regression-cleanwash.spec.ts), & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#023`–`#024` |
+| **UI/UX Overhaul** | Subagent `ui-ux-designer`, Design System, App Shell & Role-Based Ergonomics Redesign + Re-QA | `DONE` | 2026-11-11 | 2026-11-11 | [DESIGN_SYSTEM.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/design/DESIGN_SYSTEM.md), [PAGE_BLUEPRINTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/design/PAGE_BLUEPRINTS.md), [QA_REGRESSION_REPORT.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/qa/QA_REGRESSION_REPORT.md), & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#025`–`#033` |
 
 ---
 

@@ -1,15 +1,23 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { useState, type FormEvent } from 'react';
+import {
+    ArrowRight,
+    CheckCircle2,
+    MinusCircle,
+    Pencil,
+    Plus,
+    Trash2,
+} from 'lucide-react';
+import { Fragment, useId, useState, type FormEvent } from 'react';
 import EmptyState from '@/Components/EmptyState';
+import FilterToolbar from '@/Components/FilterToolbar';
 import Modal from '@/Components/Modal';
 import Pagination from '@/Components/Pagination';
 import {
-    ProductionStageBadge,
     SpeedTierBadge,
     StatusBadge,
 } from '@/Components/StatusBadge';
 import AppLayout from '@/Layouts/AppLayout';
-import { formatRupiah } from '@/lib/format';
+import { formatRupiah, formatTahapProduksi } from '@/lib/format';
 import type {
     JenisLayananItem,
     LayananIndexProps,
@@ -36,6 +44,8 @@ function resolveSatuan(metode: MetodeHitung): SatuanLayanan {
 }
 
 export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
+    const tableCaptionId = useId();
+    const formId = useId();
     const [search, setSearch] = useState(filters.search ?? '');
     const [formModalOpen, setFormModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<JenisLayananItem | null>(
@@ -223,53 +233,31 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                 <button
                     type="button"
                     onClick={openCreateModal}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-sky-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-sky-700"
+                    className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
                 >
-                    + Tambah Layanan
+                    <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    <span>
+                        <span className="sr-only">+ </span>Tambah Layanan
+                    </span>
                 </button>
             }
         >
             <Head title="Master Jenis Layanan" />
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:p-5">
-                <form
-                    onSubmit={handleSearchSubmit}
-                    className="flex flex-col gap-3 sm:flex-row sm:items-center"
-                >
-                    <div className="relative flex-1">
-                        <label htmlFor="search-layanan" className="sr-only">
-                            Cari layanan
-                        </label>
-                        <input
-                            id="search-layanan"
-                            type="text"
-                            value={search}
-                            onChange={(event) => setSearch(event.target.value)}
-                            placeholder="Cari nama layanan atau kecepatan (REGULER / EXPRESS)..."
-                            className="block w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                        />
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button
-                            type="submit"
-                            className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
-                        >
-                            Cari
-                        </button>
-                        {filters.search !== '' && (
-                            <button
-                                type="button"
-                                onClick={handleResetSearch}
-                                className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-                            >
-                                Reset
-                            </button>
-                        )}
-                    </div>
-                </form>
-            </section>
+            <FilterToolbar
+                ariaLabel="Cari jenis layanan"
+                onSubmit={handleSearchSubmit}
+                searchValue={search}
+                onSearchChange={setSearch}
+                searchId="search-layanan"
+                searchLabel="Cari layanan"
+                searchPlaceholder="Cari nama layanan atau kecepatan (REGULER / EXPRESS)..."
+                submitLabel="Cari"
+                onReset={handleResetSearch}
+                hasActiveFilters={filters.search !== ''}
+            />
 
-            <section className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+            <section className="mt-5 overflow-hidden rounded-2xl border border-[#D8E2E6] bg-white shadow-[0_1px_2px_rgba(15,41,51,0.04)]">
                 {layanan.data.length === 0 ? (
                     <div className="p-6">
                         <EmptyState
@@ -293,43 +281,73 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                     </div>
                 ) : (
                     <>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-                                <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <div
+                            tabIndex={0}
+                            role="region"
+                            aria-labelledby={tableCaptionId}
+                            className="overflow-x-auto"
+                        >
+                            <table className="min-w-full divide-y divide-[#D8E2E6] text-left text-sm">
+                                <caption
+                                    id={tableCaptionId}
+                                    className="sr-only"
+                                >
+                                    Daftar master jenis layanan laundry beserta
+                                    tarif, opsi setrika, dan urutan tahap
+                                    produksi
+                                </caption>
+                                <thead className="border-b border-[#D8E2E6] bg-[#F8FAFC] text-[0.6875rem] font-semibold uppercase tracking-wider text-[#475569]">
                                     <tr>
-                                        <th className="px-5 py-3.5">Layanan</th>
-                                        <th className="px-5 py-3.5">
+                                        <th scope="col" className="px-5 py-3.5">
+                                            Layanan
+                                        </th>
+                                        <th scope="col" className="px-5 py-3.5">
                                             Kecepatan
                                         </th>
-                                        <th className="px-5 py-3.5">
-                                            Metode & Satuan
+                                        <th scope="col" className="px-5 py-3.5">
+                                            Metode &amp; Satuan
                                         </th>
-                                        <th className="px-5 py-3.5 text-right">
+                                        <th
+                                            scope="col"
+                                            className="px-5 py-3.5 text-right"
+                                        >
                                             Harga Satuan
                                         </th>
-                                        <th className="px-5 py-3.5">
+                                        <th scope="col" className="px-5 py-3.5">
                                             Setrika
                                         </th>
-                                        <th className="px-5 py-3.5">
+                                        <th scope="col" className="px-5 py-3.5">
                                             Urutan Tahap Produksi
                                         </th>
-                                        <th className="px-5 py-3.5 text-right">
+                                        <th
+                                            scope="col"
+                                            className="px-5 py-3.5 text-right"
+                                        >
                                             Aksi
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 bg-white">
-                                    {layanan.data.map((item) => (
-                                        <tr
-                                            key={item.id_layanan}
-                                            className="hover:bg-slate-50/70"
-                                        >
-                                            <td className="px-5 py-3.5">
-                                                <div className="flex flex-col gap-1">
-                                                    <span className="font-semibold text-slate-900">
-                                                        {item.nama_layanan}
-                                                    </span>
-                                                    <div>
+                                <tbody className="divide-y divide-[#D8E2E6] bg-white">
+                                    {layanan.data.map((item) => {
+                                        const sortedStages = item.tahap_layanan
+                                            .slice()
+                                            .sort(
+                                                (a, b) => a.urutan - b.urutan,
+                                            );
+
+                                        return (
+                                            <tr
+                                                key={item.id_layanan}
+                                                className="align-top transition hover:bg-[#F8FAFC]"
+                                            >
+                                                <th
+                                                    scope="row"
+                                                    className="px-5 py-3.5 text-left font-normal"
+                                                >
+                                                    <div className="flex flex-col items-start gap-1">
+                                                        <span className="font-semibold text-[#0F172A]">
+                                                            {item.nama_layanan}
+                                                        </span>
                                                         {item.is_active ? (
                                                             <StatusBadge tone="emerald">
                                                                 Aktif
@@ -340,86 +358,126 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                                             </StatusBadge>
                                                         )}
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td className="whitespace-nowrap px-5 py-3.5">
-                                                <SpeedTierBadge
-                                                    tier={
-                                                        item.tingkat_kecepatan
-                                                    }
-                                                />
-                                            </td>
-                                            <td className="whitespace-nowrap px-5 py-3.5 text-xs font-medium text-slate-700">
-                                                {item.metode_hitung} (
-                                                <span className="font-semibold">
-                                                    {item.satuan}
-                                                </span>
-                                                )
-                                            </td>
-                                            <td className="whitespace-nowrap px-5 py-3.5 text-right font-semibold tabular-nums text-slate-900">
-                                                {formatRupiah(
-                                                    item.harga_satuan,
-                                                )}
-                                                <span className="text-xs font-normal text-slate-500">
-                                                    /{item.satuan}
-                                                </span>
-                                            </td>
-                                            <td className="whitespace-nowrap px-5 py-3.5">
-                                                {item.perlu_setrika ? (
-                                                    <StatusBadge tone="sky">
-                                                        Perlu Setrika
-                                                    </StatusBadge>
-                                                ) : (
-                                                    <StatusBadge tone="amber">
-                                                        Tanpa Setrika
-                                                    </StatusBadge>
-                                                )}
-                                            </td>
-                                            <td className="px-5 py-3.5">
-                                                <div className="flex flex-wrap items-center gap-1.5">
-                                                    {item.tahap_layanan.map(
-                                                        (tahap) => (
-                                                            <ProductionStageBadge
-                                                                key={
-                                                                    tahap.id_tahap
-                                                                }
-                                                                stage={
-                                                                    tahap.nama_tahap
-                                                                }
-                                                                order={
-                                                                    tahap.urutan
-                                                                }
-                                                            />
-                                                        ),
+                                                </th>
+                                                <td className="whitespace-nowrap px-5 py-3.5">
+                                                    <SpeedTierBadge
+                                                        tier={
+                                                            item.tingkat_kecepatan
+                                                        }
+                                                        variant="text"
+                                                    />
+                                                </td>
+                                                <td className="whitespace-nowrap px-5 py-3.5 text-xs font-medium text-[#475569]">
+                                                    {item.metode_hitung} (
+                                                    <span className="font-mono font-semibold text-[#0F172A]">
+                                                        {item.satuan}
+                                                    </span>
+                                                    )
+                                                </td>
+                                                <td className="whitespace-nowrap px-5 py-3.5 text-right font-mono font-semibold tabular-nums text-[#0F172A]">
+                                                    {formatRupiah(
+                                                        item.harga_satuan,
                                                     )}
-                                                </div>
-                                            </td>
-                                            <td className="whitespace-nowrap px-5 py-3.5 text-right">
-                                                <div className="inline-flex items-center gap-2">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            openEditModal(item)
-                                                        }
-                                                        className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            setDeleteTarget(
-                                                                item,
-                                                            )
-                                                        }
-                                                        className="rounded-lg border border-rose-200 px-2.5 py-1 text-xs font-semibold text-rose-700 transition hover:bg-rose-50"
-                                                    >
-                                                        Hapus
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                                    <span className="text-xs font-normal text-[#5B697A]">
+                                                        /{item.satuan}
+                                                    </span>
+                                                </td>
+                                                <td className="whitespace-nowrap px-5 py-3.5 text-xs">
+                                                    {item.perlu_setrika ? (
+                                                        <span className="inline-flex items-center gap-1.5 font-medium text-[#0F766E]">
+                                                            <CheckCircle2
+                                                                className="h-3.5 w-3.5 shrink-0"
+                                                                aria-hidden="true"
+                                                            />
+                                                            <span>
+                                                                Perlu Setrika
+                                                            </span>
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center gap-1.5 font-medium text-[#5B697A]">
+                                                            <MinusCircle
+                                                                className="h-3.5 w-3.5 shrink-0"
+                                                                aria-hidden="true"
+                                                            />
+                                                            <span>
+                                                                Tanpa Setrika
+                                                            </span>
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-5 py-3.5">
+                                                    <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs font-medium text-[#475569]">
+                                                        {sortedStages.map(
+                                                            (tahap, index) => (
+                                                                <Fragment
+                                                                    key={
+                                                                        tahap.id_tahap
+                                                                    }
+                                                                >
+                                                                    {index >
+                                                                        0 && (
+                                                                        <li
+                                                                            aria-hidden="true"
+                                                                            className="text-[#7C8C9D]"
+                                                                        >
+                                                                            &rarr;
+                                                                        </li>
+                                                                    )}
+                                                                    <li className="whitespace-nowrap">
+                                                                        <span className="font-mono text-[11px] text-[#5B697A] tabular-nums">
+                                                                            {
+                                                                                tahap.urutan
+                                                                            }
+                                                                            .
+                                                                        </span>{' '}
+                                                                        <span className="text-[#0F172A]">
+                                                                            {formatTahapProduksi(
+                                                                                tahap.nama_tahap,
+                                                                            )}
+                                                                        </span>
+                                                                    </li>
+                                                                </Fragment>
+                                                            ),
+                                                        )}
+                                                    </ol>
+                                                </td>
+                                                <td className="whitespace-nowrap px-5 py-3.5 text-right">
+                                                    <div className="inline-flex items-center gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                openEditModal(
+                                                                    item,
+                                                                )
+                                                            }
+                                                            className="inline-flex min-h-[2.25rem] items-center gap-1 rounded-xl border border-[#7C8C9D] bg-white px-3 py-1.5 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
+                                                        >
+                                                            <Pencil
+                                                                className="h-3.5 w-3.5 shrink-0"
+                                                                aria-hidden="true"
+                                                            />
+                                                            <span>Edit</span>
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                setDeleteTarget(
+                                                                    item,
+                                                                )
+                                                            }
+                                                            className="inline-flex min-h-[2.25rem] items-center gap-1 rounded-xl border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-[#9F1239] transition hover:bg-rose-100"
+                                                        >
+                                                            <Trash2
+                                                                className="h-3.5 w-3.5 shrink-0"
+                                                                aria-hidden="true"
+                                                            />
+                                                            <span>Hapus</span>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
@@ -440,12 +498,40 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                         : 'Tambah Jenis Layanan Baru'
                 }
                 subtitle="Perubahan harga layanan tidak memengaruhi nota transaksi lama (KK-09)."
+                footer={
+                    <>
+                        <button
+                            type="button"
+                            onClick={closeFormModal}
+                            disabled={processing}
+                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl border border-[#7C8C9D] bg-white px-4 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC] disabled:opacity-50"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            type="submit"
+                            form={formId}
+                            disabled={processing}
+                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:opacity-60"
+                        >
+                            {processing
+                                ? 'Menyimpan...'
+                                : editingItem
+                                  ? 'Simpan Perubahan'
+                                  : 'Simpan Layanan'}
+                        </button>
+                    </>
+                }
             >
-                <form onSubmit={handleFormSubmit} className="space-y-4">
+                <form
+                    id={formId}
+                    onSubmit={handleFormSubmit}
+                    className="space-y-4"
+                >
                     {(errors as Record<string, string | undefined>).layanan && (
                         <div
                             role="alert"
-                            className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-medium text-rose-800"
+                            className="rounded-xl border border-rose-200 border-l-4 border-l-[#BE123C] bg-[#FFF1F2] px-3.5 py-2.5 text-xs font-medium text-[#9F1239]"
                         >
                             {
                                 (errors as Record<string, string | undefined>)
@@ -457,7 +543,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                         <div>
                             <label
                                 htmlFor="layanan-nama"
-                                className="block text-xs font-semibold text-slate-700"
+                                className="block text-xs font-semibold text-[#0F172A]"
                             >
                                 Nama Layanan
                             </label>
@@ -471,10 +557,10 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                     setData('nama_layanan', event.target.value)
                                 }
                                 placeholder="mis. Cuci Setrika / Cuci Sepatu"
-                                className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                             />
                             {errors.nama_layanan && (
-                                <p className="mt-1 text-xs font-medium text-rose-600">
+                                <p className="mt-1.5 text-xs font-medium text-rose-600">
                                     {errors.nama_layanan}
                                 </p>
                             )}
@@ -483,7 +569,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                         <div>
                             <label
                                 htmlFor="layanan-kecepatan"
-                                className="block text-xs font-semibold text-slate-700"
+                                className="block text-xs font-semibold text-[#0F172A]"
                             >
                                 Tingkat Kecepatan
                             </label>
@@ -496,13 +582,13 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                         event.target.value as TingkatKecepatan,
                                     )
                                 }
-                                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                             >
                                 <option value="REGULER">REGULER</option>
                                 <option value="EXPRESS">EXPRESS</option>
                             </select>
                             {errors.tingkat_kecepatan && (
-                                <p className="mt-1 text-xs font-medium text-rose-600">
+                                <p className="mt-1.5 text-xs font-medium text-rose-600">
                                     {errors.tingkat_kecepatan}
                                 </p>
                             )}
@@ -513,7 +599,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                         <div>
                             <label
                                 htmlFor="layanan-metode"
-                                className="block text-xs font-semibold text-slate-700"
+                                className="block text-xs font-semibold text-[#0F172A]"
                             >
                                 Metode Hitung
                             </label>
@@ -525,13 +611,13 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                         event.target.value as MetodeHitung,
                                     )
                                 }
-                                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                             >
                                 <option value="BERAT">BERAT (kg)</option>
                                 <option value="JUMLAH">JUMLAH (pcs)</option>
                             </select>
                             {errors.metode_hitung && (
-                                <p className="mt-1 text-xs font-medium text-rose-600">
+                                <p className="mt-1.5 text-xs font-medium text-rose-600">
                                     {errors.metode_hitung}
                                 </p>
                             )}
@@ -540,7 +626,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                         <div>
                             <label
                                 htmlFor="layanan-satuan"
-                                className="block text-xs font-semibold text-slate-700"
+                                className="block text-xs font-semibold text-[#0F172A]"
                             >
                                 Satuan (Otomatis)
                             </label>
@@ -549,10 +635,10 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                 type="text"
                                 readOnly
                                 value={data.satuan}
-                                className="mt-1 block w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700"
+                                className="mt-1.5 block min-h-[2.625rem] w-full cursor-not-allowed rounded-xl border border-[#D8E2E6] bg-[#EEF2F5] px-3.5 py-2 font-mono text-sm font-semibold text-[#475569]"
                             />
                             {errors.satuan && (
-                                <p className="mt-1 text-xs font-medium text-rose-600">
+                                <p className="mt-1.5 text-xs font-medium text-rose-600">
                                     {errors.satuan}
                                 </p>
                             )}
@@ -561,7 +647,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                         <div>
                             <label
                                 htmlFor="layanan-harga"
-                                className="block text-xs font-semibold text-slate-700"
+                                className="block text-xs font-semibold text-[#0F172A]"
                             >
                                 Harga Satuan (Rp)
                             </label>
@@ -576,10 +662,10 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                     setData('harga_satuan', event.target.value)
                                 }
                                 placeholder="mis. 8000"
-                                className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm tabular-nums text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm tabular-nums text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                             />
                             {errors.harga_satuan && (
-                                <p className="mt-1 text-xs font-medium text-rose-600">
+                                <p className="mt-1.5 text-xs font-medium text-rose-600">
                                     {errors.harga_satuan}
                                 </p>
                             )}
@@ -589,7 +675,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <label
                             htmlFor="layanan-setrika"
-                            className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3.5"
+                            className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] p-3.5"
                         >
                             <input
                                 id="layanan-setrika"
@@ -600,13 +686,13 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                         event.target.checked,
                                     )
                                 }
-                                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                                className="mt-0.5 h-4 w-4 rounded border-[#7C8C9D] accent-[#0F766E]"
                             />
                             <div>
-                                <span className="block text-xs font-semibold text-slate-900">
+                                <span className="block text-xs font-semibold text-[#0F172A]">
                                     Perlu Tahap Setrika
                                 </span>
-                                <span className="mt-0.5 block text-[11px] text-slate-500">
+                                <span className="mt-0.5 block text-[11px] text-[#475569]">
                                     Nonaktifkan untuk layanan seperti Cuci Sepatu
                                     (tahap DISETRIKA dilarang).
                                 </span>
@@ -615,7 +701,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
 
                         <label
                             htmlFor="layanan-aktif"
-                            className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3.5"
+                            className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] p-3.5"
                         >
                             <input
                                 id="layanan-aktif"
@@ -624,13 +710,13 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                 onChange={(event) =>
                                     setData('is_active', event.target.checked)
                                 }
-                                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                                className="mt-0.5 h-4 w-4 rounded border-[#7C8C9D] accent-[#0F766E]"
                             />
                             <div>
-                                <span className="block text-xs font-semibold text-slate-900">
+                                <span className="block text-xs font-semibold text-[#0F172A]">
                                     Layanan Aktif
                                 </span>
-                                <span className="mt-0.5 block text-[11px] text-slate-500">
+                                <span className="mt-0.5 block text-[11px] text-[#475569]">
                                     Hanya layanan aktif yang dapat dipilih pada
                                     form penerimaan nota baru.
                                 </span>
@@ -638,9 +724,9 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                         </label>
                     </div>
 
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] p-4">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                            <p className="text-xs font-semibold text-slate-800">
+                            <p className="text-xs font-semibold text-[#0F172A]">
                                 Preview Alur Tahap Produksi
                             </p>
                             <button
@@ -653,24 +739,37 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                         ),
                                     )
                                 }
-                                className="text-[11px] font-semibold text-sky-600 hover:text-sky-700"
+                                className="text-xs font-semibold text-[#0F766E] hover:text-[#115E59] hover:underline"
                             >
                                 Reset Urutan Standar
                             </button>
                         </div>
 
-                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <ol className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-xs font-semibold text-[#0F172A]">
                             {data.tahap_layanan.map((stage, index) => (
-                                <ProductionStageBadge
-                                    key={stage}
-                                    stage={stage}
-                                    order={index + 1}
-                                />
+                                <Fragment key={stage}>
+                                    {index > 0 && (
+                                        <li
+                                            aria-hidden="true"
+                                            className="text-[#7C8C9D]"
+                                        >
+                                            <ArrowRight className="h-3.5 w-3.5" />
+                                        </li>
+                                    )}
+                                    <li className="inline-flex items-center gap-1 rounded-lg border border-[#D8E2E6] bg-white px-2.5 py-1">
+                                        <span className="font-mono text-[11px] text-[#0F766E] tabular-nums">
+                                            {index + 1}.
+                                        </span>
+                                        <span>
+                                            {formatTahapProduksi(stage)}
+                                        </span>
+                                    </li>
+                                </Fragment>
                             ))}
-                        </div>
+                        </ol>
 
-                        <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-slate-200 pt-3">
-                            <span className="text-[11px] font-medium text-slate-500">
+                        <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-[#D8E2E6] pt-3">
+                            <span className="text-[11px] font-medium text-[#5B697A]">
                                 Tahap opsional tengah:
                             </span>
                             {INTERMEDIATE_STAGES.map((stage) => {
@@ -685,8 +784,8 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                         key={stage}
                                         className={`inline-flex items-center gap-1.5 text-xs ${
                                             disabled
-                                                ? 'cursor-not-allowed text-slate-400 line-through'
-                                                : 'cursor-pointer text-slate-700'
+                                                ? 'cursor-not-allowed text-[#5B697A] line-through'
+                                                : 'cursor-pointer text-[#0F172A]'
                                         }`}
                                     >
                                         <input
@@ -696,7 +795,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                             onChange={() =>
                                                 handleToggleStage(stage)
                                             }
-                                            className="h-3.5 w-3.5 rounded border-slate-300 text-sky-600"
+                                            className="h-3.5 w-3.5 rounded border-[#7C8C9D] accent-[#0F766E]"
                                         />
                                         <span>{stage}</span>
                                     </label>
@@ -708,28 +807,6 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                 {errors.tahap_layanan}
                             </p>
                         )}
-                    </div>
-
-                    <div className="flex items-center justify-end gap-2 pt-2">
-                        <button
-                            type="button"
-                            onClick={closeFormModal}
-                            disabled={processing}
-                            className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-                        >
-                            Batal
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="rounded-xl bg-sky-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-sky-700 disabled:opacity-60"
-                        >
-                            {processing
-                                ? 'Menyimpan...'
-                                : editingItem
-                                  ? 'Simpan Perubahan'
-                                  : 'Simpan Layanan'}
-                        </button>
                     </div>
                 </form>
             </Modal>
@@ -747,7 +824,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                             type="button"
                             onClick={() => setDeleteTarget(null)}
                             disabled={deleting}
-                            className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl border border-[#7C8C9D] bg-white px-4 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC] disabled:opacity-50"
                         >
                             Batal
                         </button>
@@ -755,7 +832,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                             type="button"
                             onClick={handleConfirmDelete}
                             disabled={deleting}
-                            className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-700 disabled:opacity-60"
+                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl bg-[#BE123C] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-rose-800 disabled:opacity-60"
                         >
                             {deleting ? 'Menghapus...' : 'Ya, Hapus Layanan'}
                         </button>
@@ -763,19 +840,19 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                 }
             >
                 {deleteTarget && (
-                    <div className="space-y-3 text-sm text-slate-700">
+                    <div className="space-y-3 text-sm text-[#475569]">
                         <p>
                             Apakah Anda yakin ingin menghapus layanan{' '}
-                            <span className="font-semibold text-slate-900">
+                            <span className="font-semibold text-[#0F172A]">
                                 {deleteTarget.nama_layanan} (
                                 {deleteTarget.tingkat_kecepatan})
                             </span>
                             ?
                         </p>
                         {(deleteTarget.transaksi_count ?? 0) > 0 && (
-                            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                            <div className="rounded-xl border border-amber-300 border-l-4 border-l-[#B45309] bg-[#FFFBEB] p-3 text-xs text-[#78350F]">
                                 Layanan ini tercatat digunakan pada{' '}
-                                <span className="font-semibold">
+                                <span className="font-semibold tabular-nums">
                                     {deleteTarget.transaksi_count} transaksi
                                 </span>
                                 . Sistem akan menolak penghapusan untuk menjaga

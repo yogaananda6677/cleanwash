@@ -70,19 +70,20 @@ flowchart LR
 
 ---
 
-## 4. Orkestrasi & Spesifikasi 5 Subagent
+## 4. Orkestrasi & Spesifikasi 6 Subagent
 
 Definisi lengkap instruksi masing-masing subagent tersimpan permanen di `.agents/agents/` (serta di-symlink ke `.claude/agents/` untuk kompatibilitas lintas CLI). Saat memanggil `define_subagent` / `invoke_subagent`, Primary Agent wajib memuat isi file `.agents/agents/<role>.md` yang sesuai.
 
 | Subagent | File Spesifikasi | Fokus Utama | Kepemilikan File / Direktori Eksklusif | Larangan Tegas |
 | --- | --- | --- | --- | --- |
 | **`product-manager`** | [product-manager.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/.agents/agents/product-manager.md) | Break-down task phase, verifikasi SRS/PRD AC, uji skenario bisnis, *Phase Gate Sign-off* | `PRD.md`, `MEMORY.md`, `WRITE.md`, `docs/phases/*` | Dilarang mengedit source code aplikasi (`app/`, `resources/js/`, `database/`) secara langsung. |
+| **`ui-ux-designer`** | [ui-ux-designer.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/.agents/agents/ui-ux-designer.md) | Audit visual & UX lintas peran, Design System (`docs/design/*`), hierarki layout, aksesibilitas WCAG AA, *visual sign-off* | `docs/design/*`, `WRITE.md`, `.claude/napkin.md` | Dilarang mengedit backend PHP/DB maupun mengubah kode React/CSS secara sepihak tanpa handoff ke `frontend-developer`. |
 | **`backend-developer`** | [backend-developer.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/.agents/agents/backend-developer.md) | Migrasi MySQL 8.4, Eloquent Models, Service Layer, FormRequests, Policies, Controllers, Pest/PHPUnit Tests | `app/`, `database/`, `routes/`, `tests/` | Dilarang memodifikasi komponen UI React (`resources/js/`) atau melewati pengujian `php artisan test`. |
-| **`frontend-developer`** | [frontend-developer.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/.agents/agents/frontend-developer.md) | Halaman Inertia React, komponen UI/UX per peran, Tailwind CSS, TypeScript types, validasi form & UI tests | `resources/js/`, `resources/css/`, `tests/Frontend/` (jika ada) | Dilarang menaruh logika otorisasi/kalkulasi harga final yang menimpa backend. |
+| **`frontend-developer`** | [frontend-developer.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/.agents/agents/frontend-developer.md) | Halaman Inertia React, komponen UI/UX per peran, Tailwind CSS, TypeScript types, validasi form & UI tests | `resources/js/`, `resources/css/`, `resources/views/`, `tests/Frontend/` (jika ada) | Dilarang menaruh logika otorisasi/kalkulasi harga final yang menimpa backend. |
 | **`fullstack-developer`** | [fullstack-developer.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/.agents/agents/fullstack-developer.md) | Wiring end-to-end BE–FE, Auth & RBAC flow, cetak Nota/laporan, E2E test, CI/Docker/env, bugfix lintas layer | `routes/web.php`, `bootstrap/`, `config/`, `.github/`, root config (`composer.json`, `package.json`, `vite.config.*`) | Wajib menghormati service backend sebagai *system of record* dan meninjau kontrak tipe FE–BE. |
 | **`qa-engineer`** | [qa-engineer.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/.agents/agents/qa-engineer.md) | Live browser Playwright regression suite, inspeksi visual & screenshot bukti per langkah, audit `console`/network error, bug triage, & QA report | `playwright.config.ts`, `tests/e2e/*`, `docs/qa/*` | Dilarang mengedit kode produksi (`app/`, `resources/js/`, `routes/`) atau menggunakan mock API pada regression browser test. |
 
-> **Aturan Anti-Konflik Paralel**: Jika `backend-developer` dan `frontend-developer` dijalankan secara paralel pada satu fitur yang sama, `product-manager` atau `fullstack-developer` wajib mengunci **kontrak JSON/Inertia props** di dokumen task terlebih dahulu sebelum keduanya menyentuh kode.
+> **Aturan Anti-Konflik Paralel & Siklus UI**: Jika `backend-developer` dan `frontend-developer` dijalankan secara paralel pada satu fitur yang sama, `product-manager` atau `fullstack-developer` wajib mengunci **kontrak JSON/Inertia props** di dokumen task terlebih dahulu sebelum keduanya menyentuh kode. Untuk pembaruan visual/UX, **`ui-ux-designer`** mengunci spesifikasi di `docs/design/` lebih dulu, **`frontend-developer`** mengimplementasikannya, lalu **`qa-engineer` + `ui-ux-designer`** memverifikasi hasil render *live browser*.
 
 ---
 

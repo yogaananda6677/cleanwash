@@ -1,6 +1,15 @@
 import { Head, Link, router } from '@inertiajs/react';
+import {
+    ArrowRight,
+    Clock,
+    PackageCheck,
+    Truck,
+    Wallet,
+} from 'lucide-react';
 import { useEffect, useId, useState, type FormEvent } from 'react';
 import EmptyState from '@/Components/EmptyState';
+import FilterToolbar from '@/Components/FilterToolbar';
+import MetadataRow from '@/Components/MetadataRow';
 import Pagination from '@/Components/Pagination';
 import PelunasanModal, {
     type PelunasanModalTarget,
@@ -8,12 +17,12 @@ import PelunasanModal, {
 import SerahTerimaModal, {
     type SerahTerimaModalTarget,
 } from '@/Components/SerahTerimaModal';
+import StatTile from '@/Components/StatTile';
 import {
     ItemPengantaranStatusBadge,
     PayLaterBadge,
     PaymentStatusBadge,
     SpeedTierBadge,
-    StatusBadge,
     TransactionStatusBadge,
 } from '@/Components/StatusBadge';
 import AppLayout from '@/Layouts/AppLayout';
@@ -99,6 +108,8 @@ export default function SerahTerimaIndex({
     };
 
     const hasSearchFilter = filters.search !== '';
+    const hasPiutangNominal =
+        parseDecimalToCents(summary.total_piutang_nominal) > 0;
 
     return (
         <AppLayout
@@ -107,94 +118,70 @@ export default function SerahTerimaIndex({
             headerActions={
                 <Link
                     href="/audit"
-                    className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
                 >
-                    Lihat Audit &amp; Piutang &rarr;
+                    <span>Lihat Audit &amp; Piutang</span>
+                    <ArrowRight
+                        className="h-3.5 w-3.5 shrink-0"
+                        aria-hidden="true"
+                    />
                 </Link>
             }
         >
             <Head title="Loket Serah Terima & Pelunasan" />
 
-            {/* Summary KPI Strip */}
+            {/* 4 StatTile KPI Cards */}
             <section
                 aria-label="Ringkasan antrean loket serah terima"
                 className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
             >
-                <button
-                    type="button"
+                <StatTile
+                    label="Siap Diambil (SELESAI)"
+                    value={summary.siap_ambil_count}
+                    hint="Nota selesai produksi menunggu pengambilan"
+                    tone="brand"
+                    icon={
+                        <PackageCheck className="h-4 w-4" aria-hidden="true" />
+                    }
                     onClick={() => handleModeChange('SIAP_AMBIL')}
-                    className={`rounded-2xl border p-4 text-left shadow-xs transition ${
-                        mode === 'SIAP_AMBIL'
-                            ? 'border-sky-500 bg-sky-50 ring-2 ring-sky-200'
-                            : 'border-slate-200 bg-white hover:border-sky-300'
-                    }`}
-                >
-                    <p className="text-xs font-medium text-slate-500">
-                        Siap Diambil (SELESAI)
-                    </p>
-                    <p className="mt-1.5 text-2xl font-bold tabular-nums text-sky-700">
-                        {summary.siap_ambil_count}
-                    </p>
-                    <p className="mt-1 text-[11px] text-slate-500">
-                        Nota selesai produksi menunggu pengambilan
-                    </p>
-                </button>
+                    active={mode === 'SIAP_AMBIL'}
+                />
 
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
-                    <p className="text-xs font-medium text-slate-500">
-                        Sedang Diantar Kurir
-                    </p>
-                    <p className="mt-1.5 text-2xl font-bold tabular-nums text-indigo-700">
-                        {summary.sedang_diantar_count}
-                    </p>
-                    <p className="mt-1 text-[11px] text-slate-500">
-                        Nota SELESAI berstatus DIAMBIL / DALAM_PERJALANAN
-                    </p>
-                </div>
+                <StatTile
+                    label="Sedang Diantar Kurir"
+                    value={summary.sedang_diantar_count}
+                    hint="Nota SELESAI berstatus DIAMBIL / DALAM_PERJALANAN"
+                    tone="indigo"
+                    icon={<Truck className="h-4 w-4" aria-hidden="true" />}
+                />
 
-                <button
-                    type="button"
+                <StatTile
+                    label="Nota Piutang Aktif (KK-06)"
+                    value={summary.piutang_count}
+                    hint="Sudah DIAMBIL dengan status BELUM_LUNAS"
+                    tone={summary.piutang_count > 0 ? 'amber' : 'neutral'}
+                    icon={<Clock className="h-4 w-4" aria-hidden="true" />}
                     onClick={() => handleModeChange('PIUTANG')}
-                    className={`rounded-2xl border p-4 text-left shadow-xs transition ${
-                        mode === 'PIUTANG'
-                            ? 'border-amber-500 bg-amber-50 ring-2 ring-amber-200'
-                            : 'border-slate-200 bg-white hover:border-amber-300'
-                    }`}
-                >
-                    <p className="text-xs font-medium text-slate-500">
-                        Nota Piutang Aktif (KK-06)
-                    </p>
-                    <p className="mt-1.5 text-2xl font-bold tabular-nums text-amber-700">
-                        {summary.piutang_count}
-                    </p>
-                    <p className="mt-1 text-[11px] text-slate-500">
-                        Sudah DIAMBIL dengan status BELUM_LUNAS
-                    </p>
-                </button>
+                    active={mode === 'PIUTANG'}
+                />
 
-                <button
-                    type="button"
-                    onClick={() => handleModeChange('PIUTANG')}
-                    className="rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-xs transition hover:border-amber-300"
-                >
-                    <p className="text-xs font-medium text-slate-500">
-                        Total Nominal Piutang
-                    </p>
-                    <p className="mt-1.5 text-2xl font-bold tabular-nums text-rose-700">
-                        {formatRupiah(summary.total_piutang_nominal)}
-                    </p>
-                    <p className="mt-1 text-[11px] text-slate-500">
-                        Akumulasi sisa tagihan pelanggan bayar akhir
-                    </p>
-                </button>
+                <StatTile
+                    label="Total Nominal Piutang"
+                    value={formatRupiah(summary.total_piutang_nominal)}
+                    hint="Akumulasi sisa tagihan pelanggan bayar akhir"
+                    tone={hasPiutangNominal ? 'rose' : 'emerald'}
+                    icon={<Wallet className="h-4 w-4" aria-hidden="true" />}
+                    href="/audit"
+                    hrefLabel="Lihat ringkasan audit"
+                />
             </section>
 
-            {/* Mode Tabs + Search */}
-            <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:p-5">
+            {/* Modern Tablist Strip */}
+            <section className="mt-5 rounded-2xl border border-[#D8E2E6] bg-white p-4 shadow-[0_1px_2px_rgba(15,41,51,0.04)] sm:px-5 sm:py-4">
                 <div
                     role="tablist"
                     aria-label="Mode antrean loket serah terima"
-                    className="flex flex-wrap gap-2 border-b border-slate-200 pb-4"
+                    className="flex flex-wrap gap-2"
                 >
                     {MODE_TABS.map((tab) => {
                         const active = mode === tab.key;
@@ -205,19 +192,19 @@ export default function SerahTerimaIndex({
                                 role="tab"
                                 aria-selected={active}
                                 onClick={() => handleModeChange(tab.key)}
-                                className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition ${
+                                className={`inline-flex min-h-[2.5rem] items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
                                     active
-                                        ? 'bg-sky-600 text-white shadow-xs'
-                                        : 'border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                                        ? 'bg-[#0F766E] text-white shadow-xs'
+                                        : 'border border-[#7C8C9D] bg-white text-[#0F172A] hover:bg-[#F8FAFC]'
                                 }`}
                             >
-                                {tab.label}
+                                <span>{tab.label}</span>
                                 {tab.key === 'SIAP_AMBIL' && (
                                     <span
-                                        className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] ${
+                                        className={`rounded-full px-2 py-0.5 font-mono text-[11px] tabular-nums ${
                                             active
-                                                ? 'bg-sky-700 text-white'
-                                                : 'bg-slate-200 text-slate-700'
+                                                ? 'bg-[#115E59] text-white'
+                                                : 'bg-[#EEF2F5] text-[#0F172A]'
                                         }`}
                                     >
                                         {summary.siap_ambil_count}
@@ -225,10 +212,10 @@ export default function SerahTerimaIndex({
                                 )}
                                 {tab.key === 'PIUTANG' && (
                                     <span
-                                        className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] ${
+                                        className={`rounded-full px-2 py-0.5 font-mono text-[11px] tabular-nums ${
                                             active
-                                                ? 'bg-sky-700 text-white'
-                                                : 'bg-amber-100 text-amber-800'
+                                                ? 'bg-[#115E59] text-white'
+                                                : 'bg-[#FFFBEB] text-[#78350F]'
                                         }`}
                                     >
                                         {summary.piutang_count}
@@ -238,56 +225,25 @@ export default function SerahTerimaIndex({
                         );
                     })}
                 </div>
-
-                <search className="mt-4 block">
-                    <form
-                        method="GET"
-                        onSubmit={handleSearchSubmit}
-                        className="flex flex-col gap-3 sm:flex-row sm:items-end"
-                    >
-                        <input type="hidden" name="mode" value={mode} />
-                        <div className="flex-1">
-                            <label
-                                htmlFor={searchInputId}
-                                className="block text-xs font-semibold text-slate-700"
-                            >
-                                Cari Nomor Nota atau Pelanggan
-                            </label>
-                            <input
-                                id={searchInputId}
-                                name="search"
-                                type="search"
-                                value={search}
-                                onChange={(event) =>
-                                    setSearch(event.target.value)
-                                }
-                                placeholder="Cari nomor nota (CW-...), nama pelanggan, atau no. telepon..."
-                                className="mt-1 block w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                            />
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                type="submit"
-                                className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
-                            >
-                                Cari
-                            </button>
-                            {hasSearchFilter && (
-                                <button
-                                    type="button"
-                                    onClick={handleResetFilters}
-                                    className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-                                >
-                                    Reset
-                                </button>
-                            )}
-                        </div>
-                    </form>
-                </search>
             </section>
 
+            {/* Search FilterToolbar */}
+            <FilterToolbar
+                className="mt-4"
+                onSubmit={handleSearchSubmit}
+                ariaLabel="Pencarian transaksi loket serah terima"
+                searchId={searchInputId}
+                searchLabel="Cari Nomor Nota atau Pelanggan"
+                searchValue={search}
+                onSearchChange={setSearch}
+                searchPlaceholder="Cari nomor nota (CW-...), nama pelanggan, atau no. telepon..."
+                submitLabel="Cari"
+                onReset={handleResetFilters}
+                hasActiveFilters={hasSearchFilter}
+            />
+
             {/* Queue Table */}
-            <section className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+            <section className="mt-5 overflow-hidden rounded-2xl border border-[#D8E2E6] bg-white shadow-[0_1px_2px_rgba(15,41,51,0.04)]">
                 {transaksi.data.length === 0 ? (
                     <div className="p-6">
                         <EmptyState
@@ -313,9 +269,9 @@ export default function SerahTerimaIndex({
                             tabIndex={0}
                             role="region"
                             aria-labelledby={tableCaptionId}
-                            className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                            className="overflow-x-auto"
                         >
-                            <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
+                            <table className="min-w-full divide-y divide-[#D8E2E6] text-left text-sm">
                                 <caption
                                     id={tableCaptionId}
                                     className="sr-only"
@@ -323,7 +279,7 @@ export default function SerahTerimaIndex({
                                     Antrean transaksi loket serah terima dan
                                     pelunasan kasir mode {mode}
                                 </caption>
-                                <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                <thead className="border-b border-[#D8E2E6] bg-[#F8FAFC] text-[0.6875rem] font-semibold uppercase tracking-wider text-[#475569]">
                                     <tr>
                                         <th scope="col" className="px-5 py-3.5">
                                             Nota &amp; Status
@@ -348,7 +304,7 @@ export default function SerahTerimaIndex({
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 bg-white">
+                                <tbody className="divide-y divide-[#D8E2E6]/70 bg-white">
                                     {transaksi.data.map(
                                         (item: TransaksiDetail) => {
                                             const sisaCents =
@@ -365,7 +321,7 @@ export default function SerahTerimaIndex({
                                             return (
                                                 <tr
                                                     key={item.nomor_nota}
-                                                    className="align-top hover:bg-slate-50/70"
+                                                    className="align-top transition hover:bg-[#F8FAFC]"
                                                 >
                                                     <th
                                                         scope="row"
@@ -373,7 +329,7 @@ export default function SerahTerimaIndex({
                                                     >
                                                         <Link
                                                             href={`/transaksi/${item.nomor_nota}`}
-                                                            className="font-mono text-sm font-bold text-sky-700 hover:text-sky-800 hover:underline"
+                                                            className="font-mono text-sm font-bold text-[#0F766E] hover:text-[#115E59] hover:underline"
                                                         >
                                                             {item.nomor_nota}
                                                         </Link>
@@ -389,7 +345,7 @@ export default function SerahTerimaIndex({
                                                                 }
                                                             />
                                                         </div>
-                                                        <p className="mt-1 text-[11px] text-slate-400">
+                                                        <p className="mt-1 text-[11px] tabular-nums text-[#5B697A]">
                                                             {item.diambil_pada
                                                                 ? `Diambil: ${formatTanggal(item.diambil_pada, { withTime: true })}`
                                                                 : `Masuk: ${formatTanggal(item.tanggal_penerimaan, { withTime: true })}`}
@@ -397,62 +353,83 @@ export default function SerahTerimaIndex({
                                                     </th>
 
                                                     <td className="px-5 py-4 text-xs">
-                                                        <p className="font-semibold text-slate-900">
+                                                        <p className="font-semibold text-[#0F172A]">
                                                             {
                                                                 item.pelanggan
                                                                     .nama
                                                             }
                                                         </p>
-                                                        <p className="font-mono text-[11px] text-slate-500">
-                                                            {
-                                                                item.pelanggan
-                                                                    .no_telepon
-                                                            }
-                                                        </p>
-                                                        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                                                            <PayLaterBadge
-                                                                allowed={
-                                                                    item
-                                                                        .pelanggan
-                                                                        .boleh_bayar_akhir
-                                                                }
-                                                            />
-                                                            {blockedByKK06 && (
-                                                                <StatusBadge tone="rose">
-                                                                    Wajib Lunas
-                                                                    KK-06
-                                                                </StatusBadge>
-                                                            )}
-                                                        </div>
+                                                        <MetadataRow
+                                                            className="mt-1"
+                                                            items={[
+                                                                <span
+                                                                    key="telp"
+                                                                    className="font-mono tabular-nums"
+                                                                >
+                                                                    {
+                                                                        item
+                                                                            .pelanggan
+                                                                            .no_telepon
+                                                                    }
+                                                                </span>,
+                                                                !item.pelanggan
+                                                                    .boleh_bayar_akhir &&
+                                                                    'Wajib Lunas',
+                                                            ]}
+                                                        />
+                                                        {item.pelanggan
+                                                            .boleh_bayar_akhir && (
+                                                            <div className="mt-1.5">
+                                                                <PayLaterBadge
+                                                                    allowed
+                                                                />
+                                                            </div>
+                                                        )}
+                                                        {blockedByKK06 && (
+                                                            <p className="mt-1 text-[11px] font-semibold text-[#9F1239]">
+                                                                Terblokir KK-06
+                                                                (perlu pelunasan)
+                                                            </p>
+                                                        )}
                                                     </td>
 
                                                     <td className="px-5 py-4 text-xs">
-                                                        <div className="flex flex-wrap items-center gap-1.5">
-                                                            <span className="font-medium text-slate-800">
-                                                                {
-                                                                    item.layanan
-                                                                        .nama_layanan
-                                                                }
-                                                            </span>
-                                                            <SpeedTierBadge
-                                                                tier={
-                                                                    item.layanan
-                                                                        .tingkat_kecepatan
-                                                                }
-                                                            />
-                                                        </div>
-                                                        <p className="mt-0.5 text-[11px] text-slate-500">
-                                                            {
-                                                                item.berat_atau_jumlah
-                                                            }{' '}
+                                                        <p className="font-semibold text-[#0F172A]">
                                                             {
                                                                 item.layanan
-                                                                    .satuan
+                                                                    .nama_layanan
                                                             }
                                                         </p>
+                                                        <MetadataRow
+                                                            className="mt-1"
+                                                            items={[
+                                                                <SpeedTierBadge
+                                                                    key="speed"
+                                                                    tier={
+                                                                        item
+                                                                            .layanan
+                                                                            .tingkat_kecepatan
+                                                                    }
+                                                                    variant="text"
+                                                                />,
+                                                                <span
+                                                                    key="qty"
+                                                                    className="font-mono tabular-nums"
+                                                                >
+                                                                    {
+                                                                        item.berat_atau_jumlah
+                                                                    }{' '}
+                                                                    {
+                                                                        item
+                                                                            .layanan
+                                                                            .satuan
+                                                                    }
+                                                                </span>,
+                                                            ]}
+                                                        />
 
                                                         {item.pengantaran_aktif && (
-                                                            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                                                            <div className="mt-2 flex flex-wrap items-center gap-1.5">
                                                                 <ItemPengantaranStatusBadge
                                                                     status={
                                                                         item
@@ -465,7 +442,7 @@ export default function SerahTerimaIndex({
                                                                     .pengantaran && (
                                                                     <Link
                                                                         href={`/pengantaran/${item.pengantaran_aktif.pengantaran.id_pengantaran}`}
-                                                                        className="text-[11px] font-semibold text-sky-700 hover:underline"
+                                                                        className="text-[11px] font-semibold text-[#0F766E] hover:text-[#115E59] hover:underline"
                                                                     >
                                                                         Sesi #
                                                                         {
@@ -489,23 +466,29 @@ export default function SerahTerimaIndex({
                                                     </td>
 
                                                     <td className="whitespace-nowrap px-5 py-4 text-right text-xs">
-                                                        <p className="text-slate-500">
+                                                        <p className="text-[#5B697A]">
                                                             Total:{' '}
-                                                            <span className="font-semibold tabular-nums text-slate-800">
+                                                            <span className="font-mono font-semibold tabular-nums text-[#0F172A]">
                                                                 {formatRupiah(
                                                                     item.total_harga,
                                                                 )}
                                                             </span>
                                                         </p>
-                                                        <p className="mt-0.5 text-slate-500">
+                                                        <p className="mt-0.5 text-[#5B697A]">
                                                             Dibayar:{' '}
-                                                            <span className="font-semibold tabular-nums text-sky-700">
+                                                            <span className="font-mono font-semibold tabular-nums text-[#0F766E]">
                                                                 {formatRupiah(
                                                                     item.total_dibayar,
                                                                 )}
                                                             </span>
                                                         </p>
-                                                        <p className="mt-1 text-sm font-bold tabular-nums text-amber-700">
+                                                        <p
+                                                            className={`mt-1 font-mono text-sm font-bold tabular-nums ${
+                                                                sisaCents > 0
+                                                                    ? 'text-[#78350F]'
+                                                                    : 'text-[#065F46]'
+                                                            }`}
+                                                        >
                                                             Sisa:{' '}
                                                             {formatRupiah(
                                                                 item.sisa_tagihan,
@@ -523,7 +506,7 @@ export default function SerahTerimaIndex({
                                                                             item,
                                                                         )
                                                                     }
-                                                                    className="rounded-xl bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-sky-700"
+                                                                    className="inline-flex min-h-[2.375rem] items-center justify-center rounded-xl bg-[#0F766E] px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
                                                                 >
                                                                     Catat
                                                                     Pelunasan
@@ -539,10 +522,10 @@ export default function SerahTerimaIndex({
                                                                             item,
                                                                         )
                                                                     }
-                                                                    className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
+                                                                    className={`inline-flex min-h-[2.375rem] items-center justify-center rounded-xl px-3.5 py-1.5 text-xs font-semibold transition ${
                                                                         item.bisa_serah_terima_loket
-                                                                            ? 'bg-emerald-600 text-white shadow-xs hover:bg-emerald-700'
-                                                                            : 'border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100'
+                                                                            ? 'bg-emerald-700 text-white shadow-xs hover:bg-emerald-800'
+                                                                            : 'border border-amber-400 bg-amber-50 text-amber-900 hover:bg-amber-100'
                                                                     }`}
                                                                 >
                                                                     {item.sedang_diantar_kurir
@@ -555,10 +538,15 @@ export default function SerahTerimaIndex({
 
                                                             <Link
                                                                 href={`/transaksi/${item.nomor_nota}`}
-                                                                className="text-[11px] font-semibold text-slate-600 hover:text-sky-700 hover:underline"
+                                                                className="inline-flex min-h-[1.75rem] items-center gap-1 text-xs font-semibold text-[#0F766E] hover:text-[#115E59] hover:underline"
                                                             >
-                                                                Detail Nota
-                                                                &rarr;
+                                                                <span>
+                                                                    Detail Nota
+                                                                </span>
+                                                                <ArrowRight
+                                                                    className="h-3 w-3 shrink-0"
+                                                                    aria-hidden="true"
+                                                                />
                                                             </Link>
                                                         </div>
                                                     </td>

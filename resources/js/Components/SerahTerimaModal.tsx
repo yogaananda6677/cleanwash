@@ -1,4 +1,13 @@
 import { useForm } from '@inertiajs/react';
+import {
+    AlertTriangle,
+    ArrowRight,
+    CheckCircle2,
+    Info,
+    PackageCheck,
+    ShieldAlert,
+    Truck,
+} from 'lucide-react';
 import { useEffect, useId, type FormEvent } from 'react';
 import Modal from '@/Components/Modal';
 import {
@@ -133,7 +142,7 @@ export default function SerahTerimaModal({
                         type="button"
                         onClick={handleClose}
                         disabled={processing}
-                        className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                        className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl border border-[#7C8C9D] bg-white px-4 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC] disabled:opacity-50"
                     >
                         Tutup
                     </button>
@@ -145,22 +154,32 @@ export default function SerahTerimaModal({
                                 onSwitchToPelunasan(target);
                             }}
                             disabled={processing}
-                            className="rounded-xl bg-sky-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-sky-700 disabled:opacity-50"
+                            className="inline-flex min-h-[2.5rem] items-center justify-center gap-1.5 rounded-xl border border-amber-400 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-900 transition hover:bg-amber-100 disabled:opacity-50"
                         >
-                            Beralih ke Pelunasan &rarr;
+                            <span>Beralih ke Pelunasan</span>
+                            <ArrowRight
+                                className="h-3.5 w-3.5 shrink-0"
+                                aria-hidden="true"
+                            />
                         </button>
                     )}
                     <button
                         type="submit"
                         form={formId}
                         disabled={processing || !canSubmit}
-                        className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex min-h-[2.5rem] items-center justify-center gap-1.5 rounded-xl bg-emerald-700 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        {processing
-                            ? 'Memproses...'
-                            : piutangDicatat
-                              ? 'Serahkan & Catat Piutang'
-                              : 'Konfirmasi Serah Terima'}
+                        <PackageCheck
+                            className="h-4 w-4 shrink-0"
+                            aria-hidden="true"
+                        />
+                        <span>
+                            {processing
+                                ? 'Memproses...'
+                                : piutangDicatat
+                                  ? 'Serahkan & Catat Piutang'
+                                  : 'Konfirmasi Serah Terima'}
+                        </span>
                     </button>
                 </>
             }
@@ -174,21 +193,24 @@ export default function SerahTerimaModal({
                     {generalError && (
                         <div
                             role="alert"
-                            className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-medium text-rose-800"
+                            className="rounded-xl border border-rose-200 border-l-4 border-l-[#BE123C] bg-[#FFF1F2] px-3.5 py-2.5 text-xs font-medium text-[#9F1239]"
                         >
                             {generalError}
                         </div>
                     )}
 
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-xs">
-                        <div className="flex flex-wrap items-center gap-1.5">
+                    <div className="rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] p-3.5 text-xs">
+                        <div className="flex flex-wrap items-center gap-2">
                             <TransactionStatusBadge
                                 status={target.status_transaksi}
                             />
                             <PaymentStatusBadge
                                 status={target.status_pembayaran}
                             />
-                            <PayLaterBadge allowed={bolehBayarAkhir} />
+                            <PayLaterBadge
+                                allowed={bolehBayarAkhir}
+                                variant={bolehBayarAkhir ? 'badge' : 'text'}
+                            />
                             {piutangDicatat && (
                                 <StatusBadge tone="amber">
                                     Piutang Dicatat (BELUM_LUNAS)
@@ -198,28 +220,28 @@ export default function SerahTerimaModal({
 
                         <dl className="mt-3 space-y-1.5">
                             <div className="flex justify-between gap-4">
-                                <dt className="text-slate-500">Total Harga</dt>
-                                <dd className="font-semibold tabular-nums text-slate-900">
+                                <dt className="text-[#5B697A]">Total Harga</dt>
+                                <dd className="font-mono font-semibold tabular-nums text-[#0F172A]">
                                     {formatRupiah(target.total_harga)}
                                 </dd>
                             </div>
                             <div className="flex justify-between gap-4">
-                                <dt className="text-slate-500">
+                                <dt className="text-[#5B697A]">
                                     Total Dibayar
                                 </dt>
-                                <dd className="font-semibold tabular-nums text-sky-700">
+                                <dd className="font-mono font-semibold tabular-nums text-[#0F766E]">
                                     {formatRupiah(target.total_dibayar)}
                                 </dd>
                             </div>
-                            <div className="flex justify-between gap-4 border-t border-slate-200 pt-1.5">
-                                <dt className="font-semibold text-slate-800">
+                            <div className="flex justify-between gap-4 border-t border-[#D8E2E6] pt-1.5">
+                                <dt className="font-semibold text-[#0F172A]">
                                     Sisa Tagihan
                                 </dt>
                                 <dd
-                                    className={`text-sm font-bold tabular-nums ${
+                                    className={`font-mono text-sm font-bold tabular-nums ${
                                         hasOutstanding
-                                            ? 'text-amber-700'
-                                            : 'text-emerald-700'
+                                            ? 'text-[#78350F]'
+                                            : 'text-[#065F46]'
                                     }`}
                                 >
                                     {formatRupiah(target.sisa_tagihan)}
@@ -231,121 +253,165 @@ export default function SerahTerimaModal({
                     {notSelesai && (
                         <div
                             role="alert"
-                            className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-900"
+                            className="flex items-start gap-2.5 rounded-xl border border-rose-200 border-l-4 border-l-[#BE123C] bg-[#FFF1F2] px-4 py-3 text-xs text-[#9F1239]"
                         >
-                            <p className="font-bold">
-                                Transaksi Belum Siap Diserahkan
-                            </p>
-                            <p className="mt-1">
-                                Serah terima hanya diizinkan untuk nota berstatus{' '}
-                                <strong>SELESAI</strong> (status saat ini:{' '}
-                                <strong>{target.status_transaksi}</strong>).
-                            </p>
+                            <ShieldAlert
+                                className="mt-0.5 h-4 w-4 shrink-0 text-[#BE123C]"
+                                aria-hidden="true"
+                            />
+                            <div>
+                                <p className="font-bold">
+                                    Transaksi Belum Siap Diserahkan
+                                </p>
+                                <p className="mt-1">
+                                    Serah terima hanya diizinkan untuk nota
+                                    berstatus <strong>SELESAI</strong> (status
+                                    saat ini:{' '}
+                                    <strong>{target.status_transaksi}</strong>).
+                                </p>
+                            </div>
                         </div>
                     )}
 
                     {blockedByKurir && (
                         <div
                             role="alert"
-                            className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-900"
+                            className="flex items-start gap-2.5 rounded-xl border border-rose-200 border-l-4 border-l-[#BE123C] bg-[#FFF1F2] px-4 py-3 text-xs text-[#9F1239]"
                         >
-                            <p className="font-bold">
-                                Sedang Dibawa Kurir Pengantaran
-                            </p>
-                            <p className="mt-1">
-                                Nota ini sedang berstatus{' '}
-                                <strong>
-                                    {target.pengantaran_aktif
-                                        ?.status_terima_pelanggan ??
-                                        'DALAM_PERJALANAN'}
-                                </strong>{' '}
-                                oleh kurir{' '}
-                                <strong>
-                                    {target.pengantaran_aktif?.pengantaran
-                                        ?.nama_petugas_antar ?? 'pengantaran'}
-                                </strong>
-                                . Selesaikan atau tandai gagal pengantaran
-                                terlebih dahulu sebelum serah terima di loket.
-                            </p>
+                            <Truck
+                                className="mt-0.5 h-4 w-4 shrink-0 text-[#BE123C]"
+                                aria-hidden="true"
+                            />
+                            <div>
+                                <p className="font-bold">
+                                    Sedang Dibawa Kurir Pengantaran
+                                </p>
+                                <p className="mt-1">
+                                    Nota ini sedang berstatus{' '}
+                                    <strong>
+                                        {target.pengantaran_aktif
+                                            ?.status_terima_pelanggan ??
+                                            'DALAM_PERJALANAN'}
+                                    </strong>{' '}
+                                    oleh kurir{' '}
+                                    <strong>
+                                        {target.pengantaran_aktif?.pengantaran
+                                            ?.nama_petugas_antar ??
+                                            'pengantaran'}
+                                    </strong>
+                                    . Selesaikan atau tandai gagal pengantaran
+                                    terlebih dahulu sebelum serah terima di
+                                    loket.
+                                </p>
+                            </div>
                         </div>
                     )}
 
                     {blockedByKK06 && (
                         <div
                             role="alert"
-                            className="rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-xs text-rose-950"
+                            className="flex items-start gap-2.5 rounded-xl border border-rose-200 border-l-4 border-l-[#BE123C] bg-[#FFF1F2] px-4 py-3 text-xs text-[#9F1239]"
                         >
-                            <p className="font-bold">
-                                Serah Terima Diblokir — Wajib Lunas (KK-06)
-                            </p>
-                            <p className="mt-1 leading-relaxed">
-                                Pelanggan <strong>{target.pelanggan.nama}</strong>{' '}
-                                masih memiliki sisa tagihan{' '}
-                                <strong className="tabular-nums">
-                                    {formatRupiah(target.sisa_tagihan)}
-                                </strong>{' '}
-                                dan <strong>tidak memiliki hak bayar akhir</strong>{' '}
-                                (<code>boleh_bayar_akhir = false</code>).
-                                Pelanggan wajib melunasi tagihan sebelum pakaian
-                                dapat diserahkan.
-                            </p>
+                            <ShieldAlert
+                                className="mt-0.5 h-4 w-4 shrink-0 text-[#BE123C]"
+                                aria-hidden="true"
+                            />
+                            <div>
+                                <p className="font-bold">
+                                    Serah Terima Diblokir — Wajib Lunas (KK-06)
+                                </p>
+                                <p className="mt-1 leading-relaxed">
+                                    Pelanggan{' '}
+                                    <strong>{target.pelanggan.nama}</strong>{' '}
+                                    masih memiliki sisa tagihan{' '}
+                                    <strong className="font-mono tabular-nums">
+                                        {formatRupiah(target.sisa_tagihan)}
+                                    </strong>{' '}
+                                    dan{' '}
+                                    <strong>
+                                        tidak memiliki hak bayar akhir
+                                    </strong>{' '}
+                                    (<code>boleh_bayar_akhir = false</code>).
+                                    Pelanggan wajib melunasi tagihan sebelum
+                                    pakaian dapat diserahkan.
+                                </p>
+                            </div>
                         </div>
                     )}
 
                     {piutangDicatat && !blockedByKurir && !notSelesai && (
-                        <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs text-amber-950">
-                            <p className="font-bold">
-                                Peringatan Piutang Hak Bayar Akhir (KK-06)
-                            </p>
-                            <p className="mt-1 leading-relaxed">
-                                Pelanggan memiliki hak bayar akhir (
-                                <code>boleh_bayar_akhir = true</code>). Pakaian
-                                diperbolehkan diserahkan sekarang dengan sisa
-                                piutang sebesar{' '}
-                                <strong className="tabular-nums">
-                                    {formatRupiah(target.sisa_tagihan)}
-                                </strong>
-                                ; status transaksi akan menjadi{' '}
-                                <strong>DIAMBIL</strong> dan status pembayaran
-                                tercatat <strong>BELUM_LUNAS</strong>.
-                            </p>
+                        <div className="flex items-start gap-2.5 rounded-xl border border-amber-300 border-l-4 border-l-[#B45309] bg-[#FFFBEB] px-4 py-3 text-xs text-[#78350F]">
+                            <AlertTriangle
+                                className="mt-0.5 h-4 w-4 shrink-0 text-[#B45309]"
+                                aria-hidden="true"
+                            />
+                            <div>
+                                <p className="font-bold">
+                                    Peringatan Piutang Hak Bayar Akhir (KK-06)
+                                </p>
+                                <p className="mt-1 leading-relaxed">
+                                    Pelanggan memiliki hak bayar akhir (
+                                    <code>boleh_bayar_akhir = true</code>).
+                                    Pakaian diperbolehkan diserahkan sekarang
+                                    dengan sisa piutang sebesar{' '}
+                                    <strong className="font-mono tabular-nums">
+                                        {formatRupiah(target.sisa_tagihan)}
+                                    </strong>
+                                    ; status transaksi akan menjadi{' '}
+                                    <strong>DIAMBIL</strong> dan status
+                                    pembayaran tercatat{' '}
+                                    <strong>BELUM_LUNAS</strong>.
+                                </p>
+                            </div>
                         </div>
                     )}
 
                     {!hasOutstanding && !blockedByKurir && !notSelesai && (
-                        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-950">
-                            <p className="font-bold">
-                                Tagihan Lunas — Siap Diserahkan
-                            </p>
-                            <p className="mt-1">
-                                Seluruh tagihan sudah terbayar penuh. Konfirmasi
-                                akan mengubah status transaksi menjadi{' '}
-                                <strong>DIAMBIL</strong> dan mencatat waktu
-                                pengambilan WIB.
-                            </p>
+                        <div className="flex items-start gap-2.5 rounded-xl border border-emerald-200 border-l-4 border-l-[#047857] bg-[#ECFDF5] px-4 py-3 text-xs text-[#065F46]">
+                            <CheckCircle2
+                                className="mt-0.5 h-4 w-4 shrink-0 text-[#047857]"
+                                aria-hidden="true"
+                            />
+                            <div>
+                                <p className="font-bold">
+                                    Tagihan Lunas — Siap Diserahkan
+                                </p>
+                                <p className="mt-1">
+                                    Seluruh tagihan sudah terbayar penuh.
+                                    Konfirmasi akan mengubah status transaksi
+                                    menjadi <strong>DIAMBIL</strong> dan
+                                    mencatat waktu pengambilan WIB.
+                                </p>
+                            </div>
                         </div>
                     )}
 
                     {hasWaitingCourierItem && !blockedByKurir && !notSelesai && (
-                        <div className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-xs text-sky-950">
-                            <p className="font-semibold">
-                                Penutupan Otomatis Jadwal Kurir (MENUNGGU)
-                            </p>
-                            <p className="mt-1">
-                                Nota ini terdaftar pada jadwal pengantaran #
-                                {target.pengantaran_aktif?.id_pengantaran}{' '}
-                                berstatus <strong>MENUNGGU</strong>. Menyerahkan
-                                pakaian di loket akan menutup item pengantaran
-                                tersebut secara otomatis agar kurir tidak mencari
-                                cucian di outlet.
-                            </p>
+                        <div className="flex items-start gap-2.5 rounded-xl border border-teal-200 border-l-4 border-l-[#0F766E] bg-[#F0FDFA] px-4 py-3 text-xs text-[#115E59]">
+                            <Info
+                                className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]"
+                                aria-hidden="true"
+                            />
+                            <div>
+                                <p className="font-semibold">
+                                    Penutupan Otomatis Jadwal Kurir (MENUNGGU)
+                                </p>
+                                <p className="mt-1">
+                                    Nota ini terdaftar pada jadwal pengantaran #
+                                    {target.pengantaran_aktif?.id_pengantaran}{' '}
+                                    berstatus <strong>MENUNGGU</strong>.
+                                    Menyerahkan pakaian di loket akan menutup
+                                    item pengantaran tersebut secara otomatis
+                                    agar kurir tidak mencari cucian di outlet.
+                                </p>
+                            </div>
                         </div>
                     )}
 
                     <div>
                         <label
                             htmlFor={catatanInputId}
-                            className="block text-xs font-semibold text-slate-700"
+                            className="block text-xs font-semibold text-[#0F172A]"
                         >
                             Catatan Serah Terima (Opsional)
                         </label>
@@ -364,13 +430,13 @@ export default function SerahTerimaModal({
                             aria-describedby={
                                 errors.catatan ? catatanErrorId : undefined
                             }
-                            className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:bg-slate-100 disabled:text-slate-500"
+                            className="mt-1.5 block min-h-[4.25rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder-[#5B697A] transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 disabled:bg-[#EEF2F5] disabled:text-[#5B697A]"
                         />
                         {errors.catatan && (
                             <p
                                 id={catatanErrorId}
                                 role="alert"
-                                className="mt-1 text-xs font-medium text-rose-600"
+                                className="mt-1.5 text-xs font-medium text-rose-600"
                             >
                                 {errors.catatan}
                             </p>

@@ -1,4 +1,5 @@
 import { useForm } from '@inertiajs/react';
+import { AlertTriangle, Info } from 'lucide-react';
 import { useEffect, useId, type FormEvent } from 'react';
 import Modal from '@/Components/Modal';
 import {
@@ -176,7 +177,7 @@ export default function LaporkanInsidenModal({
                         type="button"
                         onClick={handleClose}
                         disabled={processing}
-                        className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                        className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl border border-[#7C8C9D] bg-white px-4 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC] disabled:opacity-50"
                     >
                         Batal
                     </button>
@@ -186,21 +187,34 @@ export default function LaporkanInsidenModal({
                         disabled={
                             processing || !activeTransaksi || !selectedDetail
                         }
-                        className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex min-h-[2.5rem] items-center justify-center gap-1.5 rounded-xl bg-[#BE123C] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-rose-800 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        {processing
-                            ? 'Menyimpan...'
-                            : isPetugas
-                              ? 'Catat & Potong Kompensasi'
-                              : 'Ajukan Laporan Insiden'}
+                        <AlertTriangle
+                            className="h-4 w-4 shrink-0"
+                            aria-hidden="true"
+                        />
+                        <span>
+                            {processing
+                                ? 'Menyimpan...'
+                                : isPetugas
+                                  ? 'Catat & Potong Kompensasi'
+                                  : 'Ajukan Laporan Insiden'}
+                        </span>
                     </button>
                 </>
             }
         >
             {!activeTransaksi && submitMode === 'global' ? (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
-                    Belum ada transaksi berstatus <strong>AKTIF</strong> atau{' '}
-                    <strong>SELESAI</strong> yang dapat dilaporkan insidennya.
+                <div className="flex items-start gap-2.5 rounded-xl border border-amber-300 border-l-4 border-l-[#B45309] bg-[#FFFBEB] p-4 text-xs text-[#78350F]">
+                    <AlertTriangle
+                        className="mt-0.5 h-4 w-4 shrink-0 text-[#B45309]"
+                        aria-hidden="true"
+                    />
+                    <p>
+                        Belum ada transaksi berstatus <strong>AKTIF</strong>{' '}
+                        atau <strong>SELESAI</strong> yang dapat dilaporkan
+                        insidennya.
+                    </p>
                 </div>
             ) : (
                 <form
@@ -212,10 +226,13 @@ export default function LaporkanInsidenModal({
                         <div>
                             <label
                                 htmlFor={notaFieldId}
-                                className="block text-xs font-semibold text-slate-700"
+                                className="block text-xs font-semibold text-[#0F172A]"
                             >
                                 Transaksi (Nota AKTIF / SELESAI){' '}
-                                <span aria-hidden="true" className="text-rose-600">
+                                <span
+                                    aria-hidden="true"
+                                    className="text-rose-600"
+                                >
                                     *
                                 </span>
                             </label>
@@ -229,7 +246,7 @@ export default function LaporkanInsidenModal({
                                     handleNotaChange(event.target.value)
                                 }
                                 aria-invalid={Boolean(errors.nomor_nota)}
-                                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                             >
                                 {transaksiOptions.map((option) => (
                                     <option
@@ -246,24 +263,28 @@ export default function LaporkanInsidenModal({
                             {errors.nomor_nota && (
                                 <p
                                     role="alert"
-                                    className="mt-1 text-xs font-medium text-rose-600"
+                                    className="mt-1.5 text-xs font-medium text-rose-600"
                                 >
                                     {errors.nomor_nota}
                                 </p>
                             )}
                         </div>
                     ) : (
-                        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs">
-                            <p className="font-semibold text-slate-900">
-                                {activeTransaksi?.nomor_nota} &bull;{' '}
-                                {activeTransaksi?.layanan_nama}
+                        <div className="rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] px-3.5 py-2.5 text-xs">
+                            <p className="font-semibold text-[#0F172A]">
+                                <span className="font-mono">
+                                    {activeTransaksi?.nomor_nota}
+                                </span>{' '}
+                                &bull; {activeTransaksi?.layanan_nama}
                             </p>
-                            <p className="mt-0.5 text-slate-600">
+                            <p className="mt-0.5 text-[#475569]">
                                 Pelanggan: {activeTransaksi?.pelanggan_nama}{' '}
                                 &bull; Subtotal Layanan:{' '}
-                                {formatRupiah(
-                                    activeTransaksi?.subtotal_layanan,
-                                )}
+                                <span className="font-mono font-semibold tabular-nums">
+                                    {formatRupiah(
+                                        activeTransaksi?.subtotal_layanan,
+                                    )}
+                                </span>
                             </p>
                         </div>
                     )}
@@ -271,7 +292,7 @@ export default function LaporkanInsidenModal({
                     <div>
                         <label
                             htmlFor={detailFieldId}
-                            className="block text-xs font-semibold text-slate-700"
+                            className="block text-xs font-semibold text-[#0F172A]"
                         >
                             Item Detail Pakaian Terdampak{' '}
                             <span aria-hidden="true" className="text-rose-600">
@@ -288,7 +309,7 @@ export default function LaporkanInsidenModal({
                                 setData('id_detail', event.target.value)
                             }
                             aria-invalid={Boolean(errors.id_detail)}
-                            className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                         >
                             {activeDetails.map((detail) => (
                                 <option
@@ -304,7 +325,7 @@ export default function LaporkanInsidenModal({
                         {errors.id_detail && (
                             <p
                                 role="alert"
-                                className="mt-1 text-xs font-medium text-rose-600"
+                                className="mt-1.5 text-xs font-medium text-rose-600"
                             >
                                 {errors.id_detail}
                             </p>
@@ -312,7 +333,7 @@ export default function LaporkanInsidenModal({
                     </div>
 
                     <fieldset>
-                        <legend className="text-xs font-semibold text-slate-700">
+                        <legend className="text-xs font-semibold text-[#0F172A]">
                             Jenis Insiden{' '}
                             <span aria-hidden="true" className="text-rose-600">
                                 *
@@ -322,8 +343,8 @@ export default function LaporkanInsidenModal({
                             <label
                                 className={`flex cursor-pointer items-start gap-2.5 rounded-xl border p-3 text-xs transition ${
                                     data.jenis_insiden === 'RUSAK'
-                                        ? 'border-amber-400 bg-amber-50/70 ring-1 ring-amber-300'
-                                        : 'border-slate-200 bg-white hover:bg-slate-50'
+                                        ? 'border-[#B45309] bg-[#FFFBEB] ring-1 ring-amber-300'
+                                        : 'border-[#7C8C9D] bg-white hover:bg-[#F8FAFC]'
                                 }`}
                             >
                                 <input
@@ -334,13 +355,13 @@ export default function LaporkanInsidenModal({
                                     onChange={() =>
                                         setData('jenis_insiden', 'RUSAK')
                                     }
-                                    className="mt-0.5 accent-amber-600"
+                                    className="mt-0.5 accent-[#B45309]"
                                 />
                                 <span>
-                                    <span className="block font-semibold text-slate-900">
+                                    <span className="block font-semibold text-[#0F172A]">
                                         Rusak (KK-04)
                                     </span>
-                                    <span className="mt-0.5 block text-[11px] text-slate-600">
+                                    <span className="mt-0.5 block text-[11px] text-[#475569]">
                                         Estimasi kompensasi 5&times; basis
                                         prorata item
                                     </span>
@@ -350,8 +371,8 @@ export default function LaporkanInsidenModal({
                             <label
                                 className={`flex cursor-pointer items-start gap-2.5 rounded-xl border p-3 text-xs transition ${
                                     data.jenis_insiden === 'HILANG'
-                                        ? 'border-rose-400 bg-rose-50/70 ring-1 ring-rose-300'
-                                        : 'border-slate-200 bg-white hover:bg-slate-50'
+                                        ? 'border-[#BE123C] bg-[#FFF1F2] ring-1 ring-rose-300'
+                                        : 'border-[#7C8C9D] bg-white hover:bg-[#F8FAFC]'
                                 }`}
                             >
                                 <input
@@ -362,13 +383,13 @@ export default function LaporkanInsidenModal({
                                     onChange={() =>
                                         setData('jenis_insiden', 'HILANG')
                                     }
-                                    className="mt-0.5 accent-rose-600"
+                                    className="mt-0.5 accent-[#BE123C]"
                                 />
                                 <span>
-                                    <span className="block font-semibold text-slate-900">
+                                    <span className="block font-semibold text-[#0F172A]">
                                         Hilang (KK-05)
                                     </span>
-                                    <span className="mt-0.5 block text-[11px] text-slate-600">
+                                    <span className="mt-0.5 block text-[11px] text-[#475569]">
                                         Estimasi kompensasi 10&times; basis
                                         prorata item
                                     </span>
@@ -378,7 +399,7 @@ export default function LaporkanInsidenModal({
                         {errors.jenis_insiden && (
                             <p
                                 role="alert"
-                                className="mt-1 text-xs font-medium text-rose-600"
+                                className="mt-1.5 text-xs font-medium text-rose-600"
                             >
                                 {errors.jenis_insiden}
                             </p>
@@ -386,29 +407,42 @@ export default function LaporkanInsidenModal({
                     </fieldset>
 
                     {compensationPreview && selectedDetail && activeTransaksi && (
-                        <div className="rounded-xl border border-sky-200 bg-sky-50/70 px-4 py-3 text-xs text-sky-950">
+                        <div className="rounded-xl border border-teal-200 border-l-4 border-l-[#0F766E] bg-[#F0FDFA] px-4 py-3 text-xs text-[#115E59]">
                             <div className="flex flex-wrap items-center justify-between gap-2">
-                                <span className="font-semibold">
-                                    Pratinjau Estimasi Kompensasi (
-                                    {compensationPreview.multiplier}&times;):
+                                <span className="inline-flex items-center gap-1.5 font-semibold">
+                                    <Info
+                                        className="h-4 w-4 shrink-0 text-[#0F766E]"
+                                        aria-hidden="true"
+                                    />
+                                    <span>
+                                        Pratinjau Estimasi Kompensasi (
+                                        {compensationPreview.multiplier}
+                                        &times;):
+                                    </span>
                                 </span>
-                                <span className="text-sm font-bold tabular-nums text-sky-800">
+                                <span className="font-mono text-sm font-bold tabular-nums text-[#0F766E]">
                                     {formatRupiah(
                                         compensationPreview.estimasiDecimal,
                                     )}
                                 </span>
                             </div>
-                            <p className="mt-1 text-[11px] text-sky-800">
+                            <p className="mt-1 text-[11px] text-[#115E59]">
                                 Prorata {selectedDetail.jumlah_potong}/
                                 {activeTransaksi.total_potong} potong dari
                                 subtotal{' '}
-                                {formatRupiah(activeTransaksi.subtotal_layanan)}{' '}
+                                <span className="font-mono tabular-nums">
+                                    {formatRupiah(
+                                        activeTransaksi.subtotal_layanan,
+                                    )}
+                                </span>{' '}
                                 (basis{' '}
-                                {formatRupiah(
-                                    centsToDecimalString(
-                                        compensationPreview.basisCents,
-                                    ),
-                                )}
+                                <span className="font-mono tabular-nums">
+                                    {formatRupiah(
+                                        centsToDecimalString(
+                                            compensationPreview.basisCents,
+                                        ),
+                                    )}
+                                </span>
                                 ). Nilai resmi dihitung server saat penyimpanan.
                             </p>
                         </div>
@@ -418,7 +452,7 @@ export default function LaporkanInsidenModal({
                         <div>
                             <label
                                 htmlFor={nilaiFieldId}
-                                className="block text-xs font-semibold text-slate-700"
+                                className="block text-xs font-semibold text-[#0F172A]"
                             >
                                 Override Nilai Kompensasi (Opsional)
                             </label>
@@ -447,11 +481,11 @@ export default function LaporkanInsidenModal({
                                         ? nilaiErrorId
                                         : undefined
                                 }
-                                className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm tabular-nums text-[#0F172A] placeholder-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                             />
-                            <p className="mt-1 text-[11px] text-slate-500">
+                            <p className="mt-1 text-[11px] text-[#5B697A]">
                                 Sebagai Petugas, laporan langsung berstatus{' '}
-                                <span className="font-semibold text-emerald-700">
+                                <span className="font-semibold text-[#065F46]">
                                     TERKONFIRMASI
                                 </span>{' '}
                                 dan langsung memotong sisa tagihan transaksi.
@@ -460,25 +494,31 @@ export default function LaporkanInsidenModal({
                                 <p
                                     id={nilaiErrorId}
                                     role="alert"
-                                    className="mt-1 text-xs font-medium text-rose-600"
+                                    className="mt-1.5 text-xs font-medium text-rose-600"
                                 >
                                     {errors.nilai_kompensasi}
                                 </p>
                             )}
                         </div>
                     ) : (
-                        <div className="rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-xs text-amber-900">
-                            Laporan yang diajukan oleh Pegawai akan berstatus{' '}
-                            <strong>MENUNGGU_KONFIRMASI</strong> hingga Petugas
-                            Kasir menyetujui nominal kompensasi dan memotong
-                            saldo nota.
+                        <div className="flex items-start gap-2.5 rounded-xl border border-amber-300 border-l-4 border-l-[#B45309] bg-[#FFFBEB] px-3.5 py-2.5 text-xs text-[#78350F]">
+                            <AlertTriangle
+                                className="mt-0.5 h-4 w-4 shrink-0 text-[#B45309]"
+                                aria-hidden="true"
+                            />
+                            <p>
+                                Laporan yang diajukan oleh Pegawai akan
+                                berstatus <strong>MENUNGGU_KONFIRMASI</strong>{' '}
+                                hingga Petugas Kasir menyetujui nominal
+                                kompensasi dan memotong saldo nota.
+                            </p>
                         </div>
                     )}
 
                     <div>
                         <label
                             htmlFor={keteranganFieldId}
-                            className="block text-xs font-semibold text-slate-700"
+                            className="block text-xs font-semibold text-[#0F172A]"
                         >
                             Kronologi / Keterangan Insiden{' '}
                             <span aria-hidden="true" className="text-rose-600">
@@ -503,13 +543,13 @@ export default function LaporkanInsidenModal({
                                     ? keteranganErrorId
                                     : undefined
                             }
-                            className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                            className="mt-1.5 block min-h-[5.5rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                         />
                         {errors.keterangan && (
                             <p
                                 id={keteranganErrorId}
                                 role="alert"
-                                className="mt-1 text-xs font-medium text-rose-600"
+                                className="mt-1.5 text-xs font-medium text-rose-600"
                             >
                                 {errors.keterangan}
                             </p>

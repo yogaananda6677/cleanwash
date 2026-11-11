@@ -1,3 +1,4 @@
+import { X } from 'lucide-react';
 import {
     useEffect,
     useId,
@@ -123,20 +124,20 @@ export default function Modal({
             }}
             onPointerDown={handlePointerDown}
             onPointerUp={handlePointerUp}
-            className={`m-auto max-h-[90vh] w-[calc(100%-2rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 text-left shadow-xl backdrop:bg-slate-900/50 backdrop:backdrop-blur-xs ${MAX_WIDTH_CLASS[maxWidth]}`}
+            className={`m-auto max-h-[90vh] w-[calc(100%-2rem)] overflow-hidden rounded-2xl border border-[#D8E2E6] bg-white p-0 text-left shadow-2xl backdrop:bg-[#0F2933]/55 backdrop:backdrop-blur-[2px] ${MAX_WIDTH_CLASS[maxWidth]}`}
         >
             {open && (
                 <div className="flex max-h-[90vh] w-full flex-col overflow-hidden">
-                    <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-4">
-                        <div>
+                    <div className="flex items-start justify-between gap-4 border-b border-[#D8E2E6] px-5 py-4 sm:px-6">
+                        <div className="min-w-0">
                             <h2
                                 id={titleId}
-                                className="text-base font-semibold text-slate-900"
+                                className="text-base font-bold tracking-tight text-[#0F172A]"
                             >
                                 {title}
                             </h2>
                             {subtitle && (
-                                <p className="mt-0.5 text-xs text-slate-500">
+                                <p className="mt-0.5 text-xs text-[#5B697A]">
                                     {subtitle}
                                 </p>
                             )}
@@ -146,25 +147,18 @@ export default function Modal({
                             onClick={onClose}
                             disabled={closeDisabled}
                             aria-label="Tutup dialog"
-                            className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="inline-flex min-h-[2.25rem] min-w-[2.25rem] shrink-0 items-center justify-center rounded-lg p-1.5 text-[#5B697A] transition hover:bg-[#F8FAFC] hover:text-[#0F172A] disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            <svg
-                                className="h-5 w-5"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                                aria-hidden="true"
-                            >
-                                <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-                            </svg>
+                            <X className="h-5 w-5" aria-hidden="true" />
                         </button>
                     </div>
 
-                    <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+                    <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6 sm:py-5">
                         {children}
                     </div>
 
                     {footer && (
-                        <div className="flex items-center justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-3.5">
+                        <div className="flex flex-wrap items-center justify-end gap-2.5 border-t border-[#D8E2E6] bg-[#F8FAFC] px-5 py-3.5 sm:px-6">
                             {footer}
                         </div>
                     )}

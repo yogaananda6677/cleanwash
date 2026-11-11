@@ -1,8 +1,35 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { useEffect, useId, useMemo, useState, type FormEvent } from 'react';
+import {
+    AlertTriangle,
+    ArrowRight,
+    CheckCircle2,
+    Clock,
+    MapPin,
+    Plus,
+    RotateCcw,
+    Search,
+    Truck,
+} from 'lucide-react';
+import {
+    useEffect,
+    useId,
+    useMemo,
+    useState,
+    type FormEvent,
+    type ReactNode,
+} from 'react';
 import EmptyState from '@/Components/EmptyState';
+import FilterToolbar, {
+    FILTER_INPUT_CLASS,
+    FILTER_LABEL_CLASS,
+    FILTER_RESET_BUTTON_CLASS,
+    FILTER_SELECT_CLASS,
+    FILTER_SUBMIT_BUTTON_CLASS,
+} from '@/Components/FilterToolbar';
+import MetadataRow from '@/Components/MetadataRow';
 import Modal from '@/Components/Modal';
 import Pagination from '@/Components/Pagination';
+import StatTile, { type StatTileTone } from '@/Components/StatTile';
 import {
     ItemPengantaranStatusBadge,
     PayLaterBadge,
@@ -30,27 +57,24 @@ const STATUS_ORDER: StatusPengantaran[] = [
     'SELESAI',
 ];
 
-const STATUS_CARD_STYLES: Record<
+const STATUS_TILE_META: Record<
     StatusPengantaran,
-    { active: string; idle: string; count: string; hint: string }
+    { tone: StatTileTone; hint: string; icon: ReactNode }
 > = {
     DIJADWALKAN: {
-        active: 'border-sky-500 bg-sky-50 ring-2 ring-sky-200',
-        idle: 'border-slate-200 bg-white hover:border-sky-300',
-        count: 'text-sky-700',
+        tone: 'brand',
         hint: 'Menunggu kurir berangkat',
+        icon: <Clock className="h-4 w-4" aria-hidden="true" />,
     },
     BERJALAN: {
-        active: 'border-amber-500 bg-amber-50 ring-2 ring-amber-200',
-        idle: 'border-slate-200 bg-white hover:border-amber-300',
-        count: 'text-amber-700',
+        tone: 'amber',
         hint: 'Sedang dalam pengantaran',
+        icon: <Truck className="h-4 w-4" aria-hidden="true" />,
     },
     SELESAI: {
-        active: 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200',
-        idle: 'border-slate-200 bg-white hover:border-emerald-300',
-        count: 'text-emerald-700',
+        tone: 'emerald',
         hint: 'Seluruh item telah tuntas',
+        icon: <CheckCircle2 className="h-4 w-4" aria-hidden="true" />,
     },
 };
 
@@ -242,7 +266,7 @@ export default function PengantaranIndex({
         }));
 
         createForm.post('/pengantaran', {
-            preserveScroll: true,
+            preserveScroll: 'errors',
             onSuccess: () => {
                 createForm.clearErrors();
                 setNotaValidationError(null);
@@ -282,9 +306,16 @@ export default function PengantaranIndex({
                     <button
                         type="button"
                         onClick={openCreateModal}
-                        className="inline-flex items-center gap-1.5 rounded-xl bg-sky-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-sky-700"
+                        className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
                     >
-                        + Buat Jadwal Pengantaran
+                        <Plus
+                            className="h-4 w-4 shrink-0"
+                            aria-hidden="true"
+                        />
+                        <span>
+                            <span className="sr-only">+ </span>Buat Jadwal
+                            Pengantaran
+                        </span>
                     </button>
                 ) : undefined
             }
@@ -302,55 +333,46 @@ export default function PengantaranIndex({
             >
                 {STATUS_ORDER.map((status) => {
                     const active = statusFilter === status;
-                    const styles = STATUS_CARD_STYLES[status];
+                    const meta = STATUS_TILE_META[status];
 
                     return (
-                        <button
+                        <StatTile
                             key={status}
-                            type="button"
-                            aria-pressed={active}
+                            label={formatStatusPengantaran(status)}
+                            value={statusCounts[status] ?? 0}
+                            hint={meta.hint}
+                            tone={meta.tone}
+                            icon={meta.icon}
+                            active={active}
                             onClick={() => handleStatusCardClick(status)}
-                            className={`flex items-center justify-between rounded-2xl border p-4 text-left shadow-xs transition ${
-                                active ? styles.active : styles.idle
-                            }`}
-                        >
-                            <div>
-                                <p className="text-xs font-semibold text-slate-600">
-                                    {formatStatusPengantaran(status)}
-                                </p>
-                                <p className="mt-0.5 text-[11px] text-slate-500">
-                                    {styles.hint}
-                                </p>
-                            </div>
-                            <span
-                                className={`text-2xl font-bold tabular-nums ${styles.count}`}
-                            >
-                                {statusCounts[status] ?? 0}
-                            </span>
-                        </button>
+                        />
                     );
                 })}
             </section>
 
             {/* Search & Filters */}
-            <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:p-5">
-                <search>
-                    <form
-                        method="GET"
-                        onSubmit={handleSearchSubmit}
-                        className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-12 lg:items-end"
+            <FilterToolbar
+                className="mt-5"
+                ariaLabel="Filter daftar sesi pengantaran"
+                onSubmit={handleSearchSubmit}
+            >
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-12 lg:items-end">
+                    <div
+                        className={
+                            isPetugas ? 'lg:col-span-4' : 'lg:col-span-5'
+                        }
                     >
-                        <div
-                            className={
-                                isPetugas ? 'lg:col-span-4' : 'lg:col-span-5'
-                            }
+                        <label
+                            htmlFor={searchInputId}
+                            className={FILTER_LABEL_CLASS}
                         >
-                            <label
-                                htmlFor={searchInputId}
-                                className="block text-xs font-semibold text-slate-700"
-                            >
-                                Cari Pengantaran
-                            </label>
+                            Cari Pengantaran
+                        </label>
+                        <div className="relative mt-1.5">
+                            <Search
+                                className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#5B697A]"
+                                aria-hidden="true"
+                            />
                             <input
                                 id={searchInputId}
                                 name="search"
@@ -360,118 +382,120 @@ export default function PengantaranIndex({
                                     setSearch(event.target.value)
                                 }
                                 placeholder="Nomor nota, nama/telepon pelanggan, atau kurir..."
-                                className="mt-1 block w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                className="block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white py-2 pl-10 pr-3.5 text-sm text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                             />
                         </div>
+                    </div>
 
+                    <div className="lg:col-span-2">
+                        <label
+                            htmlFor={statusSelectId}
+                            className={FILTER_LABEL_CLASS}
+                        >
+                            Status Sesi
+                        </label>
+                        <select
+                            id={statusSelectId}
+                            name="status_pengantaran"
+                            value={statusFilter}
+                            onChange={(event) =>
+                                setStatusFilter(
+                                    event.target.value as
+                                        | StatusPengantaran
+                                        | '',
+                                )
+                            }
+                            className={FILTER_SELECT_CLASS}
+                        >
+                            <option value="">Semua Status</option>
+                            {STATUS_ORDER.map((st) => (
+                                <option key={st} value={st}>
+                                    {formatStatusPengantaran(st)}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div
+                        className={
+                            isPetugas ? 'lg:col-span-2' : 'lg:col-span-3'
+                        }
+                    >
+                        <label
+                            htmlFor={tanggalInputId}
+                            className={FILTER_LABEL_CLASS}
+                        >
+                            Tanggal Antar
+                        </label>
+                        <input
+                            id={tanggalInputId}
+                            name="tanggal_pengantaran"
+                            type="date"
+                            value={tanggalFilter}
+                            onChange={(event) =>
+                                setTanggalFilter(event.target.value)
+                            }
+                            className={FILTER_INPUT_CLASS}
+                        />
+                    </div>
+
+                    {isPetugas && (
                         <div className="lg:col-span-2">
                             <label
-                                htmlFor={statusSelectId}
-                                className="block text-xs font-semibold text-slate-700"
+                                htmlFor={kurirSelectId}
+                                className={FILTER_LABEL_CLASS}
                             >
-                                Status Sesi
+                                Kurir
                             </label>
                             <select
-                                id={statusSelectId}
-                                name="status_pengantaran"
-                                value={statusFilter}
+                                id={kurirSelectId}
+                                name="id_petugas_antar"
+                                value={kurirFilter}
                                 onChange={(event) =>
-                                    setStatusFilter(
-                                        event.target.value as
-                                            | StatusPengantaran
-                                            | '',
-                                    )
+                                    setKurirFilter(event.target.value)
                                 }
-                                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                className={FILTER_SELECT_CLASS}
                             >
-                                <option value="">Semua Status</option>
-                                {STATUS_ORDER.map((st) => (
-                                    <option key={st} value={st}>
-                                        {formatStatusPengantaran(st)}
+                                <option value="">Semua Kurir</option>
+                                {kurirOptions.map((kurir) => (
+                                    <option
+                                        key={kurir.id_petugas_antar}
+                                        value={kurir.id_petugas_antar}
+                                    >
+                                        {kurir.nama_petugas_antar}
+                                        {!kurir.is_active ? ' (Nonaktif)' : ''}
                                     </option>
                                 ))}
                             </select>
                         </div>
+                    )}
 
-                        <div
-                            className={
-                                isPetugas ? 'lg:col-span-2' : 'lg:col-span-3'
-                            }
+                    <div className="flex flex-wrap items-center gap-2 lg:col-span-2">
+                        <button
+                            type="submit"
+                            className={FILTER_SUBMIT_BUTTON_CLASS}
                         >
-                            <label
-                                htmlFor={tanggalInputId}
-                                className="block text-xs font-semibold text-slate-700"
-                            >
-                                Tanggal Antar
-                            </label>
-                            <input
-                                id={tanggalInputId}
-                                name="tanggal_pengantaran"
-                                type="date"
-                                value={tanggalFilter}
-                                onChange={(event) =>
-                                    setTanggalFilter(event.target.value)
-                                }
-                                className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                            />
-                        </div>
-
-                        {isPetugas && (
-                            <div className="lg:col-span-2">
-                                <label
-                                    htmlFor={kurirSelectId}
-                                    className="block text-xs font-semibold text-slate-700"
-                                >
-                                    Kurir
-                                </label>
-                                <select
-                                    id={kurirSelectId}
-                                    name="id_petugas_antar"
-                                    value={kurirFilter}
-                                    onChange={(event) =>
-                                        setKurirFilter(event.target.value)
-                                    }
-                                    className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                                >
-                                    <option value="">Semua Kurir</option>
-                                    {kurirOptions.map((kurir) => (
-                                        <option
-                                            key={kurir.id_petugas_antar}
-                                            value={kurir.id_petugas_antar}
-                                        >
-                                            {kurir.nama_petugas_antar}
-                                            {!kurir.is_active
-                                                ? ' (Nonaktif)'
-                                                : ''}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        )}
-
-                        <div className="flex items-center gap-2 lg:col-span-2">
+                            Terapkan
+                        </button>
+                        {hasActiveFilters && (
                             <button
-                                type="submit"
-                                className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
+                                type="button"
+                                onClick={handleResetFilters}
+                                className={FILTER_RESET_BUTTON_CLASS}
                             >
-                                Terapkan
+                                <RotateCcw
+                                    className="h-3.5 w-3.5 shrink-0"
+                                    aria-hidden="true"
+                                />
+                                <span>Reset</span>
                             </button>
-                            {hasActiveFilters && (
-                                <button
-                                    type="button"
-                                    onClick={handleResetFilters}
-                                    className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-                                >
-                                    Reset
-                                </button>
-                            )}
-                        </div>
-                    </form>
-                </search>
-            </section>
+                        )}
+                    </div>
+                </div>
+            </FilterToolbar>
 
             {/* Delivery Sessions Table */}
-            <section className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+            <section className="mt-5 overflow-hidden rounded-2xl border border-[#D8E2E6] bg-white shadow-[0_1px_2px_rgba(15,41,51,0.04)]">
                 {pengantaran.data.length === 0 ? (
                     <div className="p-6">
                         <EmptyState
@@ -505,9 +529,9 @@ export default function PengantaranIndex({
                             tabIndex={0}
                             role="region"
                             aria-labelledby={tableCaptionId}
-                            className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                            className="overflow-x-auto"
                         >
-                            <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
+                            <table className="min-w-full divide-y divide-[#D8E2E6] text-left text-sm">
                                 <caption
                                     id={tableCaptionId}
                                     className="sr-only"
@@ -515,7 +539,7 @@ export default function PengantaranIndex({
                                     Daftar sesi pengantaran laundry beserta
                                     kurir, progres item, dan ringkasan pelanggan
                                 </caption>
-                                <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                <thead className="border-b border-[#D8E2E6] bg-[#F8FAFC] text-[0.6875rem] font-semibold uppercase tracking-wider text-[#475569]">
                                     <tr>
                                         <th scope="col" className="px-5 py-3.5">
                                             Sesi &amp; Tanggal
@@ -537,7 +561,7 @@ export default function PengantaranIndex({
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 bg-white">
+                                <tbody className="divide-y divide-[#D8E2E6] bg-white">
                                     {pengantaran.data.map((sesi) => {
                                         const visibleItems = sesi.items.slice(
                                             0,
@@ -552,7 +576,7 @@ export default function PengantaranIndex({
                                         return (
                                             <tr
                                                 key={sesi.id_pengantaran}
-                                                className="align-top hover:bg-slate-50/70"
+                                                className="align-top transition hover:bg-[#F8FAFC]"
                                             >
                                                 <th
                                                     scope="row"
@@ -560,17 +584,17 @@ export default function PengantaranIndex({
                                                 >
                                                     <Link
                                                         href={`/pengantaran/${sesi.id_pengantaran}`}
-                                                        className="font-mono text-sm font-bold text-sky-700 hover:text-sky-800 hover:underline"
+                                                        className="font-mono text-sm font-bold text-[#0F766E] hover:text-[#115E59] hover:underline"
                                                     >
                                                         Sesi #
                                                         {sesi.id_pengantaran}
                                                     </Link>
-                                                    <p className="mt-1 text-xs font-medium text-slate-700">
+                                                    <p className="mt-1 text-xs font-medium text-[#0F172A]">
                                                         {formatTanggal(
                                                             sesi.tanggal_pengantaran,
                                                         )}
                                                     </p>
-                                                    <p className="mt-0.5 text-[11px] text-slate-400">
+                                                    <p className="mt-0.5 text-[11px] text-[#5B697A]">
                                                         Dibuat{' '}
                                                         {formatTanggal(
                                                             sesi.created_at,
@@ -580,14 +604,14 @@ export default function PengantaranIndex({
                                                 </th>
 
                                                 <td className="whitespace-nowrap px-5 py-4 text-xs">
-                                                    <p className="font-semibold text-slate-900">
+                                                    <p className="font-semibold text-[#0F172A]">
                                                         {
                                                             sesi
                                                                 .petugas_pengantaran
                                                                 .nama_petugas_antar
                                                         }
                                                     </p>
-                                                    <p className="mt-0.5 text-[11px] text-slate-500">
+                                                    <p className="mt-0.5 text-[11px] text-[#5B697A] tabular-nums">
                                                         {sesi.total_item} nota
                                                         pelanggan
                                                     </p>
@@ -610,7 +634,7 @@ export default function PengantaranIndex({
                                                             </StatusBadge>
                                                         )}
                                                     </div>
-                                                    <p className="mt-1.5 text-[11px] font-medium tabular-nums text-slate-600">
+                                                    <p className="mt-1.5 text-[11px] font-medium tabular-nums text-[#475569]">
                                                         {
                                                             sesi.item_selesai_count
                                                         }
@@ -629,13 +653,13 @@ export default function PengantaranIndex({
                                                                     }
                                                                     className="flex flex-wrap items-center gap-1.5"
                                                                 >
-                                                                    <span className="font-mono font-semibold text-slate-800">
+                                                                    <span className="font-mono font-semibold text-[#0F172A]">
                                                                         {
                                                                             item.nomor_nota
                                                                         }
                                                                     </span>
-                                                                    <span className="text-slate-500">
-                                                                        —{' '}
+                                                                    <span className="text-[#475569]">
+                                                                        &mdash;{' '}
                                                                         {
                                                                             item
                                                                                 .transaksi
@@ -653,7 +677,7 @@ export default function PengantaranIndex({
                                                         )}
                                                     </ul>
                                                     {remainingCount > 0 && (
-                                                        <p className="mt-1.5 text-[11px] font-medium text-slate-500">
+                                                        <p className="mt-1.5 text-[11px] font-medium text-[#5B697A]">
                                                             +{remainingCount}{' '}
                                                             item lainnya
                                                         </p>
@@ -663,9 +687,13 @@ export default function PengantaranIndex({
                                                 <td className="whitespace-nowrap px-5 py-4 text-right">
                                                     <Link
                                                         href={`/pengantaran/${sesi.id_pengantaran}`}
-                                                        className="inline-flex items-center rounded-xl bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-700 ring-1 ring-inset ring-sky-200 transition hover:bg-sky-100"
+                                                        className="inline-flex min-h-[2.375rem] items-center gap-1 rounded-xl border border-teal-200 bg-[#F0FDFA] px-3 py-1.5 text-xs font-semibold text-[#115E59] transition hover:bg-[#CCFBF1]"
                                                     >
-                                                        Buka Sesi &rarr;
+                                                        <span>Buka Sesi</span>
+                                                        <ArrowRight
+                                                            className="h-3.5 w-3.5 shrink-0"
+                                                            aria-hidden="true"
+                                                        />
                                                     </Link>
                                                 </td>
                                             </tr>
@@ -697,7 +725,7 @@ export default function PengantaranIndex({
                                 type="button"
                                 onClick={closeCreateModal}
                                 disabled={createForm.processing}
-                                className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                                className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl border border-[#7C8C9D] bg-white px-4 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC] disabled:opacity-50"
                             >
                                 Batal
                             </button>
@@ -709,11 +737,17 @@ export default function PengantaranIndex({
                                     activeKurirOptions.length === 0 ||
                                     eligibleTransaksiOptions.length === 0
                                 }
-                                className="rounded-xl bg-sky-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="inline-flex min-h-[2.5rem] items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                {createForm.processing
-                                    ? 'Menyimpan...'
-                                    : `Buat Jadwal (${createForm.data.nomor_nota_list.length} Nota)`}
+                                <Truck
+                                    className="h-4 w-4 shrink-0"
+                                    aria-hidden="true"
+                                />
+                                <span>
+                                    {createForm.processing
+                                        ? 'Menyimpan...'
+                                        : `Buat Jadwal (${createForm.data.nomor_nota_list.length} Nota)`}
+                                </span>
                             </button>
                         </>
                     }
@@ -727,7 +761,7 @@ export default function PengantaranIndex({
                             <div>
                                 <label
                                     htmlFor={createKurirId}
-                                    className="block text-xs font-semibold text-slate-700"
+                                    className="block text-xs font-semibold text-[#0F172A]"
                                 >
                                     Kurir Pengantaran Aktif{' '}
                                     <span
@@ -757,7 +791,7 @@ export default function PengantaranIndex({
                                             ? createKurirErrId
                                             : undefined
                                     }
-                                    className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                    className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                                 >
                                     {activeKurirOptions.length === 0 ? (
                                         <option value="">
@@ -778,7 +812,7 @@ export default function PengantaranIndex({
                                     <p
                                         id={createKurirErrId}
                                         role="alert"
-                                        className="mt-1 text-xs font-medium text-rose-600"
+                                        className="mt-1.5 text-xs font-medium text-rose-600"
                                     >
                                         {createForm.errors.id_petugas_antar}
                                     </p>
@@ -788,7 +822,7 @@ export default function PengantaranIndex({
                             <div>
                                 <label
                                     htmlFor={createTanggalId}
-                                    className="block text-xs font-semibold text-slate-700"
+                                    className="block text-xs font-semibold text-[#0F172A]"
                                 >
                                     Tanggal Pengantaran{' '}
                                     <span
@@ -819,13 +853,13 @@ export default function PengantaranIndex({
                                             ? createTanggalErrId
                                             : undefined
                                     }
-                                    className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                    className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                                 />
                                 {createForm.errors.tanggal_pengantaran && (
                                     <p
                                         id={createTanggalErrId}
                                         role="alert"
-                                        className="mt-1 text-xs font-medium text-rose-600"
+                                        className="mt-1.5 text-xs font-medium text-rose-600"
                                     >
                                         {createForm.errors.tanggal_pengantaran}
                                     </p>
@@ -833,15 +867,15 @@ export default function PengantaranIndex({
                             </div>
                         </div>
 
-                        <fieldset className="rounded-xl border border-slate-200 p-3.5">
-                            <legend className="px-1 text-xs font-semibold text-slate-700">
+                        <fieldset className="rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] p-3.5">
+                            <legend className="px-1.5 text-xs font-semibold text-[#0F172A]">
                                 Pilih Nota Transaksi SELESAI (
                                 {createForm.data.nomor_nota_list.length} nota,{' '}
                                 {selectedUniqueCustomersCount} pelanggan)
                             </legend>
 
                             {eligibleTransaksiOptions.length === 0 ? (
-                                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-xs text-amber-900">
+                                <div className="rounded-xl border border-amber-300 border-l-4 border-l-[#B45309] bg-[#FFFBEB] p-3.5 text-xs text-[#78350F]">
                                     Belum ada transaksi berstatus{' '}
                                     <strong>SELESAI</strong> yang bebas dari
                                     jadwal pengantaran aktif.
@@ -849,13 +883,17 @@ export default function PengantaranIndex({
                             ) : (
                                 <>
                                     <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                        <div className="flex-1">
+                                        <div className="relative flex-1">
                                             <label
                                                 htmlFor={createNotaFilterId}
                                                 className="sr-only"
                                             >
                                                 Saring daftar nota eligible
                                             </label>
+                                            <Search
+                                                className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#5B697A]"
+                                                aria-hidden="true"
+                                            />
                                             <input
                                                 id={createNotaFilterId}
                                                 type="search"
@@ -866,10 +904,10 @@ export default function PengantaranIndex({
                                                     )
                                                 }
                                                 placeholder="Filter nota atau nama/alamat pelanggan..."
-                                                className="block w-full rounded-xl border border-slate-300 px-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                                className="block min-h-[2.375rem] w-full rounded-xl border border-[#7C8C9D] bg-white py-1.5 pl-9 pr-3 text-xs text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                                             />
                                         </div>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex flex-wrap items-center gap-2">
                                             <button
                                                 type="button"
                                                 onClick={() => {
@@ -886,7 +924,7 @@ export default function PengantaranIndex({
                                                         ),
                                                     );
                                                 }}
-                                                className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:bg-slate-50"
+                                                className="min-h-[2.25rem] rounded-xl border border-[#7C8C9D] bg-white px-3 py-1.5 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
                                             >
                                                 Pilih Tampak
                                             </button>
@@ -898,14 +936,14 @@ export default function PengantaranIndex({
                                                         [],
                                                     )
                                                 }
-                                                className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:bg-slate-50"
+                                                className="min-h-[2.25rem] rounded-xl border border-[#7C8C9D] bg-white px-3 py-1.5 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
                                             >
                                                 Kosongkan
                                             </button>
                                         </div>
                                     </div>
 
-                                    <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+                                    <div className="max-h-72 space-y-2.5 overflow-y-auto pr-1">
                                         {filteredEligibleOptions.map((opt) => {
                                             const checked =
                                                 createForm.data.nomor_nota_list.includes(
@@ -919,10 +957,10 @@ export default function PengantaranIndex({
                                             return (
                                                 <label
                                                     key={opt.nomor_nota}
-                                                    className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 text-xs transition ${
+                                                    className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 text-xs transition ${
                                                         checked
-                                                            ? 'border-sky-400 bg-sky-50/70 ring-1 ring-sky-200'
-                                                            : 'border-slate-200 bg-white hover:bg-slate-50'
+                                                            ? 'border-2 border-[#0F766E] bg-[#F0FDFA] shadow-xs'
+                                                            : 'border-[#D8E2E6] bg-white hover:border-[#7C8C9D]'
                                                     }`}
                                                 >
                                                     <input
@@ -935,51 +973,58 @@ export default function PengantaranIndex({
                                                                 opt.nomor_nota,
                                                             )
                                                         }
-                                                        className="mt-1 h-4 w-4 rounded border-slate-300 accent-sky-600"
+                                                        className="mt-1 h-4 w-4 shrink-0 rounded border-[#7C8C9D] accent-[#0F766E]"
                                                     />
                                                     <div className="min-w-0 flex-1">
-                                                        <div className="flex flex-wrap items-center gap-1.5">
-                                                            <span className="font-mono font-bold text-slate-900">
-                                                                {opt.nomor_nota}
-                                                            </span>
-                                                            <SpeedTierBadge
-                                                                tier={
-                                                                    opt.layanan
-                                                                        .tingkat_kecepatan
-                                                                }
-                                                            />
-                                                            <PaymentStatusBadge
-                                                                status={
-                                                                    opt.status_pembayaran
-                                                                }
-                                                            />
-                                                            <PayLaterBadge
-                                                                allowed={
+                                                        {/* Max 2 status badges per card */}
+                                                        <div className="flex flex-wrap items-center justify-between gap-2">
+                                                            <div className="flex flex-wrap items-center gap-1.5">
+                                                                <span className="font-mono text-sm font-bold text-[#0F172A]">
+                                                                    {
+                                                                        opt.nomor_nota
+                                                                    }
+                                                                </span>
+                                                                <PaymentStatusBadge
+                                                                    status={
+                                                                        opt.status_pembayaran
+                                                                    }
+                                                                />
+                                                                {opt.has_previous_failed_delivery ? (
+                                                                    <StatusBadge tone="rose">
+                                                                        Pernah
+                                                                        Gagal
+                                                                        Antar
+                                                                    </StatusBadge>
+                                                                ) : (
                                                                     opt
                                                                         .pelanggan
-                                                                        .boleh_bayar_akhir
-                                                                }
-                                                            />
-                                                            {opt.has_previous_failed_delivery && (
-                                                                <StatusBadge tone="rose">
-                                                                    Pernah Gagal
-                                                                    Antar
-                                                                </StatusBadge>
-                                                            )}
-                                                            {opt.insiden_pending_count >
-                                                                0 && (
-                                                                <StatusBadge tone="amber">
-                                                                    {
-                                                                        opt.insiden_pending_count
-                                                                    }{' '}
-                                                                    Insiden
-                                                                    Pending
-                                                                </StatusBadge>
-                                                            )}
+                                                                        .boleh_bayar_akhir && (
+                                                                        <PayLaterBadge
+                                                                            allowed={
+                                                                                true
+                                                                            }
+                                                                        />
+                                                                    )
+                                                                )}
+                                                            </div>
+                                                            <span
+                                                                className={`font-mono font-bold tabular-nums ${
+                                                                    sisaCents >
+                                                                    0
+                                                                        ? 'text-[#78350F]'
+                                                                        : 'text-[#065F46]'
+                                                                }`}
+                                                            >
+                                                                Sisa:{' '}
+                                                                {formatRupiah(
+                                                                    opt.sisa_tagihan,
+                                                                )}
+                                                            </span>
                                                         </div>
-                                                        <p className="mt-1 font-semibold text-slate-900">
+
+                                                        <p className="mt-1.5 text-xs font-bold text-[#0F172A]">
                                                             {opt.pelanggan.nama}{' '}
-                                                            <span className="font-normal text-slate-500">
+                                                            <span className="font-mono font-normal text-[#5B697A]">
                                                                 (
                                                                 {
                                                                     opt
@@ -989,42 +1034,94 @@ export default function PengantaranIndex({
                                                                 )
                                                             </span>
                                                         </p>
-                                                        <p className="mt-0.5 text-[11px] text-slate-600">
-                                                            {
-                                                                opt.pelanggan
-                                                                    .alamat
-                                                            }
-                                                        </p>
-                                                        <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-600">
+
+                                                        <p className="mt-1 flex items-start gap-1.5 text-[11px] leading-relaxed text-[#475569]">
+                                                            <MapPin
+                                                                className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#0F766E]"
+                                                                aria-hidden="true"
+                                                            />
                                                             <span>
                                                                 {
-                                                                    opt.layanan
-                                                                        .nama_layanan
-                                                                }{' '}
-                                                                (
-                                                                {
-                                                                    opt.berat_atau_jumlah
-                                                                }{' '}
-                                                                {
-                                                                    opt.layanan
-                                                                        .satuan
+                                                                    opt
+                                                                        .pelanggan
+                                                                        .alamat
                                                                 }
-                                                                )
                                                             </span>
-                                                            <span
-                                                                className={`font-semibold tabular-nums ${
-                                                                    sisaCents >
-                                                                    0
-                                                                        ? 'text-amber-700'
-                                                                        : 'text-emerald-700'
-                                                                }`}
-                                                            >
-                                                                Sisa:{' '}
-                                                                {formatRupiah(
-                                                                    opt.sisa_tagihan,
-                                                                )}
-                                                            </span>
-                                                        </div>
+                                                        </p>
+
+                                                        <MetadataRow
+                                                            className="mt-1.5"
+                                                            items={[
+                                                                <span key="layanan">
+                                                                    {
+                                                                        opt
+                                                                            .layanan
+                                                                            .nama_layanan
+                                                                    }{' '}
+                                                                    (
+                                                                    <span className="font-mono tabular-nums">
+                                                                        {
+                                                                            opt.berat_atau_jumlah
+                                                                        }{' '}
+                                                                        {
+                                                                            opt
+                                                                                .layanan
+                                                                                .satuan
+                                                                        }
+                                                                    </span>
+                                                                    )
+                                                                </span>,
+                                                                <SpeedTierBadge
+                                                                    key="tier"
+                                                                    tier={
+                                                                        opt
+                                                                            .layanan
+                                                                            .tingkat_kecepatan
+                                                                    }
+                                                                    variant="text"
+                                                                />,
+                                                                opt.pelanggan
+                                                                    .boleh_bayar_akhir ? (
+                                                                    opt.has_previous_failed_delivery && (
+                                                                        <span
+                                                                            key="paylater-text"
+                                                                            className="font-medium text-[#3730A3]"
+                                                                        >
+                                                                            Boleh
+                                                                            Bayar
+                                                                            Akhir
+                                                                        </span>
+                                                                    )
+                                                                ) : (
+                                                                    <PayLaterBadge
+                                                                        key="paylater-text"
+                                                                        allowed={
+                                                                            false
+                                                                        }
+                                                                        variant="text"
+                                                                    />
+                                                                ),
+                                                            ]}
+                                                        />
+
+                                                        {opt.insiden_pending_count >
+                                                            0 && (
+                                                            <p className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold text-[#78350F]">
+                                                                <AlertTriangle
+                                                                    className="h-3.5 w-3.5 shrink-0 text-[#B45309]"
+                                                                    aria-hidden="true"
+                                                                />
+                                                                <span>
+                                                                    {
+                                                                        opt.insiden_pending_count
+                                                                    }{' '}
+                                                                    Insiden
+                                                                    Pending
+                                                                    menunggu
+                                                                    konfirmasi
+                                                                </span>
+                                                            </p>
+                                                        )}
                                                     </div>
                                                 </label>
                                             );

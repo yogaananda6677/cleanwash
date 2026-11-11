@@ -1,6 +1,10 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { useState, type FormEvent } from 'react';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { useId, useState, type FormEvent } from 'react';
 import EmptyState from '@/Components/EmptyState';
+import FilterToolbar, {
+    FILTER_SELECT_CLASS,
+} from '@/Components/FilterToolbar';
 import Modal from '@/Components/Modal';
 import Pagination from '@/Components/Pagination';
 import { VoucherStatusBadge } from '@/Components/StatusBadge';
@@ -9,6 +13,8 @@ import { formatRupiah, formatTanggal } from '@/lib/format';
 import type { VoucherIndexProps, VoucherItem, VoucherStatus } from '@/types';
 
 export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
+    const tableCaptionId = useId();
+    const formId = useId();
     const [search, setSearch] = useState(filters.search ?? '');
     const [statusFilter, setStatusFilter] = useState<VoucherStatus | ''>(
         filters.status ?? '',
@@ -152,75 +158,55 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                 <button
                     type="button"
                     onClick={openCreateModal}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-sky-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-sky-700"
+                    className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
                 >
-                    + Tambah Voucher
+                    <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    <span>
+                        <span className="sr-only">+ </span>Tambah Voucher
+                    </span>
                 </button>
             }
         >
             <Head title="Master Voucher" />
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:p-5">
-                <form
-                    onSubmit={handleSearchSubmit}
-                    className="flex flex-col gap-3 sm:flex-row sm:items-center"
-                >
-                    <div className="relative flex-1">
-                        <label htmlFor="search-voucher" className="sr-only">
-                            Cari kode voucher
-                        </label>
-                        <input
-                            id="search-voucher"
-                            type="text"
-                            value={search}
-                            onChange={(event) => setSearch(event.target.value)}
-                            placeholder="Cari kode voucher (mis. HEMAT10K)..."
-                            className="block w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm uppercase text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                        />
-                    </div>
-                    <div className="w-full sm:w-52">
-                        <label htmlFor="filter-status-voucher" className="sr-only">
-                            Filter status voucher
-                        </label>
-                        <select
-                            id="filter-status-voucher"
-                            value={statusFilter}
-                            onChange={(event) =>
-                                handleStatusChange(
-                                    event.target.value as VoucherStatus | '',
-                                )
-                            }
-                            className="block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                        >
-                            <option value="">Semua Status</option>
-                            <option value="TERSEDIA">Tersedia</option>
-                            <option value="SUDAH_DIGUNAKAN">
-                                Sudah Digunakan
-                            </option>
-                            <option value="KEDALUWARSA">Kedaluwarsa</option>
-                        </select>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button
-                            type="submit"
-                            className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
-                        >
-                            Cari
-                        </button>
-                        {hasActiveFilters && (
-                            <button
-                                type="button"
-                                onClick={handleResetFilters}
-                                className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-                            >
-                                Reset
-                            </button>
-                        )}
-                    </div>
-                </form>
-            </section>
+            <FilterToolbar
+                ariaLabel="Filter daftar voucher"
+                onSubmit={handleSearchSubmit}
+                searchValue={search}
+                onSearchChange={setSearch}
+                searchId="search-voucher"
+                searchLabel="Cari kode voucher"
+                searchPlaceholder="Cari kode voucher (mis. HEMAT10K)..."
+                submitLabel="Cari"
+                onReset={handleResetFilters}
+                hasActiveFilters={hasActiveFilters}
+            >
+                <div className="w-full sm:w-52 lg:shrink-0">
+                    <label
+                        htmlFor="filter-status-voucher"
+                        className="block text-xs font-semibold text-[#475569]"
+                    >
+                        Filter status voucher
+                    </label>
+                    <select
+                        id="filter-status-voucher"
+                        value={statusFilter}
+                        onChange={(event) =>
+                            handleStatusChange(
+                                event.target.value as VoucherStatus | '',
+                            )
+                        }
+                        className={FILTER_SELECT_CLASS}
+                    >
+                        <option value="">Semua Status</option>
+                        <option value="TERSEDIA">Tersedia</option>
+                        <option value="SUDAH_DIGUNAKAN">Sudah Digunakan</option>
+                        <option value="KEDALUWARSA">Kedaluwarsa</option>
+                    </select>
+                </div>
+            </FilterToolbar>
 
-            <section className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+            <section className="mt-5 overflow-hidden rounded-2xl border border-[#D8E2E6] bg-white shadow-[0_1px_2px_rgba(15,41,51,0.04)]">
                 {voucher.data.length === 0 ? (
                     <div className="p-6">
                         <EmptyState
@@ -244,31 +230,49 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                     </div>
                 ) : (
                     <>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-                                <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <div
+                            tabIndex={0}
+                            role="region"
+                            aria-labelledby={tableCaptionId}
+                            className="overflow-x-auto"
+                        >
+                            <table className="min-w-full divide-y divide-[#D8E2E6] text-left text-sm">
+                                <caption
+                                    id={tableCaptionId}
+                                    className="sr-only"
+                                >
+                                    Daftar master kode voucher dan status
+                                    efektif masa berlakunya
+                                </caption>
+                                <thead className="border-b border-[#D8E2E6] bg-[#F8FAFC] text-[0.6875rem] font-semibold uppercase tracking-wider text-[#475569]">
                                     <tr>
-                                        <th className="px-5 py-3.5">
+                                        <th scope="col" className="px-5 py-3.5">
                                             Kode Voucher
                                         </th>
-                                        <th className="px-5 py-3.5 text-right">
+                                        <th
+                                            scope="col"
+                                            className="px-5 py-3.5 text-right"
+                                        >
                                             Nilai Potongan
                                         </th>
-                                        <th className="px-5 py-3.5">
+                                        <th scope="col" className="px-5 py-3.5">
                                             Masa Berlaku
                                         </th>
-                                        <th className="px-5 py-3.5">
+                                        <th scope="col" className="px-5 py-3.5">
                                             Status Efektif
                                         </th>
-                                        <th className="px-5 py-3.5">
+                                        <th scope="col" className="px-5 py-3.5">
                                             Digunakan Pada
                                         </th>
-                                        <th className="px-5 py-3.5 text-right">
+                                        <th
+                                            scope="col"
+                                            className="px-5 py-3.5 text-right"
+                                        >
                                             Aksi
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 bg-white">
+                                <tbody className="divide-y divide-[#D8E2E6] bg-white">
                                     {voucher.data.map((item) => {
                                         const isUsed =
                                             item.status_penggunaan ===
@@ -282,15 +286,18 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                                         return (
                                             <tr
                                                 key={item.nomor_voucher}
-                                                className="hover:bg-slate-50/70"
+                                                className="transition hover:bg-[#F8FAFC]"
                                             >
-                                                <td className="whitespace-nowrap px-5 py-3.5 font-mono text-sm font-bold text-slate-900">
+                                                <th
+                                                    scope="row"
+                                                    className="whitespace-nowrap px-5 py-3.5 text-left font-mono text-sm font-bold text-[#0F172A]"
+                                                >
                                                     {item.nomor_voucher}
-                                                </td>
-                                                <td className="whitespace-nowrap px-5 py-3.5 text-right font-semibold tabular-nums text-slate-900">
+                                                </th>
+                                                <td className="whitespace-nowrap px-5 py-3.5 text-right font-mono font-semibold tabular-nums text-[#0F172A]">
                                                     {formatRupiah(item.nilai)}
                                                 </td>
-                                                <td className="whitespace-nowrap px-5 py-3.5 text-xs text-slate-700">
+                                                <td className="whitespace-nowrap px-5 py-3.5 text-xs text-[#475569]">
                                                     {formatTanggal(
                                                         item.masa_berlaku,
                                                     )}
@@ -303,14 +310,14 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                                                             }
                                                         />
                                                         {isStaleExpired && (
-                                                            <span className="text-[11px] text-rose-600">
+                                                            <span className="text-[11px] font-medium text-[#9F1239]">
                                                                 Melewati batas
                                                                 masa berlaku
                                                             </span>
                                                         )}
                                                     </div>
                                                 </td>
-                                                <td className="whitespace-nowrap px-5 py-3.5 text-xs text-slate-500">
+                                                <td className="whitespace-nowrap px-5 py-3.5 text-xs text-[#5B697A]">
                                                     {item.digunakan_pada
                                                         ? formatTanggal(
                                                               item.digunakan_pada,
@@ -335,9 +342,13 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                                                                     item,
                                                                 )
                                                             }
-                                                            className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                                                            className="inline-flex min-h-[2.25rem] items-center gap-1 rounded-xl border border-[#7C8C9D] bg-white px-3 py-1.5 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-40"
                                                         >
-                                                            Edit
+                                                            <Pencil
+                                                                className="h-3.5 w-3.5 shrink-0"
+                                                                aria-hidden="true"
+                                                            />
+                                                            <span>Edit</span>
                                                         </button>
                                                         <button
                                                             type="button"
@@ -352,9 +363,13 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                                                                     item,
                                                                 )
                                                             }
-                                                            className="rounded-lg border border-rose-200 px-2.5 py-1 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40"
+                                                            className="inline-flex min-h-[2.25rem] items-center gap-1 rounded-xl border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-[#9F1239] transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-40"
                                                         >
-                                                            Hapus
+                                                            <Trash2
+                                                                className="h-3.5 w-3.5 shrink-0"
+                                                                aria-hidden="true"
+                                                            />
+                                                            <span>Hapus</span>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -381,12 +396,40 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                         : 'Tambah Voucher Baru'
                 }
                 subtitle="Kode voucher dinormalisasi menjadi huruf kapital (huruf/angka/-/_)."
+                footer={
+                    <>
+                        <button
+                            type="button"
+                            onClick={closeFormModal}
+                            disabled={processing}
+                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl border border-[#7C8C9D] bg-white px-4 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC] disabled:opacity-50"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            type="submit"
+                            form={formId}
+                            disabled={processing}
+                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:opacity-60"
+                        >
+                            {processing
+                                ? 'Menyimpan...'
+                                : editingItem
+                                  ? 'Simpan Perubahan'
+                                  : 'Simpan Voucher'}
+                        </button>
+                    </>
+                }
             >
-                <form onSubmit={handleFormSubmit} className="space-y-4">
+                <form
+                    id={formId}
+                    onSubmit={handleFormSubmit}
+                    className="space-y-4"
+                >
                     {(errors as Record<string, string | undefined>).voucher && (
                         <div
                             role="alert"
-                            className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-medium text-rose-800"
+                            className="rounded-xl border border-rose-200 border-l-4 border-l-[#BE123C] bg-[#FFF1F2] px-3.5 py-2.5 text-xs font-medium text-[#9F1239]"
                         >
                             {
                                 (errors as Record<string, string | undefined>)
@@ -397,7 +440,7 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                     <div>
                         <label
                             htmlFor="voucher-kode"
-                            className="block text-xs font-semibold text-slate-700"
+                            className="block text-xs font-semibold text-[#0F172A]"
                         >
                             Nomor / Kode Voucher
                         </label>
@@ -415,14 +458,14 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                                 )
                             }
                             placeholder="mis. HEMAT10K"
-                            className={`mt-1 block w-full rounded-xl border px-3 py-2 font-mono text-sm uppercase focus:outline-none focus:ring-2 ${
+                            className={`mt-1.5 block min-h-[2.625rem] w-full rounded-xl border px-3.5 py-2 font-mono text-sm uppercase focus:outline-none focus:ring-2 ${
                                 editingItem
-                                    ? 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-500'
-                                    : 'border-slate-300 text-slate-900 focus:border-sky-500 focus:ring-sky-200'
+                                    ? 'cursor-not-allowed border-[#D8E2E6] bg-[#EEF2F5] text-[#5B697A]'
+                                    : 'border-[#7C8C9D] bg-white text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#0F766E] focus:ring-[#0F766E]/20'
                             }`}
                         />
                         {errors.nomor_voucher && (
-                            <p className="mt-1 text-xs font-medium text-rose-600">
+                            <p className="mt-1.5 text-xs font-medium text-rose-600">
                                 {errors.nomor_voucher}
                             </p>
                         )}
@@ -431,7 +474,7 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                     <div>
                         <label
                             htmlFor="voucher-nilai"
-                            className="block text-xs font-semibold text-slate-700"
+                            className="block text-xs font-semibold text-[#0F172A]"
                         >
                             Nilai Potongan (Rp)
                         </label>
@@ -446,10 +489,10 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                                 setData('nilai', event.target.value)
                             }
                             placeholder="mis. 10000"
-                            className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm tabular-nums text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm tabular-nums text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                         />
                         {errors.nilai && (
-                            <p className="mt-1 text-xs font-medium text-rose-600">
+                            <p className="mt-1.5 text-xs font-medium text-rose-600">
                                 {errors.nilai}
                             </p>
                         )}
@@ -458,7 +501,7 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                     <div>
                         <label
                             htmlFor="voucher-masa-berlaku"
-                            className="block text-xs font-semibold text-slate-700"
+                            className="block text-xs font-semibold text-[#0F172A]"
                         >
                             Masa Berlaku (Tanggal Terakhir Berlaku)
                         </label>
@@ -470,10 +513,10 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                             onChange={(event) =>
                                 setData('masa_berlaku', event.target.value)
                             }
-                            className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                         />
                         {errors.masa_berlaku && (
-                            <p className="mt-1 text-xs font-medium text-rose-600">
+                            <p className="mt-1.5 text-xs font-medium text-rose-600">
                                 {errors.masa_berlaku}
                             </p>
                         )}
@@ -483,7 +526,7 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                         <div>
                             <label
                                 htmlFor="voucher-status"
-                                className="block text-xs font-semibold text-slate-700"
+                                className="block text-xs font-semibold text-[#0F172A]"
                             >
                                 Status Penggunaan
                             </label>
@@ -498,40 +541,18 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                                             | 'KEDALUWARSA',
                                     )
                                 }
-                                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                             >
                                 <option value="TERSEDIA">TERSEDIA</option>
                                 <option value="KEDALUWARSA">KEDALUWARSA</option>
                             </select>
                             {errors.status_penggunaan && (
-                                <p className="mt-1 text-xs font-medium text-rose-600">
+                                <p className="mt-1.5 text-xs font-medium text-rose-600">
                                     {errors.status_penggunaan}
                                 </p>
                             )}
                         </div>
                     )}
-
-                    <div className="flex items-center justify-end gap-2 pt-2">
-                        <button
-                            type="button"
-                            onClick={closeFormModal}
-                            disabled={processing}
-                            className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-                        >
-                            Batal
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="rounded-xl bg-sky-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-sky-700 disabled:opacity-60"
-                        >
-                            {processing
-                                ? 'Menyimpan...'
-                                : editingItem
-                                  ? 'Simpan Perubahan'
-                                  : 'Simpan Voucher'}
-                        </button>
-                    </div>
                 </form>
             </Modal>
 
@@ -548,7 +569,7 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                             type="button"
                             onClick={() => setDeleteTarget(null)}
                             disabled={deleting}
-                            className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl border border-[#7C8C9D] bg-white px-4 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC] disabled:opacity-50"
                         >
                             Batal
                         </button>
@@ -556,7 +577,7 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                             type="button"
                             onClick={handleConfirmDelete}
                             disabled={deleting}
-                            className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-700 disabled:opacity-60"
+                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl bg-[#BE123C] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-rose-800 disabled:opacity-60"
                         >
                             {deleting ? 'Menghapus...' : 'Ya, Hapus Voucher'}
                         </button>
@@ -564,12 +585,16 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                 }
             >
                 {deleteTarget && (
-                    <p className="text-sm text-slate-700">
+                    <p className="text-sm text-[#475569]">
                         Apakah Anda yakin ingin menghapus voucher{' '}
-                        <span className="font-mono font-bold text-slate-900">
+                        <span className="font-mono font-bold text-[#0F172A]">
                             {deleteTarget.nomor_voucher}
                         </span>{' '}
-                        senilai {formatRupiah(deleteTarget.nilai)}?
+                        senilai{' '}
+                        <span className="font-mono font-semibold text-[#0F172A]">
+                            {formatRupiah(deleteTarget.nilai)}
+                        </span>
+                        ?
                     </p>
                 )}
             </Modal>

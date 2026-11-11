@@ -1,10 +1,20 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import axios from 'axios';
-import { useMemo, useState, type FormEvent } from 'react';
+import {
+    AlertCircle,
+    AlertTriangle,
+    ArrowLeft,
+    ArrowRight,
+    CheckCircle2,
+    Plus,
+    ReceiptText,
+    Trash2,
+} from 'lucide-react';
+import { Fragment, useMemo, useState, type FormEvent } from 'react';
+import MetadataRow from '@/Components/MetadataRow';
 import {
     PayLaterBadge,
     PaymentStatusBadge,
-    ProductionStageBadge,
     SpeedTierBadge,
 } from '@/Components/StatusBadge';
 import AppLayout from '@/Layouts/AppLayout';
@@ -12,6 +22,7 @@ import {
     calculatePreviewTotals,
     centsToDecimalString,
     formatRupiah,
+    formatTahapProduksi,
     formatTanggal,
 } from '@/lib/format';
 import type {
@@ -49,6 +60,9 @@ const REASON_LABELS: Record<
     EXPIRED: 'Kedaluwarsa',
     ALREADY_USED: 'Sudah Digunakan',
 };
+
+const CONTROL_INPUT_CLASS =
+    'mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20';
 
 function createEmptyDetailRow(): DetailPakaianFormRow {
     return {
@@ -99,6 +113,20 @@ export default function TransaksiCreate({
             ) ?? null,
         [layananOptions, data.id_layanan],
     );
+
+    const orderedLayananStages = useMemo(() => {
+        if (!selectedLayanan) {
+            return [];
+        }
+        return selectedLayanan.tahap_layanan
+            .slice()
+            .sort((a, b) => a.urutan - b.urutan)
+            .filter(
+                (tahap) =>
+                    selectedLayanan.perlu_setrika ||
+                    tahap.nama_tahap !== 'DISETRIKA',
+            );
+    }, [selectedLayanan]);
 
     const activeVoucherDiscount = useMemo(() => {
         if (voucherCheck.status !== 'valid') {
@@ -285,7 +313,7 @@ export default function TransaksiCreate({
         }));
 
         post('/transaksi', {
-            preserveScroll: true,
+            preserveScroll: 'errors',
         });
     };
 
@@ -300,23 +328,30 @@ export default function TransaksiCreate({
             headerActions={
                 <Link
                     href="/transaksi"
-                    className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
                 >
-                    &larr; Daftar Transaksi
+                    <ArrowLeft className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                    <span>Daftar Transaksi</span>
                 </Link>
             }
         >
             <Head title="Penerimaan Nota Baru" />
 
             {hasMissingMasterData && (
-                <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-                    <p className="font-semibold">
-                        Data master belum siap untuk penerimaan transaksi
-                    </p>
-                    <p className="mt-1 text-xs">
-                        Pastikan minimal terdapat 1 pelanggan dan 1 jenis
-                        layanan berstatus aktif sebelum menerbitkan nota baru.
-                    </p>
+                <div className="mb-5 flex items-start gap-2.5 rounded-2xl border border-amber-300 border-l-4 border-l-[#B45309] bg-[#FFFBEB] p-4 text-sm text-[#78350F]">
+                    <AlertTriangle
+                        className="mt-0.5 h-5 w-5 shrink-0 text-[#B45309]"
+                        aria-hidden="true"
+                    />
+                    <div>
+                        <p className="font-bold">
+                            Data master belum siap untuk penerimaan transaksi
+                        </p>
+                        <p className="mt-1 text-xs">
+                            Pastikan minimal terdapat 1 pelanggan dan 1 jenis
+                            layanan berstatus aktif sebelum menerbitkan nota baru.
+                        </p>
+                    </div>
                 </div>
             )}
 
@@ -324,19 +359,27 @@ export default function TransaksiCreate({
                 onSubmit={handleSubmit}
                 className="grid grid-cols-1 gap-6 xl:grid-cols-12"
             >
-                {/* Left Column — Cashier Form Inputs */}
-                <div className="space-y-6 xl:col-span-8">
-                    {/* 1. Pelanggan & Layanan */}
-                    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6">
-                        <h2 className="text-sm font-bold text-slate-900">
-                            1. Identitas Pelanggan &amp; Layanan
-                        </h2>
+                {/* Left Column — 3-Step Cashier Form */}
+                <div className="space-y-5 xl:col-span-8">
+                    {/* Step 1: Identitas Pelanggan & Layanan */}
+                    <section className="rounded-2xl border border-[#D8E2E6] bg-white p-5 shadow-[0_1px_2px_rgba(15,41,51,0.04)] sm:p-6">
+                        <div className="flex items-center gap-2.5">
+                            <span
+                                aria-hidden="true"
+                                className="flex min-h-6 min-w-6 items-center justify-center rounded-full bg-[#0F766E] px-1.5 text-xs font-bold text-white"
+                            >
+                                1
+                            </span>
+                            <h2 className="text-base font-bold tracking-tight text-[#0F172A]">
+                                Identitas Pelanggan &amp; Layanan
+                            </h2>
+                        </div>
 
                         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
                                 <label
                                     htmlFor="transaksi-pelanggan"
-                                    className="block text-xs font-semibold text-slate-700"
+                                    className="block text-xs font-semibold text-[#0F172A]"
                                 >
                                     Pelanggan
                                 </label>
@@ -350,7 +393,7 @@ export default function TransaksiCreate({
                                             event.target.value,
                                         )
                                     }
-                                    className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                    className={CONTROL_INPUT_CLASS}
                                 >
                                     <option value="" disabled>
                                         Pilih pelanggan...
@@ -367,21 +410,29 @@ export default function TransaksiCreate({
                                 </select>
                                 {selectedPelanggan && (
                                     <div className="mt-2 flex flex-wrap items-center gap-2">
+                                        <span className="text-[11px] font-medium text-[#5B697A]">
+                                            Hak bayar:
+                                        </span>
                                         <PayLaterBadge
                                             allowed={
                                                 selectedPelanggan.boleh_bayar_akhir
                                             }
+                                            variant={
+                                                selectedPelanggan.boleh_bayar_akhir
+                                                    ? 'badge'
+                                                    : 'text'
+                                            }
                                         />
                                         {selectedPelanggan.boleh_bayar_akhir && (
-                                            <span className="text-[11px] text-indigo-700">
-                                                Pelanggan diizinkan ambil
-                                                pakaian sebelum lunas (KK-06).
+                                            <span className="text-[11px] text-[#3730A3]">
+                                                Diizinkan ambil sebelum lunas
+                                                (KK-06).
                                             </span>
                                         )}
                                     </div>
                                 )}
                                 {errorMap.id_pelanggan && (
-                                    <p className="mt-1 text-xs font-medium text-rose-600">
+                                    <p className="mt-1.5 text-xs font-medium text-rose-600">
                                         {errorMap.id_pelanggan}
                                     </p>
                                 )}
@@ -390,7 +441,7 @@ export default function TransaksiCreate({
                             <div>
                                 <label
                                     htmlFor="transaksi-layanan"
-                                    className="block text-xs font-semibold text-slate-700"
+                                    className="block text-xs font-semibold text-[#0F172A]"
                                 >
                                     Jenis Layanan (Aktif)
                                 </label>
@@ -401,7 +452,7 @@ export default function TransaksiCreate({
                                     onChange={(event) =>
                                         handleLayananChange(event.target.value)
                                     }
-                                    className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                    className={CONTROL_INPUT_CLASS}
                                 >
                                     <option value="" disabled>
                                         Pilih jenis layanan...
@@ -419,7 +470,7 @@ export default function TransaksiCreate({
                                     ))}
                                 </select>
                                 {errorMap.id_layanan && (
-                                    <p className="mt-1 text-xs font-medium text-rose-600">
+                                    <p className="mt-1.5 text-xs font-medium text-rose-600">
                                         {errorMap.id_layanan}
                                     </p>
                                 )}
@@ -430,13 +481,13 @@ export default function TransaksiCreate({
                             <div>
                                 <label
                                     htmlFor="transaksi-kuantitas"
-                                    className="block text-xs font-semibold text-slate-700"
+                                    className="block text-xs font-semibold text-[#0F172A]"
                                 >
                                     {isQuantityByPieces
                                         ? 'Jumlah (pcs)'
                                         : 'Berat (kg)'}
                                 </label>
-                                <div className="relative mt-1">
+                                <div className="relative mt-1.5">
                                     <input
                                         id="transaksi-kuantitas"
                                         type="number"
@@ -460,79 +511,112 @@ export default function TransaksiCreate({
                                                 ? 'mis. 2'
                                                 : 'mis. 2.50'
                                         }
-                                        className="block w-full rounded-xl border border-slate-300 px-3.5 py-2 pr-14 text-sm tabular-nums text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                        className="block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white py-2 pl-3.5 pr-14 font-mono text-sm font-semibold tabular-nums text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                                     />
-                                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-xs font-semibold text-slate-500">
+                                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-xs font-semibold text-[#475569]">
                                         {selectedLayanan?.satuan ?? 'kg'}
                                     </span>
                                 </div>
-                                <p className="mt-1 text-[11px] text-slate-500">
+                                <p className="mt-1.5 text-[11px] text-[#5B697A]">
                                     {isQuantityByPieces
                                         ? 'Wajib bilangan bulat minimal 1 pcs untuk layanan metode JUMLAH.'
                                         : 'Dapat memasukkan berat desimal hingga 2 angka di belakang koma (mis. 2.50 kg).'}
                                 </p>
                                 {errorMap.berat_atau_jumlah && (
-                                    <p className="mt-1 text-xs font-medium text-rose-600">
+                                    <p className="mt-1.5 text-xs font-medium text-rose-600">
                                         {errorMap.berat_atau_jumlah}
                                     </p>
                                 )}
                             </div>
 
                             {selectedLayanan && (
-                                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5">
+                                <div className="rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] p-3.5">
                                     <div className="flex flex-wrap items-center justify-between gap-2">
-                                        <span className="text-xs font-semibold text-slate-800">
+                                        <span className="text-xs font-semibold text-[#0F172A]">
                                             Tarif:{' '}
-                                            {formatRupiah(
-                                                selectedLayanan.harga_satuan,
-                                            )}
-                                            /{selectedLayanan.satuan}
+                                            <span className="font-mono tabular-nums">
+                                                {formatRupiah(
+                                                    selectedLayanan.harga_satuan,
+                                                )}
+                                                /{selectedLayanan.satuan}
+                                            </span>
                                         </span>
                                         <SpeedTierBadge
                                             tier={
                                                 selectedLayanan.tingkat_kecepatan
                                             }
+                                            variant="text"
                                         />
                                     </div>
-                                    <p className="mt-1.5 text-[11px] text-slate-600">
-                                        {selectedLayanan.perlu_setrika
-                                            ? 'Layanan termasuk tahap penyetrikaan.'
-                                            : 'Tanpa tahap penyetrikaan (mis. sepatu/tas).'}
+                                    <MetadataRow
+                                        className="mt-1.5"
+                                        items={[
+                                            selectedLayanan.metode_hitung,
+                                            selectedLayanan.perlu_setrika
+                                                ? 'Perlu Setrika'
+                                                : 'Tanpa Setrika',
+                                        ]}
+                                    />
+                                    <p className="mt-2 text-[11px] font-semibold uppercase tracking-wider text-[#5B697A]">
+                                        Alur Tahap Produksi
                                     </p>
-                                    <div className="mt-2 flex flex-wrap gap-1.5">
-                                        {selectedLayanan.tahap_layanan.map(
-                                            (tahap) => (
-                                                <ProductionStageBadge
-                                                    key={tahap.id_tahap}
-                                                    stage={tahap.nama_tahap}
-                                                    order={tahap.urutan}
-                                                />
+                                    <ol className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs font-medium text-[#0F172A]">
+                                        {orderedLayananStages.map(
+                                            (tahap, idx) => (
+                                                <Fragment key={tahap.id_tahap}>
+                                                    {idx > 0 && (
+                                                        <li aria-hidden="true">
+                                                            <ArrowRight className="h-3 w-3 text-[#7C8C9D]" />
+                                                        </li>
+                                                    )}
+                                                    <li>
+                                                        {tahap.urutan}.{' '}
+                                                        {formatTahapProduksi(
+                                                            tahap.nama_tahap,
+                                                        )}
+                                                    </li>
+                                                </Fragment>
                                             ),
                                         )}
-                                    </div>
+                                    </ol>
                                 </div>
                             )}
                         </div>
                     </section>
 
-                    {/* 2. Rincian Detail Pakaian */}
-                    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6">
+                    {/* Step 2: Rincian Item Pakaian */}
+                    <section className="rounded-2xl border border-[#D8E2E6] bg-white p-5 shadow-[0_1px_2px_rgba(15,41,51,0.04)] sm:p-6">
                         <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div>
-                                <h2 className="text-sm font-bold text-slate-900">
-                                    2. Rincian Item Pakaian (DetailPakaian)
-                                </h2>
-                                <p className="mt-0.5 text-xs text-slate-500">
-                                    Minimal 1 baris item untuk identifikasi saat
-                                    produksi maupun laporan insiden.
-                                </p>
+                            <div className="flex items-start gap-2.5">
+                                <span
+                                    aria-hidden="true"
+                                    className="mt-0.5 flex min-h-6 min-w-6 items-center justify-center rounded-full bg-[#0F766E] px-1.5 text-xs font-bold text-white"
+                                >
+                                    2
+                                </span>
+                                <div>
+                                    <h2 className="text-base font-bold tracking-tight text-[#0F172A]">
+                                        Rincian Item Pakaian (DetailPakaian)
+                                    </h2>
+                                    <p className="mt-0.5 text-xs text-[#5B697A]">
+                                        Minimal 1 baris item untuk identifikasi
+                                        saat produksi maupun laporan insiden.
+                                    </p>
+                                </div>
                             </div>
                             <button
                                 type="button"
                                 onClick={handleAddDetailRow}
-                                className="inline-flex items-center gap-1 rounded-xl border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-700 transition hover:bg-sky-100"
+                                className="inline-flex min-h-[2.375rem] items-center gap-1.5 rounded-xl border border-teal-200 bg-[#F0FDFA] px-3.5 py-2 text-xs font-semibold text-[#115E59] transition hover:bg-[#CCFBF1]"
                             >
-                                + Tambah Item
+                                <Plus
+                                    className="h-3.5 w-3.5 shrink-0"
+                                    aria-hidden="true"
+                                />
+                                <span>
+                                    <span className="sr-only">+ </span>Tambah
+                                    Item
+                                </span>
                             </button>
                         </div>
 
@@ -560,10 +644,10 @@ export default function TransaksiCreate({
                                 return (
                                     <div
                                         key={index}
-                                        className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5"
+                                        className="rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] p-3.5 sm:p-4"
                                     >
-                                        <div className="mb-2 flex items-center justify-between">
-                                            <span className="text-xs font-semibold text-slate-600">
+                                        <div className="mb-2.5 flex items-center justify-between">
+                                            <span className="text-xs font-bold text-[#0F172A]">
                                                 Item #{index + 1}
                                             </span>
                                             {data.detail_pakaian.length > 1 && (
@@ -574,9 +658,13 @@ export default function TransaksiCreate({
                                                             index,
                                                         )
                                                     }
-                                                    className="text-xs font-semibold text-rose-600 hover:text-rose-700"
+                                                    className="inline-flex min-h-[2rem] items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-[#9F1239] transition hover:bg-[#FFF1F2]"
                                                 >
-                                                    Hapus Baris
+                                                    <Trash2
+                                                        className="h-3.5 w-3.5 shrink-0"
+                                                        aria-hidden="true"
+                                                    />
+                                                    <span>Hapus Baris</span>
                                                 </button>
                                             )}
                                         </div>
@@ -585,7 +673,7 @@ export default function TransaksiCreate({
                                             <div className="sm:col-span-5">
                                                 <label
                                                     htmlFor={`detail-jenis-${index}`}
-                                                    className="block text-[11px] font-semibold text-slate-700"
+                                                    className="block text-[11px] font-semibold text-[#475569]"
                                                 >
                                                     Jenis Pakaian / Barang
                                                 </label>
@@ -603,7 +691,9 @@ export default function TransaksiCreate({
                                                         )
                                                     }
                                                     placeholder="mis. Kemeja Putih / Sepatu Canvas"
-                                                    className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                                    className={
+                                                        CONTROL_INPUT_CLASS
+                                                    }
                                                 />
                                                 {jenisErr && (
                                                     <p className="mt-1 text-xs font-medium text-rose-600">
@@ -615,7 +705,7 @@ export default function TransaksiCreate({
                                             <div className="sm:col-span-2">
                                                 <label
                                                     htmlFor={`detail-potong-${index}`}
-                                                    className="block text-[11px] font-semibold text-slate-700"
+                                                    className="block text-[11px] font-semibold text-[#475569]"
                                                 >
                                                     Jml Potong
                                                 </label>
@@ -634,7 +724,7 @@ export default function TransaksiCreate({
                                                             event.target.value,
                                                         )
                                                     }
-                                                    className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm tabular-nums text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                                    className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3 py-2 font-mono text-sm tabular-nums text-[#0F172A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                                                 />
                                                 {potongErr && (
                                                     <p className="mt-1 text-xs font-medium text-rose-600">
@@ -646,7 +736,7 @@ export default function TransaksiCreate({
                                             <div className="sm:col-span-5">
                                                 <label
                                                     htmlFor={`detail-kondisi-${index}`}
-                                                    className="block text-[11px] font-semibold text-slate-700"
+                                                    className="block text-[11px] font-semibold text-[#475569]"
                                                 >
                                                     Kondisi Awal
                                                 </label>
@@ -664,7 +754,9 @@ export default function TransaksiCreate({
                                                         )
                                                     }
                                                     placeholder="mis. Baik / Noda ringan di kerah"
-                                                    className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                                    className={
+                                                        CONTROL_INPUT_CLASS
+                                                    }
                                                 />
                                                 {kondisiErr && (
                                                     <p className="mt-1 text-xs font-medium text-rose-600">
@@ -679,21 +771,29 @@ export default function TransaksiCreate({
                         </div>
                     </section>
 
-                    {/* 3. Voucher, DP & Catatan */}
-                    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6">
-                        <h2 className="text-sm font-bold text-slate-900">
-                            3. Voucher, Uang Muka (DP) &amp; Catatan
-                        </h2>
+                    {/* Step 3: Voucher, DP & Catatan */}
+                    <section className="rounded-2xl border border-[#D8E2E6] bg-white p-5 shadow-[0_1px_2px_rgba(15,41,51,0.04)] sm:p-6">
+                        <div className="flex items-center gap-2.5">
+                            <span
+                                aria-hidden="true"
+                                className="flex min-h-6 min-w-6 items-center justify-center rounded-full bg-[#0F766E] px-1.5 text-xs font-bold text-white"
+                            >
+                                3
+                            </span>
+                            <h2 className="text-base font-bold tracking-tight text-[#0F172A]">
+                                Voucher, Uang Muka (DP) &amp; Catatan
+                            </h2>
+                        </div>
 
                         <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
                             <div>
                                 <label
                                     htmlFor="transaksi-voucher"
-                                    className="block text-xs font-semibold text-slate-700"
+                                    className="block text-xs font-semibold text-[#0F172A]"
                                 >
                                     Kode Voucher (Opsional)
                                 </label>
-                                <div className="mt-1 flex gap-2">
+                                <div className="mt-1.5 flex gap-2">
                                     <input
                                         id="transaksi-voucher"
                                         type="text"
@@ -713,7 +813,7 @@ export default function TransaksiCreate({
                                             }
                                         }}
                                         placeholder="mis. HEMAT10K"
-                                        className="block w-full rounded-xl border border-slate-300 px-3 py-2 font-mono text-sm uppercase text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                        className="block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm uppercase text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                                     />
                                     <button
                                         type="button"
@@ -721,7 +821,7 @@ export default function TransaksiCreate({
                                         disabled={
                                             voucherCheck.status === 'loading'
                                         }
-                                        className="shrink-0 rounded-xl bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60"
+                                        className="inline-flex min-h-[2.625rem] shrink-0 items-center justify-center rounded-xl bg-[#0F2933] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#163C4A] disabled:opacity-60"
                                     >
                                         {voucherCheck.status === 'loading'
                                             ? 'Mengecek...'
@@ -730,38 +830,45 @@ export default function TransaksiCreate({
                                 </div>
 
                                 {voucherCheck.status === 'valid' && (
-                                    <div className="mt-2.5 flex items-start justify-between gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-900">
-                                        <div>
-                                            <p className="font-semibold">
-                                                Voucher{' '}
-                                                <span className="font-mono">
-                                                    {
+                                    <div className="mt-2.5 flex items-start justify-between gap-2 rounded-xl border border-emerald-200 border-l-4 border-l-[#047857] bg-[#ECFDF5] p-3 text-xs text-[#065F46]">
+                                        <div className="flex items-start gap-2">
+                                            <CheckCircle2
+                                                className="mt-0.5 h-4 w-4 shrink-0 text-[#047857]"
+                                                aria-hidden="true"
+                                            />
+                                            <div>
+                                                <p className="font-semibold">
+                                                    Voucher{' '}
+                                                    <span className="font-mono">
+                                                        {
+                                                            voucherCheck
+                                                                .response
+                                                                .nomor_voucher
+                                                        }
+                                                    </span>{' '}
+                                                    valid!
+                                                </p>
+                                                <p className="mt-0.5">
+                                                    Potongan:{' '}
+                                                    <span className="font-mono font-bold tabular-nums">
+                                                        {formatRupiah(
+                                                            voucherCheck
+                                                                .response.nilai,
+                                                        )}
+                                                    </span>{' '}
+                                                    (Berlaku s.d.{' '}
+                                                    {formatTanggal(
                                                         voucherCheck.response
-                                                            .nomor_voucher
-                                                    }
-                                                </span>{' '}
-                                                valid!
-                                            </p>
-                                            <p className="mt-0.5">
-                                                Potongan:{' '}
-                                                <span className="font-bold">
-                                                    {formatRupiah(
-                                                        voucherCheck.response
-                                                            .nilai,
+                                                            .masa_berlaku,
                                                     )}
-                                                </span>{' '}
-                                                (Berlaku s.d.{' '}
-                                                {formatTanggal(
-                                                    voucherCheck.response
-                                                        .masa_berlaku,
-                                                )}
-                                                )
-                                            </p>
+                                                    )
+                                                </p>
+                                            </div>
                                         </div>
                                         <button
                                             type="button"
                                             onClick={handleClearVoucher}
-                                            className="shrink-0 font-semibold text-emerald-700 underline hover:text-emerald-900"
+                                            className="min-h-[1.75rem] shrink-0 font-semibold text-[#065F46] underline hover:text-[#047857]"
                                         >
                                             Hapus Voucher
                                         </button>
@@ -771,28 +878,39 @@ export default function TransaksiCreate({
                                 {voucherCheck.status === 'invalid' && (
                                     <div
                                         role="alert"
-                                        className="mt-2.5 flex items-start justify-between gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-900"
+                                        className="mt-2.5 flex items-start justify-between gap-2 rounded-xl border border-rose-200 border-l-4 border-l-[#BE123C] bg-[#FFF1F2] p-3 text-xs text-[#9F1239]"
                                     >
-                                        <div>
-                                            {voucherCheck.response.reason && (
-                                                <span className="mb-1 inline-block rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold uppercase text-rose-800">
+                                        <div className="flex items-start gap-2">
+                                            <AlertCircle
+                                                className="mt-0.5 h-4 w-4 shrink-0 text-[#BE123C]"
+                                                aria-hidden="true"
+                                            />
+                                            <div>
+                                                {voucherCheck.response
+                                                    .reason && (
+                                                    <span className="mb-1 inline-block rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold uppercase text-[#9F1239]">
+                                                        {
+                                                            REASON_LABELS[
+                                                                voucherCheck
+                                                                    .response
+                                                                    .reason
+                                                            ]
+                                                        }
+                                                    </span>
+                                                )}
+                                                <p className="font-medium">
                                                     {
-                                                        REASON_LABELS[
-                                                            voucherCheck
-                                                                .response.reason
-                                                        ]
+                                                        voucherCheck.response
+                                                            .message
                                                     }
-                                                </span>
-                                            )}
-                                            <p className="font-medium">
-                                                {voucherCheck.response.message}
-                                            </p>
+                                                </p>
+                                            </div>
                                         </div>
                                         {data.nomor_voucher.trim() !== '' && (
                                             <button
                                                 type="button"
                                                 onClick={handleClearVoucher}
-                                                className="shrink-0 font-semibold text-rose-700 underline hover:text-rose-900"
+                                                className="min-h-[1.75rem] shrink-0 font-semibold text-[#9F1239] underline hover:text-[#BE123C]"
                                             >
                                                 Kosongkan
                                             </button>
@@ -810,7 +928,7 @@ export default function TransaksiCreate({
                             <div>
                                 <label
                                     htmlFor="transaksi-dp"
-                                    className="block text-xs font-semibold text-slate-700"
+                                    className="block text-xs font-semibold text-[#0F172A]"
                                 >
                                     Nominal Uang Muka / Pembayaran Awal (Rp)
                                 </label>
@@ -827,27 +945,27 @@ export default function TransaksiCreate({
                                         )
                                     }
                                     placeholder="0"
-                                    className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm tabular-nums text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                    className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm font-semibold tabular-nums text-[#0F172A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                                 />
                                 <div className="mt-2 flex flex-wrap gap-1.5">
                                     <button
                                         type="button"
                                         onClick={() => handleQuickDp('ZERO')}
-                                        className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                                        className="min-h-[2.125rem] rounded-lg border border-[#7C8C9D] bg-white px-3 py-1 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
                                     >
                                         Rp 0
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => handleQuickDp('HALF')}
-                                        className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                                        className="min-h-[2.125rem] rounded-lg border border-[#7C8C9D] bg-white px-3 py-1 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
                                     >
                                         50%
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => handleQuickDp('FULL')}
-                                        className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                                        className="min-h-[2.125rem] rounded-lg border border-teal-200 bg-[#F0FDFA] px-3 py-1 text-xs font-semibold text-[#115E59] transition hover:bg-[#CCFBF1]"
                                     >
                                         Lunas
                                     </button>
@@ -863,7 +981,7 @@ export default function TransaksiCreate({
                         <div className="mt-4">
                             <label
                                 htmlFor="transaksi-catatan"
-                                className="block text-xs font-semibold text-slate-700"
+                                className="block text-xs font-semibold text-[#0F172A]"
                             >
                                 Catatan Khusus (Opsional)
                             </label>
@@ -879,10 +997,10 @@ export default function TransaksiCreate({
                                     )
                                 }
                                 placeholder="mis. Pisahkan pakaian putih, jangan pakai pemutih..."
-                                className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                className="mt-1.5 block min-h-[4.5rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                             />
                             {errorMap.catatan_khusus && (
-                                <p className="mt-1 text-xs font-medium text-rose-600">
+                                <p className="mt-1.5 text-xs font-medium text-rose-600">
                                     {errorMap.catatan_khusus}
                                 </p>
                             )}
@@ -890,80 +1008,92 @@ export default function TransaksiCreate({
                     </section>
                 </div>
 
-                {/* Right Column — Sticky Preview Summary */}
+                {/* Right Column — Sticky Receipt Calculator */}
                 <aside className="xl:col-span-4">
-                    <div className="sticky top-24 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6">
-                        <h2 className="text-sm font-bold text-slate-900">
-                            Ringkasan Estimasi Tagihan
-                        </h2>
-                        <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
+                    <div className="rounded-2xl border border-[#D8E2E6] bg-[#F8FAFC] p-5 shadow-[0_1px_2px_rgba(15,41,51,0.04)] sm:p-6 xl:sticky xl:top-24">
+                        <div className="flex items-center gap-2">
+                            <ReceiptText
+                                className="h-4 w-4 shrink-0 text-[#0F766E]"
+                                aria-hidden="true"
+                            />
+                            <h2 className="text-base font-bold tracking-tight text-[#0F172A]">
+                                Ringkasan Estimasi Tagihan
+                            </h2>
+                        </div>
+                        <p className="mt-1 text-[11px] leading-relaxed text-[#5B697A]">
                             Pratinjau kalkulasi presisi integer. Nilai resmi dan
                             penguncian voucher atomik ditetapkan oleh server saat
                             nota diterbitkan.
                         </p>
 
-                        <dl className="mt-5 space-y-3 border-t border-slate-100 pt-4 text-sm">
+                        <dl className="mt-5 space-y-3 border-t border-[#D8E2E6] pt-4 text-sm">
                             <div className="flex items-center justify-between gap-2">
-                                <dt className="text-xs text-slate-500">
+                                <dt className="text-xs text-[#5B697A]">
                                     Pelanggan
                                 </dt>
-                                <dd className="text-right text-xs font-semibold text-slate-900">
+                                <dd className="text-right text-xs font-semibold text-[#0F172A]">
                                     {selectedPelanggan?.nama ?? '—'}
                                 </dd>
                             </div>
                             <div className="flex items-center justify-between gap-2">
-                                <dt className="text-xs text-slate-500">
+                                <dt className="text-xs text-[#5B697A]">
                                     Layanan
                                 </dt>
-                                <dd className="text-right text-xs font-semibold text-slate-900">
+                                <dd className="text-right text-xs font-semibold text-[#0F172A]">
                                     {selectedLayanan
                                         ? `${selectedLayanan.nama_layanan} (${selectedLayanan.tingkat_kecepatan})`
                                         : '—'}
                                 </dd>
                             </div>
                             <div className="flex items-center justify-between gap-2">
-                                <dt className="text-xs text-slate-500">
+                                <dt className="text-xs text-[#5B697A]">
                                     Subtotal ({data.berat_atau_jumlah || 0}{' '}
                                     {selectedLayanan?.satuan ?? 'kg'})
                                 </dt>
-                                <dd className="font-semibold tabular-nums text-slate-900">
+                                <dd className="font-mono font-semibold tabular-nums text-[#0F172A]">
                                     {formatRupiah(preview.subtotalDecimal)}
                                 </dd>
                             </div>
                             <div className="flex items-center justify-between gap-2">
-                                <dt className="text-xs text-slate-500">
+                                <dt className="text-xs text-[#5B697A]">
                                     Potongan Voucher
                                 </dt>
-                                <dd className="font-semibold tabular-nums text-emerald-700">
+                                <dd className="font-mono font-semibold tabular-nums text-[#065F46]">
                                     -{formatRupiah(preview.voucherDecimal)}
                                 </dd>
                             </div>
-                            <div className="flex items-center justify-between gap-2 border-t border-slate-200 pt-3">
-                                <dt className="text-sm font-bold text-slate-900">
+                            <div className="flex items-center justify-between gap-2 border-t border-[#D8E2E6] pt-3">
+                                <dt className="text-sm font-bold text-[#0F172A]">
                                     Estimasi Total
                                 </dt>
-                                <dd className="text-lg font-bold tabular-nums text-slate-900">
+                                <dd className="font-mono text-lg font-bold tabular-nums text-[#0F172A]">
                                     {formatRupiah(preview.totalDecimal)}
                                 </dd>
                             </div>
                             <div className="flex items-center justify-between gap-2">
-                                <dt className="text-xs text-slate-500">
+                                <dt className="text-xs text-[#5B697A]">
                                     Dibayar Awal (DP)
                                 </dt>
-                                <dd className="font-semibold tabular-nums text-sky-700">
+                                <dd className="font-mono font-semibold tabular-nums text-[#0F766E]">
                                     {formatRupiah(preview.dpDecimal)}
                                 </dd>
                             </div>
-                            <div className="flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
-                                <dt className="text-xs font-semibold text-slate-700">
+                            <div className="flex items-center justify-between gap-2 border-t border-[#D8E2E6] pt-3">
+                                <dt className="text-xs font-semibold text-[#0F172A]">
                                     Estimasi Sisa Tagihan
                                 </dt>
-                                <dd className="text-base font-bold tabular-nums text-amber-700">
+                                <dd
+                                    className={`font-mono text-base font-bold tabular-nums ${
+                                        preview.sisaCents > 0
+                                            ? 'text-[#78350F]'
+                                            : 'text-[#065F46]'
+                                    }`}
+                                >
                                     {formatRupiah(preview.sisaDecimal)}
                                 </dd>
                             </div>
                             <div className="flex items-center justify-between gap-2">
-                                <dt className="text-xs text-slate-500">
+                                <dt className="text-xs text-[#5B697A]">
                                     Estimasi Status
                                 </dt>
                                 <dd>
@@ -977,10 +1107,16 @@ export default function TransaksiCreate({
                         {preview.isOverpaid && (
                             <div
                                 role="alert"
-                                className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-medium text-rose-800"
+                                className="mt-4 flex items-start gap-2 rounded-xl border border-rose-200 border-l-4 border-l-[#BE123C] bg-[#FFF1F2] p-3 text-xs font-medium text-[#9F1239]"
                             >
-                                Nominal DP melebihi estimasi total tagihan.
-                                Kurangi nominal DP agar sesuai total.
+                                <AlertCircle
+                                    className="mt-0.5 h-4 w-4 shrink-0 text-[#BE123C]"
+                                    aria-hidden="true"
+                                />
+                                <p>
+                                    Nominal DP melebihi estimasi total tagihan.
+                                    Kurangi nominal DP agar sesuai total.
+                                </p>
                             </div>
                         )}
 
@@ -992,7 +1128,7 @@ export default function TransaksiCreate({
                                     hasMissingMasterData ||
                                     preview.isOverpaid
                                 }
-                                className="flex w-full items-center justify-center rounded-xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                                className="flex min-h-[2.75rem] w-full items-center justify-center rounded-xl bg-[#0F766E] px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 {processing
                                     ? 'Menyimpan Transaksi...'
@@ -1000,7 +1136,7 @@ export default function TransaksiCreate({
                             </button>
                             <Link
                                 href="/transaksi"
-                                className="flex w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                                className="flex min-h-[2.5rem] w-full items-center justify-center rounded-xl border border-[#7C8C9D] bg-white px-4 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
                             >
                                 Batal
                             </Link>

@@ -1,11 +1,23 @@
 import { Head, Link, router } from '@inertiajs/react';
+import {
+    AlertTriangle,
+    CheckCircle2,
+    ClipboardList,
+    Plus,
+} from 'lucide-react';
 import { useEffect, useId, useState, type FormEvent } from 'react';
 import EmptyState from '@/Components/EmptyState';
+import FilterToolbar, {
+    FILTER_LABEL_CLASS,
+    FILTER_SELECT_CLASS,
+} from '@/Components/FilterToolbar';
 import KonfirmasiKompensasiModal, {
     type KonfirmasiKompensasiTarget,
 } from '@/Components/KonfirmasiKompensasiModal';
 import LaporkanInsidenModal from '@/Components/LaporkanInsidenModal';
+import MetadataRow from '@/Components/MetadataRow';
 import Pagination from '@/Components/Pagination';
+import StatTile from '@/Components/StatTile';
 import {
     JenisInsidenBadge,
     StatusBadge,
@@ -97,6 +109,15 @@ export default function InsidenIndex({
         applyFilters(search, jenisInsiden, statusKonfirmasi);
     };
 
+    const handleTogglePendingFilter = () => {
+        const nextStatus: StatusKonfirmasiInsiden | '' =
+            statusKonfirmasi === 'MENUNGGU_KONFIRMASI'
+                ? ''
+                : 'MENUNGGU_KONFIRMASI';
+        setStatusKonfirmasi(nextStatus);
+        applyFilters(search, jenisInsiden, nextStatus);
+    };
+
     const handleResetFilters = () => {
         setSearch('');
         setJenisInsiden('');
@@ -121,122 +142,130 @@ export default function InsidenIndex({
                     <button
                         type="button"
                         onClick={() => setCreateModalOpen(true)}
-                        className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-rose-700"
+                        className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#BE123C] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-rose-800"
                     >
-                        + Laporkan Insiden
+                        <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
+                        <span>
+                            <span className="sr-only">+ </span>Laporkan Insiden
+                        </span>
                     </button>
                 </div>
             }
         >
             <Head title="Insiden & Kompensasi" />
 
-            {/* Search & Filters */}
-            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:p-5">
-                <search>
-                    <form
-                        method="GET"
-                        onSubmit={handleSearchSubmit}
-                        className="flex flex-col gap-3 lg:flex-row lg:items-end"
-                    >
-                        <div className="flex-1">
-                            <label
-                                htmlFor={searchInputId}
-                                className="block text-xs font-semibold text-slate-700"
-                            >
-                                Cari Insiden
-                            </label>
-                            <input
-                                id={searchInputId}
-                                name="search"
-                                type="search"
-                                value={search}
-                                onChange={(event) =>
-                                    setSearch(event.target.value)
-                                }
-                                placeholder="Cari nomor nota, nama pelanggan, jenis pakaian, atau keterangan..."
-                                className="mt-1 block w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                            />
-                        </div>
-
-                        <div className="w-full sm:w-48">
-                            <label
-                                htmlFor={jenisSelectId}
-                                className="block text-xs font-semibold text-slate-700"
-                            >
-                                Jenis Insiden
-                            </label>
-                            <select
-                                id={jenisSelectId}
-                                name="jenis_insiden"
-                                value={jenisInsiden}
-                                onChange={(event) =>
-                                    setJenisInsiden(
-                                        event.target.value as JenisInsiden | '',
-                                    )
-                                }
-                                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                            >
-                                <option value="">Semua Jenis</option>
-                                <option value="RUSAK">Rusak (5&times;)</option>
-                                <option value="HILANG">
-                                    Hilang (10&times;)
-                                </option>
-                            </select>
-                        </div>
-
-                        <div className="w-full sm:w-56">
-                            <label
-                                htmlFor={statusSelectId}
-                                className="block text-xs font-semibold text-slate-700"
-                            >
-                                Status Konfirmasi
-                            </label>
-                            <select
-                                id={statusSelectId}
-                                name="status_konfirmasi"
-                                value={statusKonfirmasi}
-                                onChange={(event) =>
-                                    setStatusKonfirmasi(
-                                        event.target.value as
-                                            | StatusKonfirmasiInsiden
-                                            | '',
-                                    )
-                                }
-                                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                            >
-                                <option value="">Semua Status</option>
-                                <option value="MENUNGGU_KONFIRMASI">
-                                    Menunggu Konfirmasi
-                                </option>
-                                <option value="TERKONFIRMASI">
-                                    Terkonfirmasi
-                                </option>
-                            </select>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <button
-                                type="submit"
-                                className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
-                            >
-                                Terapkan Filter
-                            </button>
-                            {hasActiveFilters && (
-                                <button
-                                    type="button"
-                                    onClick={handleResetFilters}
-                                    className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-                                >
-                                    Reset
-                                </button>
-                            )}
-                        </div>
-                    </form>
-                </search>
+            {/* Quick Summary & Filter Tiles */}
+            <section
+                aria-label="Ringkasan laporan insiden"
+                className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+            >
+                <StatTile
+                    label="Menunggu Konfirmasi"
+                    value={pendingCount}
+                    hint={
+                        statusKonfirmasi === 'MENUNGGU_KONFIRMASI'
+                            ? 'Klik untuk tampilkan semua status'
+                            : pendingCount > 0
+                              ? 'Klik untuk menyaring laporan yang perlu konfirmasi kasir'
+                              : 'Tidak ada laporan menunggu konfirmasi'
+                    }
+                    tone={pendingCount > 0 ? 'amber' : 'emerald'}
+                    icon={
+                        <AlertTriangle
+                            className="h-4 w-4"
+                            aria-hidden="true"
+                        />
+                    }
+                    active={statusKonfirmasi === 'MENUNGGU_KONFIRMASI'}
+                    onClick={handleTogglePendingFilter}
+                />
+                <StatTile
+                    label="Total Laporan Sesuai Filter"
+                    value={laporan.total}
+                    hint={
+                        hasActiveFilters
+                            ? 'Menampilkan jumlah laporan sesuai pencarian/filter aktif'
+                            : 'Total seluruh laporan kerusakan dan kehilangan tercatat'
+                    }
+                    tone="neutral"
+                    icon={
+                        <ClipboardList
+                            className="h-4 w-4"
+                            aria-hidden="true"
+                        />
+                    }
+                />
             </section>
 
+            {/* Search & Filters */}
+            <FilterToolbar
+                className="mt-5"
+                ariaLabel="Filter laporan insiden"
+                onSubmit={handleSearchSubmit}
+                searchValue={search}
+                onSearchChange={setSearch}
+                searchId={searchInputId}
+                searchLabel="Cari Insiden"
+                searchPlaceholder="Cari nomor nota, nama pelanggan, jenis pakaian, atau keterangan..."
+                submitLabel="Terapkan Filter"
+                onReset={handleResetFilters}
+                hasActiveFilters={hasActiveFilters}
+            >
+                <div className="w-full sm:w-44 lg:shrink-0">
+                    <label
+                        htmlFor={jenisSelectId}
+                        className={FILTER_LABEL_CLASS}
+                    >
+                        Jenis Insiden
+                    </label>
+                    <select
+                        id={jenisSelectId}
+                        name="jenis_insiden"
+                        value={jenisInsiden}
+                        onChange={(event) =>
+                            setJenisInsiden(
+                                event.target.value as JenisInsiden | '',
+                            )
+                        }
+                        className={FILTER_SELECT_CLASS}
+                    >
+                        <option value="">Semua Jenis</option>
+                        <option value="RUSAK">Rusak (5&times;)</option>
+                        <option value="HILANG">Hilang (10&times;)</option>
+                    </select>
+                </div>
+
+                <div className="w-full sm:w-52 lg:shrink-0">
+                    <label
+                        htmlFor={statusSelectId}
+                        className={FILTER_LABEL_CLASS}
+                    >
+                        Status Konfirmasi
+                    </label>
+                    <select
+                        id={statusSelectId}
+                        name="status_konfirmasi"
+                        value={statusKonfirmasi}
+                        onChange={(event) =>
+                            setStatusKonfirmasi(
+                                event.target.value as
+                                    | StatusKonfirmasiInsiden
+                                    | '',
+                            )
+                        }
+                        className={FILTER_SELECT_CLASS}
+                    >
+                        <option value="">Semua Status</option>
+                        <option value="MENUNGGU_KONFIRMASI">
+                            Menunggu Konfirmasi
+                        </option>
+                        <option value="TERKONFIRMASI">Terkonfirmasi</option>
+                    </select>
+                </div>
+            </FilterToolbar>
+
             {/* Incident Reports Table */}
-            <section className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+            <section className="mt-5 overflow-hidden rounded-2xl border border-[#D8E2E6] bg-white shadow-[0_1px_2px_rgba(15,41,51,0.04)]">
                 {laporan.data.length === 0 ? (
                     <div className="p-6">
                         <EmptyState
@@ -264,9 +293,9 @@ export default function InsidenIndex({
                             tabIndex={0}
                             role="region"
                             aria-labelledby={tableCaptionId}
-                            className="overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                            className="overflow-x-auto"
                         >
-                            <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
+                            <table className="min-w-full divide-y divide-[#D8E2E6] text-left text-sm">
                                 <caption
                                     id={tableCaptionId}
                                     className="sr-only"
@@ -274,7 +303,7 @@ export default function InsidenIndex({
                                     Daftar laporan kerusakan dan kehilangan
                                     pakaian beserta status konfirmasi kompensasi
                                 </caption>
-                                <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                <thead className="border-b border-[#D8E2E6] bg-[#F8FAFC] text-[0.6875rem] font-semibold uppercase tracking-wider text-[#475569]">
                                     <tr>
                                         <th scope="col" className="px-5 py-3.5">
                                             Nota &amp; Pelanggan
@@ -304,7 +333,7 @@ export default function InsidenIndex({
                                         )}
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 bg-white">
+                                <tbody className="divide-y divide-[#D8E2E6] bg-white">
                                     {laporan.data.map((item) => {
                                         const isPending =
                                             item.status_konfirmasi ===
@@ -317,7 +346,7 @@ export default function InsidenIndex({
                                         return (
                                             <tr
                                                 key={item.id_laporan}
-                                                className="align-top hover:bg-slate-50/70"
+                                                className="align-top transition hover:bg-[#F8FAFC]"
                                             >
                                                 <th
                                                     scope="row"
@@ -327,14 +356,14 @@ export default function InsidenIndex({
                                                         {isPetugas ? (
                                                             <Link
                                                                 href={`/transaksi/${item.nomor_nota}`}
-                                                                className="font-mono text-sm font-bold text-sky-700 hover:text-sky-800 hover:underline"
+                                                                className="font-mono text-sm font-bold text-[#0F766E] hover:text-[#115E59] hover:underline"
                                                             >
                                                                 {
                                                                     item.nomor_nota
                                                                 }
                                                             </Link>
                                                         ) : (
-                                                            <span className="font-mono text-sm font-bold text-slate-900">
+                                                            <span className="font-mono text-sm font-bold text-[#0F172A]">
                                                                 {
                                                                     item.nomor_nota
                                                                 }
@@ -347,26 +376,37 @@ export default function InsidenIndex({
                                                             }
                                                         />
                                                     </div>
-                                                    <p className="mt-1 text-xs font-semibold text-slate-900">
+                                                    <p className="mt-1 text-xs font-semibold text-[#0F172A]">
                                                         {
                                                             item.transaksi
                                                                 .pelanggan.nama
                                                         }
                                                     </p>
-                                                    <p className="text-[11px] text-slate-500">
-                                                        {
-                                                            item.transaksi
-                                                                .pelanggan
-                                                                .no_telepon
-                                                        }{' '}
-                                                        &bull;{' '}
-                                                        {
-                                                            item.transaksi
-                                                                .layanan
-                                                                .nama_layanan
-                                                        }
-                                                    </p>
-                                                    <p className="mt-1 text-[11px] text-slate-400">
+                                                    <MetadataRow
+                                                        className="mt-0.5 text-[11px]"
+                                                        items={[
+                                                            <span
+                                                                key="tel"
+                                                                className="font-mono"
+                                                            >
+                                                                {
+                                                                    item
+                                                                        .transaksi
+                                                                        .pelanggan
+                                                                        .no_telepon
+                                                                }
+                                                            </span>,
+                                                            <span key="layanan">
+                                                                {
+                                                                    item
+                                                                        .transaksi
+                                                                        .layanan
+                                                                        .nama_layanan
+                                                                }
+                                                            </span>,
+                                                        ]}
+                                                    />
+                                                    <p className="mt-1 text-[11px] text-[#5B697A]">
                                                         Laporan #
                                                         {item.id_laporan}{' '}
                                                         &bull;{' '}
@@ -384,25 +424,27 @@ export default function InsidenIndex({
                                                                 item.jenis_insiden
                                                             }
                                                         />
-                                                        <span className="text-xs font-semibold text-slate-900">
+                                                        <span className="text-xs font-semibold text-[#0F172A]">
                                                             {
                                                                 item
                                                                     .detail_pakaian
                                                                     .jenis_pakaian
                                                             }{' '}
                                                             &times;{' '}
-                                                            {
-                                                                item
-                                                                    .detail_pakaian
-                                                                    .jumlah_potong
-                                                            }{' '}
+                                                            <span className="font-mono tabular-nums">
+                                                                {
+                                                                    item
+                                                                        .detail_pakaian
+                                                                        .jumlah_potong
+                                                                }
+                                                            </span>{' '}
                                                             pcs
                                                         </span>
                                                     </div>
-                                                    <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-slate-700">
+                                                    <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-[#475569]">
                                                         {item.keterangan}
                                                     </p>
-                                                    <p className="mt-1 text-[11px] text-slate-400">
+                                                    <p className="mt-1 text-[11px] text-[#5B697A]">
                                                         Kondisi awal:{' '}
                                                         {
                                                             item.detail_pakaian
@@ -413,10 +455,10 @@ export default function InsidenIndex({
 
                                                 <td className="whitespace-nowrap px-5 py-4 text-xs">
                                                     <div>
-                                                        <p className="text-[11px] text-slate-500">
+                                                        <p className="text-[11px] text-[#5B697A]">
                                                             Pelapor:
                                                         </p>
-                                                        <p className="font-semibold text-slate-900">
+                                                        <p className="font-semibold text-[#0F172A]">
                                                             {item
                                                                 .pegawai_pelapor
                                                                 ?.nama_pegawai ??
@@ -424,15 +466,15 @@ export default function InsidenIndex({
                                                         </p>
                                                     </div>
                                                     <div className="mt-2">
-                                                        <p className="text-[11px] text-slate-500">
+                                                        <p className="text-[11px] text-[#5B697A]">
                                                             Petugas
                                                             Konfirmator:
                                                         </p>
                                                         <p
                                                             className={
                                                                 item.petugas
-                                                                    ? 'font-semibold text-emerald-700'
-                                                                    : 'text-slate-400'
+                                                                    ? 'font-semibold text-[#065F46]'
+                                                                    : 'text-[#5B697A]'
                                                             }
                                                         >
                                                             {item.petugas
@@ -443,15 +485,15 @@ export default function InsidenIndex({
                                                 </td>
 
                                                 <td className="whitespace-nowrap px-5 py-4 text-right text-xs tabular-nums">
-                                                    <p className="text-[11px] text-slate-500">
+                                                    <p className="text-[11px] text-[#5B697A]">
                                                         Estimasi:{' '}
-                                                        <span className="font-semibold text-slate-700">
+                                                        <span className="font-mono font-semibold text-[#475569]">
                                                             {formatRupiah(
                                                                 item.estimasi_kompensasi,
                                                             )}
                                                         </span>
                                                     </p>
-                                                    <p className="mt-1 text-sm font-bold text-slate-900">
+                                                    <p className="mt-1 font-mono text-sm font-bold text-[#0F172A]">
                                                         {isPending
                                                             ? '—'
                                                             : formatRupiah(
@@ -459,7 +501,7 @@ export default function InsidenIndex({
                                                               )}
                                                     </p>
                                                     {hasKelebihan && (
-                                                        <p className="mt-1 inline-block rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 ring-1 ring-amber-200">
+                                                        <p className="mt-1 inline-block rounded-md border border-amber-300 bg-[#FFFBEB] px-2 py-0.5 font-mono text-[11px] font-semibold text-[#78350F]">
                                                             Ganti rugi tunai:{' '}
                                                             {formatRupiah(
                                                                 item.kelebihan_ganti_rugi,
@@ -474,7 +516,7 @@ export default function InsidenIndex({
                                                             item.status_konfirmasi
                                                         }
                                                     />
-                                                    <p className="mt-1.5 text-[11px] tabular-nums text-slate-500">
+                                                    <p className="mt-1.5 font-mono text-[11px] tabular-nums text-[#5B697A]">
                                                         Sisa nota:{' '}
                                                         {formatRupiah(
                                                             item.transaksi
@@ -496,15 +538,23 @@ export default function InsidenIndex({
                                                                             ),
                                                                         )
                                                                     }
-                                                                    className="rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-emerald-700"
+                                                                    className="inline-flex min-h-[2.375rem] items-center gap-1.5 rounded-xl bg-[#047857] px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-emerald-800"
                                                                 >
-                                                                    Konfirmasi &amp;
-                                                                    Potong Saldo
+                                                                    <CheckCircle2
+                                                                        className="h-3.5 w-3.5 shrink-0"
+                                                                        aria-hidden="true"
+                                                                    />
+                                                                    <span>
+                                                                        Konfirmasi
+                                                                        &amp;
+                                                                        Potong
+                                                                        Saldo
+                                                                    </span>
                                                                 </button>
                                                             )}
                                                             <Link
                                                                 href={`/transaksi/${item.nomor_nota}`}
-                                                                className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+                                                                className="inline-flex min-h-[2.25rem] items-center rounded-xl border border-[#7C8C9D] bg-white px-3 py-1.5 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
                                                             >
                                                                 Buka Nota
                                                             </Link>

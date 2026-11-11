@@ -40,14 +40,14 @@ export default function Pagination<T>({
         Math.min(paginated.current_page * paginated.per_page, paginated.total);
 
     return (
-        <div className="flex flex-col items-center justify-between gap-3 border-t border-slate-200 bg-white px-4 py-3 sm:flex-row sm:px-6">
-            <p className="text-xs text-slate-600">
+        <div className="flex flex-col items-center justify-between gap-3 border-t border-[#D8E2E6] bg-white px-4 py-3.5 sm:flex-row sm:px-6">
+            <p className="text-xs text-[#475569] tabular-nums">
                 Menampilkan{' '}
-                <span className="font-semibold text-slate-900">
+                <span className="font-semibold text-[#0F172A]">
                     {startItem}–{endItem}
                 </span>{' '}
                 dari{' '}
-                <span className="font-semibold text-slate-900">
+                <span className="font-semibold text-[#0F172A]">
                     {paginated.total}
                 </span>{' '}
                 {itemLabel}
@@ -55,7 +55,7 @@ export default function Pagination<T>({
 
             {paginated.last_page > 1 && (
                 <nav
-                    className="flex flex-wrap items-center gap-1"
+                    className="flex flex-wrap items-center gap-1.5"
                     aria-label="Navigasi halaman"
                 >
                     {paginated.links.map((link, index) => {
@@ -65,7 +65,8 @@ export default function Pagination<T>({
                             return (
                                 <span
                                     key={`${label}-${index}`}
-                                    className="inline-flex min-w-8 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-400"
+                                    aria-disabled="true"
+                                    className="inline-flex min-h-[2.375rem] min-w-[2.375rem] items-center justify-center rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] px-3 py-1.5 text-xs font-medium text-[#5B697A] tabular-nums"
                                 >
                                     {label}
                                 </span>
@@ -78,10 +79,11 @@ export default function Pagination<T>({
                                 href={link.url}
                                 preserveScroll
                                 preserveState
-                                className={`inline-flex min-w-8 items-center justify-center rounded-lg border px-2.5 py-1.5 text-xs font-medium transition ${
+                                aria-current={link.active ? 'page' : undefined}
+                                className={`inline-flex min-h-[2.375rem] min-w-[2.375rem] items-center justify-center rounded-xl border px-3 py-1.5 text-xs font-semibold tabular-nums transition ${
                                     link.active
-                                        ? 'border-sky-600 bg-sky-600 text-white shadow-xs'
-                                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                                        ? 'border-[#0F766E] bg-[#0F766E] text-white shadow-xs'
+                                        : 'border-[#7C8C9D] bg-white text-[#0F172A] hover:bg-[#F8FAFC]'
                                 }`}
                             >
                                 {label}

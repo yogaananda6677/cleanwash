@@ -1,13 +1,18 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useEffect, useState, type FormEvent } from 'react';
+import { PlusCircle, Printer } from 'lucide-react';
+import { useEffect, useId, useState, type FormEvent } from 'react';
 import EmptyState from '@/Components/EmptyState';
+import FilterToolbar, {
+    FILTER_LABEL_CLASS,
+    FILTER_SELECT_CLASS,
+} from '@/Components/FilterToolbar';
+import MetadataRow from '@/Components/MetadataRow';
 import Pagination from '@/Components/Pagination';
 import {
     PayLaterBadge,
     PaymentStatusBadge,
     ProductionStageBadge,
     SpeedTierBadge,
-    StatusBadge,
     TransactionStatusBadge,
 } from '@/Components/StatusBadge';
 import AppLayout from '@/Layouts/AppLayout';
@@ -22,6 +27,7 @@ export default function TransaksiIndex({
     transaksi,
     filters,
 }: TransaksiIndexProps) {
+    const tableCaptionId = useId();
     const [search, setSearch] = useState(filters.search ?? '');
     const [statusPembayaran, setStatusPembayaran] = useState<
         StatusPembayaran | ''
@@ -92,101 +98,80 @@ export default function TransaksiIndex({
             headerActions={
                 <Link
                     href="/transaksi/create"
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-sky-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-sky-700"
+                    className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
                 >
-                    + Buat Nota Baru
+                    <PlusCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    <span>
+                        <span className="sr-only">+ </span>Buat Nota Baru
+                    </span>
                 </Link>
             }
         >
             <Head title="Daftar Transaksi" />
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:p-5">
-                <form
-                    onSubmit={handleSearchSubmit}
-                    className="flex flex-col gap-3 lg:flex-row lg:items-center"
-                >
-                    <div className="relative flex-1">
-                        <label htmlFor="search-transaksi" className="sr-only">
-                            Cari nomor nota, nama, atau nomor telepon
-                        </label>
-                        <input
-                            id="search-transaksi"
-                            type="text"
-                            value={search}
-                            onChange={(event) => setSearch(event.target.value)}
-                            placeholder="Cari nomor nota (CW-...), nama pelanggan, atau no. telepon..."
-                            className="block w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                        />
-                    </div>
-                    <div className="w-full lg:w-52">
-                        <label
-                            htmlFor="filter-status-pembayaran"
-                            className="sr-only"
-                        >
-                            Filter status pembayaran
-                        </label>
-                        <select
-                            id="filter-status-pembayaran"
-                            value={statusPembayaran}
-                            onChange={(event) =>
-                                handleStatusPembayaranChange(
-                                    event.target.value as StatusPembayaran | '',
-                                )
-                            }
-                            className="block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                        >
-                            <option value="">Semua Status Pembayaran</option>
-                            <option value="BELUM_BAYAR">Belum Bayar</option>
-                            <option value="DP">DP</option>
-                            <option value="BELUM_LUNAS">Belum Lunas</option>
-                            <option value="LUNAS">Lunas</option>
-                        </select>
-                    </div>
-                    <div className="w-full lg:w-44">
-                        <label
-                            htmlFor="filter-status-transaksi"
-                            className="sr-only"
-                        >
-                            Filter status transaksi
-                        </label>
-                        <select
-                            id="filter-status-transaksi"
-                            value={statusTransaksi}
-                            onChange={(event) =>
-                                handleStatusTransaksiChange(
-                                    event.target.value as StatusTransaksi | '',
-                                )
-                            }
-                            className="block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                        >
-                            <option value="">Semua Status</option>
-                            <option value="AKTIF">AKTIF</option>
-                            <option value="SELESAI">SELESAI</option>
-                            <option value="DIAMBIL">DIAMBIL</option>
-                            <option value="DIBATALKAN">DIBATALKAN</option>
-                        </select>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button
-                            type="submit"
-                            className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
-                        >
-                            Cari
-                        </button>
-                        {hasActiveFilters && (
-                            <button
-                                type="button"
-                                onClick={handleResetFilters}
-                                className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-                            >
-                                Reset
-                            </button>
-                        )}
-                    </div>
-                </form>
-            </section>
+            <FilterToolbar
+                onSubmit={handleSearchSubmit}
+                ariaLabel="Filter dan pencarian daftar transaksi"
+                searchId="search-transaksi"
+                searchLabel="Cari Nomor Nota / Pelanggan"
+                searchValue={search}
+                onSearchChange={setSearch}
+                searchPlaceholder="Cari nomor nota (CW-...), nama pelanggan, atau no. telepon..."
+                submitLabel="Cari"
+                onReset={handleResetFilters}
+                hasActiveFilters={hasActiveFilters}
+            >
+                <div className="w-full lg:w-52">
+                    <label
+                        htmlFor="filter-status-pembayaran"
+                        className={FILTER_LABEL_CLASS}
+                    >
+                        Status Pembayaran
+                    </label>
+                    <select
+                        id="filter-status-pembayaran"
+                        value={statusPembayaran}
+                        onChange={(event) =>
+                            handleStatusPembayaranChange(
+                                event.target.value as StatusPembayaran | '',
+                            )
+                        }
+                        className={FILTER_SELECT_CLASS}
+                    >
+                        <option value="">Semua Status Pembayaran</option>
+                        <option value="BELUM_BAYAR">Belum Bayar</option>
+                        <option value="DP">DP</option>
+                        <option value="BELUM_LUNAS">Belum Lunas</option>
+                        <option value="LUNAS">Lunas</option>
+                    </select>
+                </div>
+                <div className="w-full lg:w-44">
+                    <label
+                        htmlFor="filter-status-transaksi"
+                        className={FILTER_LABEL_CLASS}
+                    >
+                        Status Transaksi
+                    </label>
+                    <select
+                        id="filter-status-transaksi"
+                        value={statusTransaksi}
+                        onChange={(event) =>
+                            handleStatusTransaksiChange(
+                                event.target.value as StatusTransaksi | '',
+                            )
+                        }
+                        className={FILTER_SELECT_CLASS}
+                    >
+                        <option value="">Semua Status</option>
+                        <option value="AKTIF">AKTIF</option>
+                        <option value="SELESAI">SELESAI</option>
+                        <option value="DIAMBIL">DIAMBIL</option>
+                        <option value="DIBATALKAN">DIBATALKAN</option>
+                    </select>
+                </div>
+            </FilterToolbar>
 
-            <section className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+            <section className="mt-5 overflow-hidden rounded-2xl border border-[#D8E2E6] bg-white shadow-[0_1px_2px_rgba(15,41,51,0.04)]">
                 {transaksi.data.length === 0 ? (
                     <div className="p-6">
                         <EmptyState
@@ -215,32 +200,55 @@ export default function TransaksiIndex({
                     </div>
                 ) : (
                     <>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-                                <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <div
+                            tabIndex={0}
+                            role="region"
+                            aria-labelledby={tableCaptionId}
+                            className="overflow-x-auto"
+                        >
+                            <table className="min-w-full divide-y divide-[#D8E2E6] text-left text-sm">
+                                <caption
+                                    id={tableCaptionId}
+                                    className="sr-only"
+                                >
+                                    Daftar transaksi laundry CleanWash beserta
+                                    status pembayaran dan tahap produksi
+                                </caption>
+                                <thead className="border-b border-[#D8E2E6] bg-[#F8FAFC] text-[0.6875rem] font-semibold uppercase tracking-wider text-[#475569]">
                                     <tr>
-                                        <th className="px-5 py-3.5">
+                                        <th scope="col" className="px-5 py-3.5">
                                             Nomor Nota
                                         </th>
-                                        <th className="px-5 py-3.5">
+                                        <th scope="col" className="px-5 py-3.5">
                                             Pelanggan
                                         </th>
-                                        <th className="px-5 py-3.5">Layanan</th>
-                                        <th className="px-5 py-3.5 text-right">
+                                        <th scope="col" className="px-5 py-3.5">
+                                            Layanan
+                                        </th>
+                                        <th
+                                            scope="col"
+                                            className="px-5 py-3.5 text-right"
+                                        >
                                             Total Tagihan
                                         </th>
-                                        <th className="px-5 py-3.5 text-right">
+                                        <th
+                                            scope="col"
+                                            className="px-5 py-3.5 text-right"
+                                        >
                                             Dibayar / Sisa
                                         </th>
-                                        <th className="px-5 py-3.5">
+                                        <th scope="col" className="px-5 py-3.5">
                                             Status Pembayaran &amp; Produksi
                                         </th>
-                                        <th className="px-5 py-3.5 text-right">
+                                        <th
+                                            scope="col"
+                                            className="px-5 py-3.5 text-right"
+                                        >
                                             Aksi
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 bg-white">
+                                <tbody className="divide-y divide-[#D8E2E6]/70 bg-white">
                                     {transaksi.data.map((item) => {
                                         const latestStageCode =
                                             item.tahap_produksi_terakhir ??
@@ -272,87 +280,118 @@ export default function TransaksiIndex({
                                         return (
                                             <tr
                                                 key={item.nomor_nota}
-                                                className="hover:bg-slate-50/70"
+                                                className="align-top transition hover:bg-[#F8FAFC]"
                                             >
-                                                <td className="whitespace-nowrap px-5 py-3.5">
+                                                <th
+                                                    scope="row"
+                                                    className="whitespace-nowrap px-5 py-4 text-left font-normal"
+                                                >
                                                     <Link
                                                         href={`/transaksi/${item.nomor_nota}`}
-                                                        className="font-mono text-sm font-bold text-sky-700 hover:text-sky-800 hover:underline"
+                                                        className="font-mono text-sm font-bold text-[#0F766E] hover:text-[#115E59] hover:underline"
                                                     >
                                                         {item.nomor_nota}
                                                     </Link>
-                                                    <p className="mt-0.5 text-[11px] text-slate-500">
+                                                    <p className="mt-0.5 text-[11px] tabular-nums text-[#5B697A]">
                                                         {formatTanggal(
                                                             item.tanggal_penerimaan,
                                                             { withTime: true },
                                                         )}
                                                     </p>
-                                                    <div className="mt-1 flex flex-wrap items-center gap-1">
-                                                        <TransactionStatusBadge
-                                                            status={
-                                                                item.status_transaksi
-                                                            }
-                                                        />
-                                                        {isDibatalkan && (
-                                                            <StatusBadge tone="rose">
-                                                                {hasBiayaBatal
+                                                    <MetadataRow
+                                                        className="mt-1"
+                                                        items={[
+                                                            item.status_transaksi,
+                                                            isDibatalkan &&
+                                                                (hasBiayaBatal
                                                                     ? 'Batal + Biaya'
-                                                                    : 'Batal Gratis'}
-                                                            </StatusBadge>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                                <td className="px-5 py-3.5">
-                                                    <p className="font-semibold text-slate-900">
+                                                                    : 'Batal Gratis'),
+                                                        ]}
+                                                    />
+                                                </th>
+
+                                                <td className="px-5 py-4">
+                                                    <p className="font-semibold text-[#0F172A]">
                                                         {item.pelanggan.nama}
                                                     </p>
-                                                    <p className="text-xs text-slate-500">
+                                                    <MetadataRow
+                                                        className="mt-1"
+                                                        items={[
+                                                            <span
+                                                                key="telp"
+                                                                className="font-mono tabular-nums"
+                                                            >
+                                                                {
+                                                                    item
+                                                                        .pelanggan
+                                                                        .no_telepon
+                                                                }
+                                                            </span>,
+                                                            <PayLaterBadge
+                                                                key="paylater"
+                                                                allowed={
+                                                                    item
+                                                                        .pelanggan
+                                                                        .boleh_bayar_akhir
+                                                                }
+                                                                variant={
+                                                                    item
+                                                                        .pelanggan
+                                                                        .boleh_bayar_akhir
+                                                                        ? 'badge'
+                                                                        : 'text'
+                                                                }
+                                                            />,
+                                                        ]}
+                                                    />
+                                                </td>
+
+                                                <td className="px-5 py-4">
+                                                    <p className="font-semibold text-[#0F172A]">
                                                         {
-                                                            item.pelanggan
-                                                                .no_telepon
+                                                            item.layanan
+                                                                .nama_layanan
                                                         }
                                                     </p>
-                                                    {item.pelanggan
-                                                        .boleh_bayar_akhir && (
-                                                        <div className="mt-1">
-                                                            <PayLaterBadge
-                                                                allowed
-                                                            />
-                                                        </div>
-                                                    )}
+                                                    <MetadataRow
+                                                        className="mt-1"
+                                                        items={[
+                                                            <SpeedTierBadge
+                                                                key="speed"
+                                                                tier={
+                                                                    item.layanan
+                                                                        .tingkat_kecepatan
+                                                                }
+                                                                variant="text"
+                                                            />,
+                                                            <span
+                                                                key="qty"
+                                                                className="font-mono tabular-nums"
+                                                            >
+                                                                {
+                                                                    item.berat_atau_jumlah
+                                                                }{' '}
+                                                                {
+                                                                    item.layanan
+                                                                        .satuan
+                                                                }{' '}
+                                                                &times;{' '}
+                                                                {formatRupiah(
+                                                                    item.harga_satuan_snapshot,
+                                                                )}
+                                                            </span>,
+                                                        ]}
+                                                    />
                                                 </td>
-                                                <td className="px-5 py-3.5">
-                                                    <div className="flex flex-wrap items-center gap-1.5">
-                                                        <span className="font-medium text-slate-900">
-                                                            {
-                                                                item.layanan
-                                                                    .nama_layanan
-                                                            }
-                                                        </span>
-                                                        <SpeedTierBadge
-                                                            tier={
-                                                                item.layanan
-                                                                    .tingkat_kecepatan
-                                                            }
-                                                        />
-                                                    </div>
-                                                    <p className="mt-1 text-xs tabular-nums text-slate-600">
-                                                        {item.berat_atau_jumlah}{' '}
-                                                        {item.layanan.satuan}{' '}
-                                                        &times;{' '}
-                                                        {formatRupiah(
-                                                            item.harga_satuan_snapshot,
-                                                        )}
-                                                    </p>
-                                                </td>
-                                                <td className="whitespace-nowrap px-5 py-3.5 text-right">
-                                                    <p className="font-bold tabular-nums text-slate-900">
+
+                                                <td className="whitespace-nowrap px-5 py-4 text-right tabular-nums">
+                                                    <p className="font-mono font-bold text-[#0F172A]">
                                                         {formatRupiah(
                                                             item.total_harga,
                                                         )}
                                                     </p>
                                                     {hasVoucher && (
-                                                        <p className="mt-0.5 text-[11px] font-medium text-emerald-700">
+                                                        <p className="mt-0.5 font-mono text-[11px] font-medium text-[#065F46]">
                                                             Voucher -
                                                             {formatRupiah(
                                                                 item.nilai_voucher_snapshot,
@@ -360,7 +399,7 @@ export default function TransaksiIndex({
                                                         </p>
                                                     )}
                                                     {hasKompensasi && (
-                                                        <p className="mt-0.5 text-[11px] font-medium text-emerald-700">
+                                                        <p className="mt-0.5 font-mono text-[11px] font-medium text-[#065F46]">
                                                             Kompensasi -
                                                             {formatRupiah(
                                                                 item.total_kompensasi,
@@ -368,7 +407,7 @@ export default function TransaksiIndex({
                                                         </p>
                                                     )}
                                                     {hasBiayaBatal && (
-                                                        <p className="mt-0.5 text-[11px] font-medium text-rose-700">
+                                                        <p className="mt-0.5 font-mono text-[11px] font-medium text-[#9F1239]">
                                                             Biaya Batal{' '}
                                                             {formatRupiah(
                                                                 item.biaya_pembatalan,
@@ -376,21 +415,22 @@ export default function TransaksiIndex({
                                                         </p>
                                                     )}
                                                 </td>
-                                                <td className="whitespace-nowrap px-5 py-3.5 text-right tabular-nums">
-                                                    <p className="text-xs font-medium text-slate-700">
+
+                                                <td className="whitespace-nowrap px-5 py-4 text-right font-mono text-xs tabular-nums">
+                                                    <p className="font-medium text-[#0F766E]">
                                                         Dibayar:{' '}
                                                         {formatRupiah(
                                                             item.total_dibayar,
                                                         )}
                                                     </p>
-                                                    <p className="mt-0.5 text-xs font-semibold text-amber-700">
+                                                    <p className="mt-0.5 font-semibold text-[#78350F]">
                                                         Sisa:{' '}
                                                         {formatRupiah(
                                                             item.sisa_tagihan,
                                                         )}
                                                     </p>
                                                     {hasPengembalian && (
-                                                        <p className="mt-0.5 text-[11px] font-semibold text-indigo-700">
+                                                        <p className="mt-0.5 text-[11px] font-semibold text-[#3730A3]">
                                                             Kembali:{' '}
                                                             {formatRupiah(
                                                                 item.total_pengembalian_pelanggan,
@@ -398,58 +438,78 @@ export default function TransaksiIndex({
                                                         </p>
                                                     )}
                                                 </td>
-                                                <td className="whitespace-nowrap px-5 py-3.5">
+
+                                                <td className="whitespace-nowrap px-5 py-4">
                                                     <div className="flex flex-col items-start gap-1.5">
                                                         <PaymentStatusBadge
                                                             status={
                                                                 item.status_pembayaran
                                                             }
                                                         />
-                                                        {latestStageCode && (
+                                                        {isDibatalkan ? (
+                                                            <TransactionStatusBadge
+                                                                status={
+                                                                    item.status_transaksi
+                                                                }
+                                                            />
+                                                        ) : latestStageCode ? (
                                                             <ProductionStageBadge
                                                                 stage={
                                                                     latestStageCode
                                                                 }
                                                             />
+                                                        ) : (
+                                                            <TransactionStatusBadge
+                                                                status={
+                                                                    item.status_transaksi
+                                                                }
+                                                            />
                                                         )}
-                                                        {item.insiden_pending_count >
-                                                            0 && (
-                                                            <StatusBadge tone="amber">
-                                                                {
-                                                                    item.insiden_pending_count
-                                                                }{' '}
-                                                                Insiden Pending
-                                                            </StatusBadge>
-                                                        )}
-                                                        {item.insiden_pending_count ===
-                                                            0 &&
-                                                            item.laporan_insiden
-                                                                .length > 0 && (
-                                                                <StatusBadge tone="slate">
-                                                                    {
-                                                                        item
-                                                                            .laporan_insiden
-                                                                            .length
-                                                                    }{' '}
-                                                                    Insiden
-                                                                    Terkonfirmasi
-                                                                </StatusBadge>
-                                                            )}
                                                     </div>
+                                                    {item.insiden_pending_count >
+                                                        0 && (
+                                                        <p className="mt-1.5 text-[11px] font-semibold text-[#78350F]">
+                                                            {
+                                                                item.insiden_pending_count
+                                                            }{' '}
+                                                            Insiden Pending
+                                                        </p>
+                                                    )}
+                                                    {item.insiden_pending_count ===
+                                                        0 &&
+                                                        item.laporan_insiden
+                                                            .length > 0 && (
+                                                            <p className="mt-1.5 text-[11px] text-[#5B697A]">
+                                                                {
+                                                                    item
+                                                                        .laporan_insiden
+                                                                        .length
+                                                                }{' '}
+                                                                Insiden
+                                                                Terkonfirmasi
+                                                            </p>
+                                                        )}
                                                 </td>
-                                                <td className="whitespace-nowrap px-5 py-3.5 text-right">
+
+                                                <td className="whitespace-nowrap px-5 py-4 text-right">
                                                     <div className="inline-flex items-center gap-2">
                                                         <Link
                                                             href={`/transaksi/${item.nomor_nota}`}
-                                                            className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
+                                                            className="inline-flex min-h-[2.25rem] items-center rounded-xl border border-[#7C8C9D] bg-white px-3 py-1.5 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
                                                         >
                                                             Detail
                                                         </Link>
                                                         <Link
                                                             href={`/transaksi/${item.nomor_nota}/nota`}
-                                                            className="rounded-lg border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700 transition hover:bg-sky-100"
+                                                            className="inline-flex min-h-[2.25rem] items-center gap-1 rounded-xl border border-teal-200 bg-[#F0FDFA] px-3 py-1.5 text-xs font-semibold text-[#115E59] transition hover:bg-[#CCFBF1]"
                                                         >
-                                                            Cetak Nota
+                                                            <Printer
+                                                                className="h-3.5 w-3.5 shrink-0"
+                                                                aria-hidden="true"
+                                                            />
+                                                            <span>
+                                                                Cetak Nota
+                                                            </span>
                                                         </Link>
                                                     </div>
                                                 </td>

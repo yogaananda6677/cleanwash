@@ -1,13 +1,32 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { useEffect, useId, useState, type FormEvent } from 'react';
+import {
+    AlertTriangle,
+    ArrowRight,
+    Check,
+    CheckCircle2,
+    ChevronRight,
+    Clock,
+    Inbox,
+    Info,
+    Scale,
+    Sparkles,
+    WashingMachine,
+    Wind,
+} from 'lucide-react';
+import { useEffect, useId, useState, type FormEvent, type ReactNode } from 'react';
 import EmptyState from '@/Components/EmptyState';
+import FilterToolbar, {
+    FILTER_LABEL_CLASS,
+    FILTER_SELECT_CLASS,
+} from '@/Components/FilterToolbar';
 import LaporkanInsidenModal from '@/Components/LaporkanInsidenModal';
+import MetadataRow from '@/Components/MetadataRow';
 import Modal from '@/Components/Modal';
 import Pagination from '@/Components/Pagination';
+import StatTile, { type StatTileTone } from '@/Components/StatTile';
 import {
     PayLaterBadge,
     PaymentStatusBadge,
-    ProductionStageBadge,
     SpeedTierBadge,
     StatusBadge,
     TransactionStatusBadge,
@@ -37,34 +56,29 @@ const STAGE_ORDER: TahapProduksiCode[] = [
     'SELESAI',
 ];
 
-const STAGE_CARD_STYLES: Record<
+const STAGE_TILE_META: Record<
     TahapProduksiCode,
-    { active: string; idle: string; count: string }
+    { tone: StatTileTone; icon: ReactNode }
 > = {
     DITERIMA: {
-        active: 'border-sky-500 bg-sky-50 ring-2 ring-sky-200',
-        idle: 'border-slate-200 bg-white hover:border-sky-300',
-        count: 'text-sky-700',
+        tone: 'brand',
+        icon: <Inbox className="h-4 w-4" aria-hidden="true" />,
     },
     DICUCI: {
-        active: 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200',
-        idle: 'border-slate-200 bg-white hover:border-indigo-300',
-        count: 'text-indigo-700',
+        tone: 'indigo',
+        icon: <WashingMachine className="h-4 w-4" aria-hidden="true" />,
     },
     DIKERINGKAN: {
-        active: 'border-amber-500 bg-amber-50 ring-2 ring-amber-200',
-        idle: 'border-slate-200 bg-white hover:border-amber-300',
-        count: 'text-amber-700',
+        tone: 'amber',
+        icon: <Wind className="h-4 w-4" aria-hidden="true" />,
     },
     DISETRIKA: {
-        active: 'border-violet-500 bg-violet-50 ring-2 ring-violet-200',
-        idle: 'border-slate-200 bg-white hover:border-violet-300',
-        count: 'text-violet-700',
+        tone: 'neutral',
+        icon: <Sparkles className="h-4 w-4" aria-hidden="true" />,
     },
     SELESAI: {
-        active: 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200',
-        idle: 'border-slate-200 bg-white hover:border-emerald-300',
-        count: 'text-emerald-700',
+        tone: 'emerald',
+        icon: <CheckCircle2 className="h-4 w-4" aria-hidden="true" />,
     },
 };
 
@@ -272,9 +286,13 @@ export default function ProduksiIndex({
             headerActions={
                 <Link
                     href="/insiden"
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
                 >
-                    Lihat Daftar Insiden
+                    <AlertTriangle
+                        className="h-4 w-4 shrink-0 text-[#B45309]"
+                        aria-hidden="true"
+                    />
+                    <span>Lihat Daftar Insiden</span>
                 </Link>
             }
         >
@@ -285,151 +303,99 @@ export default function ProduksiIndex({
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                     {STAGE_ORDER.map((stage) => {
                         const selected = tahapStatus === stage;
-                        const style = STAGE_CARD_STYLES[stage];
+                        const meta = STAGE_TILE_META[stage];
                         const count = stageCounts[stage] ?? 0;
 
                         return (
-                            <button
+                            <StatTile
                                 key={stage}
-                                type="button"
-                                aria-pressed={selected}
-                                onClick={() => handleStageCardClick(stage)}
-                                className={`flex flex-col justify-between rounded-2xl border p-4 text-left shadow-xs transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 ${
-                                    selected ? style.active : style.idle
-                                }`}
-                            >
-                                <div className="flex items-center justify-between gap-2">
-                                    <ProductionStageBadge stage={stage} />
-                                    {selected && (
-                                        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-600">
-                                            Aktif
-                                        </span>
-                                    )}
-                                </div>
-                                <p
-                                    className={`mt-3 text-2xl font-bold tabular-nums ${style.count}`}
-                                >
-                                    {count}
-                                </p>
-                                <p className="mt-0.5 text-[11px] text-slate-500">
-                                    {selected
+                                label={formatTahapProduksi(stage)}
+                                value={count}
+                                hint={
+                                    selected
                                         ? 'Klik untuk hapus filter'
-                                        : `Filter tahap ${formatTahapProduksi(stage)}`}
-                                </p>
-                            </button>
+                                        : `Filter tahap ${formatTahapProduksi(stage)}`
+                                }
+                                tone={meta.tone}
+                                icon={meta.icon}
+                                active={selected}
+                                onClick={() => handleStageCardClick(stage)}
+                            />
                         );
                     })}
                 </div>
             </section>
 
             {/* Search & Filter Controls */}
-            <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:p-5">
-                <search>
-                    <form
-                        method="GET"
-                        onSubmit={handleSearchSubmit}
-                        className="flex flex-col gap-3 lg:flex-row lg:items-end"
+            <FilterToolbar
+                className="mt-5"
+                ariaLabel="Filter dan pencarian antrean produksi"
+                onSubmit={handleSearchSubmit}
+                searchValue={search}
+                onSearchChange={setSearch}
+                searchId={searchInputId}
+                searchLabel="Cari Nota / Pelanggan"
+                searchPlaceholder="Cari nomor nota (CW-...), nama pelanggan, atau no. telepon..."
+                submitLabel="Terapkan Filter"
+                onReset={handleResetFilters}
+                hasActiveFilters={hasActiveFilters}
+            >
+                <div className="w-full sm:w-48 lg:shrink-0">
+                    <label
+                        htmlFor={tahapSelectId}
+                        className={FILTER_LABEL_CLASS}
                     >
-                        <div className="flex-1">
-                            <label
-                                htmlFor={searchInputId}
-                                className="block text-xs font-semibold text-slate-700"
-                            >
-                                Cari Nota / Pelanggan
-                            </label>
-                            <input
-                                id={searchInputId}
-                                name="search"
-                                type="search"
-                                value={search}
-                                onChange={(event) =>
-                                    setSearch(event.target.value)
-                                }
-                                placeholder="Cari nomor nota (CW-...), nama pelanggan, atau no. telepon..."
-                                className="mt-1 block w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                            />
-                        </div>
+                        Tahap Produksi
+                    </label>
+                    <select
+                        id={tahapSelectId}
+                        name="tahap_status"
+                        value={tahapStatus}
+                        onChange={(event) =>
+                            setTahapStatus(
+                                event.target.value as TahapProduksiCode | '',
+                            )
+                        }
+                        className={FILTER_SELECT_CLASS}
+                    >
+                        <option value="">Semua Tahap</option>
+                        {STAGE_ORDER.map((stage) => (
+                            <option key={stage} value={stage}>
+                                {formatTahapProduksi(stage)}
+                            </option>
+                        ))}
+                    </select>
+                </div>
 
-                        <div className="w-full sm:w-52">
-                            <label
-                                htmlFor={tahapSelectId}
-                                className="block text-xs font-semibold text-slate-700"
-                            >
-                                Tahap Produksi
-                            </label>
-                            <select
-                                id={tahapSelectId}
-                                name="tahap_status"
-                                value={tahapStatus}
-                                onChange={(event) =>
-                                    setTahapStatus(
-                                        event.target.value as
-                                            | TahapProduksiCode
-                                            | '',
-                                    )
-                                }
-                                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                            >
-                                <option value="">Semua Tahap</option>
-                                {STAGE_ORDER.map((stage) => (
-                                    <option key={stage} value={stage}>
-                                        {formatTahapProduksi(stage)}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="w-full sm:w-52">
-                            <label
-                                htmlFor={statusSelectId}
-                                className="block text-xs font-semibold text-slate-700"
-                            >
-                                Status Transaksi
-                            </label>
-                            <select
-                                id={statusSelectId}
-                                name="status_transaksi"
-                                value={statusTransaksi}
-                                onChange={(event) =>
-                                    setStatusTransaksi(
-                                        event.target.value as
-                                            | 'AKTIF'
-                                            | 'SELESAI'
-                                            | 'ALL',
-                                    )
-                                }
-                                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                            >
-                                <option value="AKTIF">Antrean Aktif</option>
-                                <option value="SELESAI">
-                                    Selesai Produksi
-                                </option>
-                                <option value="ALL">
-                                    Semua (Aktif &amp; Selesai)
-                                </option>
-                            </select>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <button
-                                type="submit"
-                                className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
-                            >
-                                Terapkan Filter
-                            </button>
-                            {hasActiveFilters && (
-                                <button
-                                    type="button"
-                                    onClick={handleResetFilters}
-                                    className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
-                                >
-                                    Reset
-                                </button>
-                            )}
-                        </div>
-                    </form>
-                </search>
-            </section>
+                <div className="w-full sm:w-52 lg:shrink-0">
+                    <label
+                        htmlFor={statusSelectId}
+                        className={FILTER_LABEL_CLASS}
+                    >
+                        Status Transaksi
+                    </label>
+                    <select
+                        id={statusSelectId}
+                        name="status_transaksi"
+                        value={statusTransaksi}
+                        onChange={(event) =>
+                            setStatusTransaksi(
+                                event.target.value as
+                                    | 'AKTIF'
+                                    | 'SELESAI'
+                                    | 'ALL',
+                            )
+                        }
+                        className={FILTER_SELECT_CLASS}
+                    >
+                        <option value="AKTIF">Antrean Aktif</option>
+                        <option value="SELESAI">Selesai Produksi</option>
+                        <option value="ALL">
+                            Semua (Aktif &amp; Selesai)
+                        </option>
+                    </select>
+                </div>
+            </FilterToolbar>
 
             {/* Production Queue List */}
             <section className="mt-5 space-y-4">
@@ -491,13 +457,13 @@ export default function ProduksiIndex({
                             return (
                                 <article
                                     key={item.nomor_nota}
-                                    className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition hover:border-slate-300"
+                                    className="rounded-2xl border border-[#D8E2E6] bg-white p-4 shadow-[0_1px_2px_rgba(15,41,51,0.04)] transition hover:border-[#7C8C9D] sm:p-5"
                                 >
-                                    {/* Card Header */}
-                                    <div className="flex flex-col justify-between gap-3 border-b border-slate-100 pb-4 sm:flex-row sm:items-start">
-                                        <div>
+                                    {/* Card Header (max 2-3 badges + single Primary CTA) */}
+                                    <div className="flex flex-col justify-between gap-3 border-b border-[#D8E2E6] pb-4 lg:flex-row lg:items-start">
+                                        <div className="min-w-0">
                                             <div className="flex flex-wrap items-center gap-2">
-                                                <span className="font-mono text-base font-bold text-slate-900">
+                                                <span className="font-mono text-base font-bold text-[#0F172A]">
                                                     {item.nomor_nota}
                                                 </span>
                                                 <TransactionStatusBadge
@@ -510,13 +476,6 @@ export default function ProduksiIndex({
                                                         item.status_pembayaran
                                                     }
                                                 />
-                                                {item.tahap_produksi_terakhir && (
-                                                    <ProductionStageBadge
-                                                        stage={
-                                                            item.tahap_produksi_terakhir
-                                                        }
-                                                    />
-                                                )}
                                                 {item.insiden_pending_count >
                                                     0 && (
                                                     <StatusBadge tone="amber">
@@ -527,14 +486,20 @@ export default function ProduksiIndex({
                                                     </StatusBadge>
                                                 )}
                                             </div>
-                                            <p className="mt-1 text-xs text-slate-500">
-                                                Masuk:{' '}
-                                                {formatTanggal(
-                                                    item.tanggal_penerimaan,
-                                                    { withTime: true },
-                                                )}{' '}
-                                                &bull; Penerima:{' '}
-                                                {item.petugas.nama_petugas}
+                                            <p className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-[#5B697A]">
+                                                <Clock
+                                                    className="h-3.5 w-3.5 shrink-0"
+                                                    aria-hidden="true"
+                                                />
+                                                <span>
+                                                    Masuk:{' '}
+                                                    {formatTanggal(
+                                                        item.tanggal_penerimaan,
+                                                        { withTime: true },
+                                                    )}{' '}
+                                                    &bull; Penerima:{' '}
+                                                    {item.petugas.nama_petugas}
+                                                </span>
                                             </p>
                                         </div>
 
@@ -545,9 +510,13 @@ export default function ProduksiIndex({
                                                     onClick={() =>
                                                         openTimbangModal(item)
                                                     }
-                                                    className="rounded-xl border border-amber-300 bg-amber-50 px-3.5 py-2 text-xs font-semibold text-amber-900 transition hover:bg-amber-100"
+                                                    className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl border border-amber-400 bg-amber-50 px-3.5 py-2 text-xs font-semibold text-amber-900 transition hover:bg-amber-100"
                                                 >
-                                                    Timbang Ulang
+                                                    <Scale
+                                                        className="h-4 w-4 shrink-0"
+                                                        aria-hidden="true"
+                                                    />
+                                                    <span>Timbang Ulang</span>
                                                 </button>
                                             )}
 
@@ -561,9 +530,15 @@ export default function ProduksiIndex({
                                                             ),
                                                         )
                                                     }
-                                                    className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
+                                                    className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-[#9F1239] transition hover:bg-rose-100"
                                                 >
-                                                    Laporkan Insiden
+                                                    <AlertTriangle
+                                                        className="h-4 w-4 shrink-0"
+                                                        aria-hidden="true"
+                                                    />
+                                                    <span>
+                                                        Laporkan Insiden
+                                                    </span>
                                                 </button>
                                             )}
 
@@ -580,12 +555,21 @@ export default function ProduksiIndex({
                                                             nextStage,
                                                         )
                                                     }
-                                                    className="rounded-xl bg-sky-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                                    className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
                                                 >
-                                                    {advancingNota ===
-                                                    item.nomor_nota
-                                                        ? 'Memproses...'
-                                                        : `Lanjut ke ${formatTahapProduksi(nextStage)} \u2192`}
+                                                    <span>
+                                                        {advancingNota ===
+                                                        item.nomor_nota
+                                                            ? 'Memproses...'
+                                                            : `Lanjut ke ${formatTahapProduksi(nextStage)}`}
+                                                    </span>
+                                                    {advancingNota !==
+                                                        item.nomor_nota && (
+                                                        <ArrowRight
+                                                            className="h-4 w-4 shrink-0"
+                                                            aria-hidden="true"
+                                                        />
+                                                    )}
                                                 </button>
                                             )}
                                         </div>
@@ -594,30 +578,49 @@ export default function ProduksiIndex({
                                     {/* Customer, Service & Clothing Details */}
                                     <div className="mt-4 grid grid-cols-1 gap-5 lg:grid-cols-12">
                                         {/* Customer + Service Summary */}
-                                        <div className="space-y-3 lg:col-span-5">
-                                            <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                                        <div className="min-w-0 space-y-3 lg:col-span-5">
+                                            <div className="rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] p-3.5">
                                                 <div className="flex flex-wrap items-center justify-between gap-2">
-                                                    <p className="text-xs font-bold text-slate-900">
+                                                    <p className="text-sm font-bold text-[#0F172A]">
                                                         {item.pelanggan.nama}
                                                     </p>
-                                                    <PayLaterBadge
-                                                        allowed={
-                                                            item.pelanggan
-                                                                .boleh_bayar_akhir
-                                                        }
-                                                    />
+                                                    {item.pelanggan
+                                                        .boleh_bayar_akhir && (
+                                                        <PayLaterBadge
+                                                            allowed={true}
+                                                        />
+                                                    )}
                                                 </div>
-                                                <p className="mt-1 font-mono text-[11px] text-slate-600">
-                                                    {item.pelanggan.no_telepon}
-                                                </p>
-                                                <p className="mt-1 text-xs text-slate-600">
+                                                <MetadataRow
+                                                    className="mt-1"
+                                                    items={[
+                                                        <span
+                                                            key="tel"
+                                                            className="font-mono text-[#475569]"
+                                                        >
+                                                            {
+                                                                item.pelanggan
+                                                                    .no_telepon
+                                                            }
+                                                        </span>,
+                                                        !item.pelanggan
+                                                            .boleh_bayar_akhir && (
+                                                            <PayLaterBadge
+                                                                key="paylater"
+                                                                allowed={false}
+                                                                variant="text"
+                                                            />
+                                                        ),
+                                                    ]}
+                                                />
+                                                <p className="mt-1.5 break-words text-xs leading-relaxed text-[#475569]">
                                                     {item.pelanggan.alamat}
                                                 </p>
                                             </div>
 
-                                            <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5 text-xs">
+                                            <div className="rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] p-3.5 text-xs">
                                                 <div className="flex flex-wrap items-center justify-between gap-2">
-                                                    <span className="font-bold text-slate-900">
+                                                    <span className="text-sm font-bold text-[#0F172A]">
                                                         {
                                                             item.layanan
                                                                 .nama_layanan
@@ -628,44 +631,64 @@ export default function ProduksiIndex({
                                                             item.layanan
                                                                 .tingkat_kecepatan
                                                         }
+                                                        variant="text"
                                                     />
                                                 </div>
-                                                <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-slate-600">
-                                                    <span className="rounded-md bg-white px-2 py-0.5 font-medium ring-1 ring-slate-200">
-                                                        {
-                                                            item.layanan
-                                                                .metode_hitung
-                                                        }{' '}
-                                                        ({item.layanan.satuan})
-                                                    </span>
-                                                    <span className="rounded-md bg-white px-2 py-0.5 font-medium ring-1 ring-slate-200">
-                                                        {item.layanan
-                                                            .perlu_setrika
-                                                            ? 'Perlu Setrika'
-                                                            : 'Tanpa Setrika'}
-                                                    </span>
-                                                    <span className="rounded-md bg-sky-50 px-2 py-0.5 font-semibold tabular-nums text-sky-800 ring-1 ring-sky-200">
-                                                        {item.berat_atau_jumlah}{' '}
-                                                        {item.layanan.satuan}
-                                                    </span>
-                                                </div>
-                                                <p className="mt-2 text-[11px] text-slate-600">
+
+                                                <MetadataRow
+                                                    className="mt-2"
+                                                    items={[
+                                                        <span key="metode">
+                                                            {
+                                                                item.layanan
+                                                                    .metode_hitung
+                                                            }{' '}
+                                                            (
+                                                            {
+                                                                item.layanan
+                                                                    .satuan
+                                                            }
+                                                            )
+                                                        </span>,
+                                                        <span key="setrika">
+                                                            {item.layanan
+                                                                .perlu_setrika
+                                                                ? 'Perlu Setrika'
+                                                                : 'Tanpa Setrika'}
+                                                        </span>,
+                                                        <strong
+                                                            key="qty"
+                                                            className="font-mono font-bold tabular-nums text-[#0F766E]"
+                                                        >
+                                                            {
+                                                                item.berat_atau_jumlah
+                                                            }{' '}
+                                                            {
+                                                                item.layanan
+                                                                    .satuan
+                                                            }
+                                                        </strong>,
+                                                    ]}
+                                                />
+
+                                                <p className="mt-2 border-t border-[#D8E2E6] pt-2 text-xs text-[#475569]">
                                                     Tarif snapshot:{' '}
-                                                    <strong className="tabular-nums text-slate-900">
+                                                    <strong className="font-mono tabular-nums text-[#0F172A]">
                                                         {formatRupiah(
                                                             item.harga_satuan_snapshot,
                                                         )}
                                                         /{item.layanan.satuan}
                                                     </strong>{' '}
                                                     &bull; Total:{' '}
-                                                    <strong className="tabular-nums text-slate-900">
+                                                    <strong className="font-mono tabular-nums text-[#0F172A]">
                                                         {formatRupiah(
                                                             item.total_harga,
                                                         )}
                                                     </strong>
                                                 </p>
+
                                                 {item.catatan_khusus && (
-                                                    <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50/70 px-2.5 py-1.5 text-[11px] text-amber-950">
+                                                    <p className="mt-2 rounded-lg border border-amber-200 border-l-4 border-l-[#B45309] bg-[#FFFBEB] px-2.5 py-1.5 text-xs text-[#78350F]">
                                                         <span className="font-semibold">
                                                             Catatan khusus:
                                                         </span>{' '}
@@ -675,11 +698,11 @@ export default function ProduksiIndex({
                                             </div>
                                         </div>
 
-                                        {/* Detail Pakaian + Ordered Pipeline */}
-                                        <div className="space-y-4 lg:col-span-7">
+                                        {/* Detail Pakaian + Visual Pipeline Stepper */}
+                                        <div className="min-w-0 space-y-4 lg:col-span-7">
                                             <div>
-                                                <div className="flex items-center justify-between">
-                                                    <h3 className="text-xs font-bold uppercase tracking-wide text-slate-600">
+                                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                                    <h2 className="text-xs font-semibold uppercase tracking-wider text-[#475569]">
                                                         Rincian Pakaian (
                                                         {
                                                             item.detail_pakaian
@@ -687,10 +710,10 @@ export default function ProduksiIndex({
                                                         }{' '}
                                                         item &bull;{' '}
                                                         {totalPotong} potong)
-                                                    </h3>
+                                                    </h2>
                                                     {item.laporan_insiden
                                                         .length > 0 && (
-                                                        <span className="text-[11px] font-semibold text-rose-700">
+                                                        <span className="text-xs font-semibold text-[#9F1239]">
                                                             {
                                                                 item
                                                                     .laporan_insiden
@@ -700,29 +723,29 @@ export default function ProduksiIndex({
                                                         </span>
                                                     )}
                                                 </div>
-                                                <ul className="mt-2 divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white text-xs">
+                                                <ul className="mt-2 divide-y divide-[#D8E2E6] rounded-xl border border-[#D8E2E6] bg-white text-xs">
                                                     {item.detail_pakaian.map(
                                                         (detail) => (
                                                             <li
                                                                 key={
                                                                     detail.id_detail
                                                                 }
-                                                                className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2"
+                                                                className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5"
                                                             >
-                                                                <div>
-                                                                    <span className="font-semibold text-slate-900">
+                                                                <div className="min-w-0">
+                                                                    <span className="font-semibold text-[#0F172A]">
                                                                         {
                                                                             detail.jenis_pakaian
                                                                         }
                                                                     </span>
-                                                                    <span className="ml-2 text-slate-500">
-                                                                        —{' '}
+                                                                    <span className="ml-2 text-[#5B697A]">
+                                                                        &mdash;{' '}
                                                                         {
                                                                             detail.kondisi_pakaian
                                                                         }
                                                                     </span>
                                                                 </div>
-                                                                <span className="font-semibold tabular-nums text-slate-800">
+                                                                <span className="font-mono font-semibold tabular-nums text-[#0F172A]">
                                                                     {
                                                                         detail.jumlah_potong
                                                                     }{' '}
@@ -734,12 +757,12 @@ export default function ProduksiIndex({
                                                 </ul>
                                             </div>
 
-                                            {/* Pipeline & Last Update */}
-                                            <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5">
-                                                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                                            {/* Visual Pipeline Stepper */}
+                                            <div className="rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] p-3.5">
+                                                <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-[#475569]">
                                                     Alur Tahap Produksi Layanan
                                                 </p>
-                                                <ol className="mt-2 flex flex-wrap items-center gap-2">
+                                                <ol className="mt-2.5 flex flex-wrap items-center gap-2">
                                                     {orderedStages.map(
                                                         (tahap, index) => {
                                                             const isCompleted =
@@ -763,21 +786,38 @@ export default function ProduksiIndex({
                                                                                 ? 'step'
                                                                                 : undefined
                                                                         }
-                                                                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset ${
+                                                                        className={`inline-flex min-h-[1.875rem] items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${
                                                                             isCurrent
-                                                                                ? 'bg-sky-600 text-white ring-sky-600 shadow-xs'
+                                                                                ? 'bg-[#0F766E] text-white ring-[#0F766E] shadow-xs'
                                                                                 : isCompleted
-                                                                                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                                                                                  : 'bg-white text-slate-500 ring-slate-200'
+                                                                                  ? 'bg-[#ECFDF5] text-[#065F46] ring-emerald-200'
+                                                                                  : 'bg-white text-[#5B697A] ring-[#CBD5E1]'
                                                                         }`}
                                                                     >
+                                                                        {isCurrent ? (
+                                                                            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white text-[10px] font-bold text-[#0F766E] tabular-nums">
+                                                                                {index +
+                                                                                    1}
+                                                                            </span>
+                                                                        ) : isCompleted ? (
+                                                                            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#047857] text-white">
+                                                                                <Check
+                                                                                    className="h-2.5 w-2.5"
+                                                                                    aria-hidden="true"
+                                                                                />
+                                                                            </span>
+                                                                        ) : (
+                                                                            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-[#CBD5E1] text-[10px] font-semibold text-[#5B697A] tabular-nums">
+                                                                                {index +
+                                                                                    1}
+                                                                            </span>
+                                                                        )}
                                                                         <span>
                                                                             {
-                                                                                tahap.urutan
+                                                                                index +
+                                                                                1
                                                                             }
-                                                                            .
-                                                                        </span>
-                                                                        <span>
+                                                                            .{' '}
                                                                             {formatTahapProduksi(
                                                                                 tahap.nama_tahap,
                                                                             )}
@@ -786,12 +826,10 @@ export default function ProduksiIndex({
                                                                     {index <
                                                                         orderedStages.length -
                                                                             1 && (
-                                                                        <span
+                                                                        <ChevronRight
+                                                                            className="h-3.5 w-3.5 shrink-0 text-[#7C8C9D]"
                                                                             aria-hidden="true"
-                                                                            className="text-slate-300"
-                                                                        >
-                                                                            &rarr;
-                                                                        </span>
+                                                                        />
                                                                     )}
                                                                 </li>
                                                             );
@@ -800,10 +838,10 @@ export default function ProduksiIndex({
                                                 </ol>
 
                                                 {latestHistory && (
-                                                    <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200/80 pt-2 text-[11px] text-slate-600">
+                                                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[#D8E2E6] pt-2.5 text-xs text-[#475569]">
                                                         <span>
                                                             Update terakhir:{' '}
-                                                            <strong className="text-slate-800">
+                                                            <strong className="text-[#0F172A]">
                                                                 {latestHistory
                                                                     .pegawai
                                                                     ?.nama_pegawai ??
@@ -813,7 +851,7 @@ export default function ProduksiIndex({
                                                                         : 'Kasir saat penerimaan')}
                                                             </strong>
                                                         </span>
-                                                        <span className="tabular-nums">
+                                                        <span className="font-mono text-[11px] tabular-nums text-[#5B697A]">
                                                             {formatTanggal(
                                                                 latestHistory.waktu_update,
                                                                 {
@@ -831,7 +869,7 @@ export default function ProduksiIndex({
                             );
                         })}
 
-                        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+                        <div className="overflow-hidden rounded-2xl border border-[#D8E2E6] bg-white shadow-[0_1px_2px_rgba(15,41,51,0.04)]">
                             <Pagination
                                 paginated={transaksi}
                                 itemLabel="nota produksi"
@@ -863,7 +901,7 @@ export default function ProduksiIndex({
                             type="button"
                             onClick={closeTimbangModal}
                             disabled={timbangForm.processing}
-                            className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl border border-[#7C8C9D] bg-white px-4 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC] disabled:opacity-50"
                         >
                             Batal
                         </button>
@@ -871,11 +909,17 @@ export default function ProduksiIndex({
                             type="submit"
                             form={timbangFormId}
                             disabled={timbangForm.processing || !timbangTarget}
-                            className="rounded-xl bg-amber-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="inline-flex min-h-[2.5rem] items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            {timbangForm.processing
-                                ? 'Menyimpan...'
-                                : 'Simpan Berat Aktual'}
+                            <Scale
+                                className="h-4 w-4 shrink-0"
+                                aria-hidden="true"
+                            />
+                            <span>
+                                {timbangForm.processing
+                                    ? 'Menyimpan...'
+                                    : 'Simpan Berat Aktual'}
+                            </span>
                         </button>
                     </>
                 }
@@ -886,33 +930,42 @@ export default function ProduksiIndex({
                         onSubmit={handleTimbangSubmit}
                         className="space-y-4"
                     >
-                        <div className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-xs text-sky-950">
-                            <p className="font-semibold">
-                                Tarif Snapshot Nota Terkunci (KK-09)
-                            </p>
-                            <p className="mt-1 leading-relaxed">
-                                Perhitungan tetap menggunakan tarif snapshot{' '}
-                                <strong className="tabular-nums">
-                                    {formatRupiah(
-                                        timbangTarget.harga_satuan_snapshot,
-                                    )}
-                                    /kg
-                                </strong>{' '}
-                                (berat awal:{' '}
-                                <strong className="tabular-nums">
-                                    {timbangTarget.berat_atau_jumlah} kg
-                                </strong>
-                                ).
-                            </p>
+                        <div className="flex items-start gap-2.5 rounded-xl border border-teal-200 border-l-4 border-l-[#0F766E] bg-[#F0FDFA] px-4 py-3 text-xs text-[#115E59]">
+                            <Info
+                                className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]"
+                                aria-hidden="true"
+                            />
+                            <div>
+                                <p className="font-semibold">
+                                    Tarif Snapshot Nota Terkunci (KK-09)
+                                </p>
+                                <p className="mt-1 leading-relaxed">
+                                    Perhitungan tetap menggunakan tarif snapshot{' '}
+                                    <strong className="font-mono tabular-nums">
+                                        {formatRupiah(
+                                            timbangTarget.harga_satuan_snapshot,
+                                        )}
+                                        /kg
+                                    </strong>{' '}
+                                    (berat awal:{' '}
+                                    <strong className="font-mono tabular-nums">
+                                        {timbangTarget.berat_atau_jumlah} kg
+                                    </strong>
+                                    ).
+                                </p>
+                            </div>
                         </div>
 
                         <div>
                             <label
                                 htmlFor={beratInputId}
-                                className="block text-xs font-semibold text-slate-700"
+                                className="block text-xs font-semibold text-[#0F172A]"
                             >
                                 Berat Aktual (kg){' '}
-                                <span aria-hidden="true" className="text-rose-600">
+                                <span
+                                    aria-hidden="true"
+                                    className="text-rose-600"
+                                >
                                     *
                                 </span>
                             </label>
@@ -941,13 +994,13 @@ export default function ProduksiIndex({
                                         ? beratErrorId
                                         : undefined
                                 }
-                                className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold tabular-nums text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm font-semibold tabular-nums text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                             />
                             {timbangForm.errors.berat_aktual && (
                                 <p
                                     id={beratErrorId}
                                     role="alert"
-                                    className="mt-1 text-xs font-medium text-rose-600"
+                                    className="mt-1.5 text-xs font-medium text-rose-600"
                                 >
                                     {timbangForm.errors.berat_aktual}
                                 </p>
@@ -955,16 +1008,16 @@ export default function ProduksiIndex({
                         </div>
 
                         {/* Live Recalculation Preview */}
-                        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-xs">
-                            <p className="font-semibold text-slate-800">
+                        <div className="rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] p-3.5 text-xs">
+                            <p className="font-semibold text-[#0F172A]">
                                 Pratinjau Dampak Tagihan
                             </p>
                             <dl className="mt-2 space-y-1.5">
                                 <div className="flex justify-between">
-                                    <dt className="text-slate-500">
+                                    <dt className="text-[#5B697A]">
                                         Subtotal Baru
                                     </dt>
-                                    <dd className="font-semibold tabular-nums text-slate-900">
+                                    <dd className="font-mono font-semibold tabular-nums text-[#0F172A]">
                                         {formatRupiah(
                                             centsToDecimalString(
                                                 timbangSubtotalBaruCents,
@@ -973,10 +1026,10 @@ export default function ProduksiIndex({
                                     </dd>
                                 </div>
                                 <div className="flex justify-between">
-                                    <dt className="text-slate-500">
+                                    <dt className="text-[#5B697A]">
                                         Total Tagihan Baru
                                     </dt>
-                                    <dd className="font-bold tabular-nums text-slate-900">
+                                    <dd className="font-mono font-bold tabular-nums text-[#0F172A]">
                                         {formatRupiah(
                                             centsToDecimalString(
                                                 timbangTotalHargaBaruCents,
@@ -985,20 +1038,20 @@ export default function ProduksiIndex({
                                     </dd>
                                 </div>
                                 <div className="flex justify-between">
-                                    <dt className="text-slate-500">
+                                    <dt className="text-[#5B697A]">
                                         Sudah Dibayar
                                     </dt>
-                                    <dd className="font-semibold tabular-nums text-sky-700">
+                                    <dd className="font-mono font-semibold tabular-nums text-[#0F766E]">
                                         {formatRupiah(
                                             timbangTarget.total_dibayar,
                                         )}
                                     </dd>
                                 </div>
-                                <div className="flex justify-between border-t border-slate-200 pt-1.5">
-                                    <dt className="font-semibold text-slate-700">
+                                <div className="flex justify-between border-t border-[#D8E2E6] pt-1.5">
+                                    <dt className="font-semibold text-[#0F172A]">
                                         Estimasi Sisa Tagihan
                                     </dt>
-                                    <dd className="font-bold tabular-nums text-amber-700">
+                                    <dd className="font-mono font-bold tabular-nums text-[#78350F]">
                                         {formatRupiah(
                                             centsToDecimalString(
                                                 timbangSisaBaruCents,
@@ -1007,11 +1060,11 @@ export default function ProduksiIndex({
                                     </dd>
                                 </div>
                                 {timbangKelebihanTunaiCents > 0 && (
-                                    <div className="flex justify-between text-emerald-700">
+                                    <div className="flex justify-between text-[#065F46]">
                                         <dt className="font-semibold">
                                             Kelebihan Bayar Tunai
                                         </dt>
-                                        <dd className="font-bold tabular-nums">
+                                        <dd className="font-mono font-bold tabular-nums">
                                             {formatRupiah(
                                                 centsToDecimalString(
                                                     timbangKelebihanTunaiCents,
@@ -1026,24 +1079,30 @@ export default function ProduksiIndex({
                         {willDowngradeFromLunas && (
                             <div
                                 role="status"
-                                className="rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-xs text-rose-900"
+                                className="flex items-start gap-2.5 rounded-xl border border-rose-300 border-l-4 border-l-[#BE123C] bg-[#FFF1F2] px-4 py-3 text-xs text-[#9F1239]"
                             >
-                                <p className="font-bold">
-                                    Peringatan Status Pembayaran (KK-01)
-                                </p>
-                                <p className="mt-1 leading-relaxed">
-                                    Nota ini saat ini berstatus{' '}
-                                    <strong>LUNAS</strong>. Karena tagihan baru
-                                    melebihi total yang sudah dibayar, status
-                                    pembayaran akan otomatis turun menjadi{' '}
-                                    <strong>BELUM_LUNAS</strong>.
-                                </p>
+                                <AlertTriangle
+                                    className="mt-0.5 h-4 w-4 shrink-0 text-[#BE123C]"
+                                    aria-hidden="true"
+                                />
+                                <div>
+                                    <p className="font-bold">
+                                        Peringatan Status Pembayaran (KK-01)
+                                    </p>
+                                    <p className="mt-1 leading-relaxed">
+                                        Nota ini saat ini berstatus{' '}
+                                        <strong>LUNAS</strong>. Karena tagihan
+                                        baru melebihi total yang sudah dibayar,
+                                        status pembayaran akan otomatis turun
+                                        menjadi <strong>BELUM_LUNAS</strong>.
+                                    </p>
+                                </div>
                             </div>
                         )}
 
                         {!willDowngradeFromLunas &&
                             timbangTarget.status_pembayaran === 'LUNAS' && (
-                                <p className="text-[11px] text-slate-500">
+                                <p className="text-[11px] text-[#5B697A]">
                                     Catatan KK-01: Jika berat aktual menaikkan
                                     total tagihan melampaui nominal yang sudah
                                     dibayar, status <strong>LUNAS</strong> akan
@@ -1054,18 +1113,24 @@ export default function ProduksiIndex({
                         {willUpgradeToLunas && (
                             <div
                                 role="status"
-                                className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-900"
+                                className="flex items-start gap-2.5 rounded-xl border border-emerald-200 border-l-4 border-l-[#047857] bg-[#ECFDF5] px-4 py-3 text-xs text-[#065F46]"
                             >
-                                Total tagihan baru sudah tertutupi oleh
-                                pembayaran masuk, sehingga status pembayaran
-                                akan menjadi <strong>LUNAS</strong>.
+                                <CheckCircle2
+                                    className="mt-0.5 h-4 w-4 shrink-0 text-[#047857]"
+                                    aria-hidden="true"
+                                />
+                                <p>
+                                    Total tagihan baru sudah tertutupi oleh
+                                    pembayaran masuk, sehingga status pembayaran
+                                    akan menjadi <strong>LUNAS</strong>.
+                                </p>
                             </div>
                         )}
 
                         <div>
                             <label
                                 htmlFor={catatanInputId}
-                                className="block text-xs font-semibold text-slate-700"
+                                className="block text-xs font-semibold text-[#0F172A]"
                             >
                                 Catatan Penimbangan (Opsional)
                             </label>
@@ -1090,13 +1155,13 @@ export default function ProduksiIndex({
                                         ? catatanErrorId
                                         : undefined
                                 }
-                                className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                                className="mt-1.5 block min-h-[4.25rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                             />
                             {timbangForm.errors.catatan && (
                                 <p
                                     id={catatanErrorId}
                                     role="alert"
-                                    className="mt-1 text-xs font-medium text-rose-600"
+                                    className="mt-1.5 text-xs font-medium text-rose-600"
                                 >
                                     {timbangForm.errors.catatan}
                                 </p>
