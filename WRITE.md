@@ -406,5 +406,25 @@
   - Repository publik tersedia di: `https://github.com/yogaananda6677/cleanwash`
   - Seluruh kredensial rahasia (`.env`, `.env.testing`, dsb.) tetap terlindungi oleh `.gitignore` dan tidak ada secret yang ter-push.
 - **Next Exact Action:**
-  - Komit `README.md` & `WRITE.md`, lalu push update terakhir ke `origin/main`.
+  - Komit `README.md` & `WRITE.md`, lalu push update terakhir ke `origin/main` (Telah selesai di commit `ed20b4c`).
+
+---
+
+### [#035] 2026-11-17 09:37 — Primary Agent — Live Server Startup
+- **Status:** `DONE` (`SERVER_RUNNING`)
+- **Ringkasan Kegiatan:**
+  - Memverifikasi container database Docker MySQL 8.4 (`cleanwash-mysql` port `3307`) berstatus Healthy.
+  - Memastikan aset frontend terkompilasi (`public/build/manifest.json` ada, `public/hot` tidak ada).
+  - Menjalankan server pengembangan Laravel `php artisan serve --host=127.0.0.1 --port=8000` sebagai background daemon process.
+  - Memverifikasi endpoint login merespons dengan HTTP `200`.
+- **File Dibuat / Diubah:**
+  - `WRITE.md` — Penambahan entri `#035`
+- **Verifikasi / Bukti Uji:**
+  - `docker compose ps` -> `cleanwash-mysql: Up About an hour (healthy), port 3307` (`exit code 0`)
+  - `curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8000/login` -> `200` (`exit code 0`)
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Server aktif dan siap diakses di `http://127.0.0.1:8000`.
+- **Next Exact Action:**
+  - Berikan URL dan kredensial default kepada pengguna.
+
 
