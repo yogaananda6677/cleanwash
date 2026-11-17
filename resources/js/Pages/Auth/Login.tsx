@@ -129,15 +129,21 @@ export default function Login() {
                         </div>
                     </div>
 
-                    <div className="relative mt-8 hidden items-center gap-2 border-t border-[#1A3B47] pt-5 text-xs text-[#9FB7C0] lg:flex">
-                        <Clock
-                            className="h-4 w-4 shrink-0 text-[#2DD4BF]"
-                            aria-hidden="true"
-                        />
-                        <span>
-                            CleanWash Operations Console &middot; Zona waktu
-                            Asia/Jakarta (WIB)
-                        </span>
+                    <div className="relative mt-8 hidden flex-col gap-1.5 border-t border-[#1A3B47] pt-5 text-xs text-[#9FB7C0] lg:flex">
+                        <div className="flex items-center gap-2">
+                            <Clock
+                                className="h-4 w-4 shrink-0 text-[#2DD4BF]"
+                                aria-hidden="true"
+                            />
+                            <span>
+                                CleanWash Operations Console &middot; Zona waktu
+                                Asia/Jakarta (WIB)
+                            </span>
+                        </div>
+                        <p className="text-[11px] text-[#718F9C]">
+                            Copyright &copy; 2026 CleanWash &bull; Developed by{' '}
+                            <strong className="text-[#2DD4BF] font-semibold">Yoga</strong>. All rights reserved.
+                        </p>
                     </div>
                 </section>
 
@@ -328,16 +334,22 @@ export default function Login() {
                             </form>
                         </div>
 
-                        <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-xs text-[#5B697A] lg:hidden">
-                            <Clock
-                                className="h-3.5 w-3.5 shrink-0 text-[#0F766E]"
-                                aria-hidden="true"
-                            />
-                            <span>
-                                CleanWash Operations Console &middot; Zona waktu
-                                Asia/Jakarta (WIB)
-                            </span>
-                        </p>
+                        <div className="mt-5 space-y-1 text-center text-xs text-[#5B697A] lg:hidden">
+                            <p className="flex items-center justify-center gap-1.5">
+                                <Clock
+                                    className="h-3.5 w-3.5 shrink-0 text-[#0F766E]"
+                                    aria-hidden="true"
+                                />
+                                <span>
+                                    CleanWash Operations Console &middot; Zona waktu
+                                    Asia/Jakarta (WIB)
+                                </span>
+                            </p>
+                            <p className="text-[11px] text-slate-500">
+                                Copyright &copy; 2026 CleanWash &bull; Developed by{' '}
+                                <strong className="text-[#0F766E] font-semibold">Yoga</strong>
+                            </p>
+                        </div>
                     </div>
                 </main>
             </div>

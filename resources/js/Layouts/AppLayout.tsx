@@ -543,11 +543,18 @@ export default function AppLayout({
 
                         <div className="order-2 flex shrink-0 items-center gap-2.5 sm:order-3">
                             {user && (
-                                <div className="hidden items-center gap-2 md:flex">
-                                    <RoleBadge role={user.role} />
-                                    <span className="text-xs font-medium text-[#475569]">
-                                        {user.name}
+                                <div className="hidden items-center gap-2.5 rounded-xl border border-slate-200/80 bg-slate-50/80 py-1 pl-1.5 pr-2.5 md:flex">
+                                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#0F766E] text-xs font-bold text-white shadow-2xs">
+                                        {user.name.charAt(0).toUpperCase()}
                                     </span>
+                                    <div className="text-left">
+                                        <p className="text-xs font-bold text-[#0F172A] leading-tight">
+                                            {user.name}
+                                        </p>
+                                        <div className="mt-0.5">
+                                            <RoleBadge role={user.role} />
+                                        </div>
+                                    </div>
                                 </div>
                             )}
                             <button
@@ -665,6 +672,21 @@ export default function AppLayout({
 
                     {children}
                 </main>
+
+                <footer className="mt-auto border-t border-slate-200/80 bg-white/70 py-4 px-4 sm:px-6 lg:px-8 text-xs text-slate-500">
+                    <div className="mx-auto flex max-w-7xl flex-col sm:flex-row items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                            <span className="font-semibold text-[#0F2933]">CleanWash Operations Console</span>
+                            <span>&bull;</span>
+                            <span>Versi 1.0</span>
+                        </div>
+                        <p className="flex items-center gap-1 text-[11px] sm:text-xs">
+                            <span>Copyright &copy; 2026 CleanWash &bull; Developed by</span>
+                            <strong className="text-[#0F766E] font-bold">Yoga</strong>
+                            <span>&bull; All rights reserved.</span>
+                        </p>
+                    </div>
+                </footer>
             </div>
         </div>
     );

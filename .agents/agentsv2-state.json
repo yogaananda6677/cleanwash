@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0.0",
+  "enabled": true,
+  "mode": "brownfield-no-docs",
+  "phase": "complete",
+  "workflow_active": false,
+  "paused_waiting_for_user": false,
+  "docs_verified": true,
+  "review_status": "PASS",
+  "docs_synced": true,
+  "max_task_retries": 3,
+  "required_docs": [
+    "docs/PRD.md",
+    "docs/ARCHITECTURE.md",
+    "docs/TASKS.md"
+  ],
+  "task_retries": {},
+  "updated_at": "2026-11-17T06:23:44Z"
+}

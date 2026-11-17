@@ -165,33 +165,32 @@ export default function AuditIndex({
             <Head title="Audit Trail & Piutang" />
 
             {/* Piutang Summary Section */}
-            <section className="overflow-hidden rounded-2xl border border-[#D8E2E6] bg-white shadow-[0_1px_2px_rgba(15,41,51,0.04)]">
-                <div className="flex flex-col justify-between gap-4 border-b border-[#D8E2E6] border-l-4 border-l-[#B45309] bg-[#FFFBEB]/80 px-5 py-4 sm:flex-row sm:items-center">
-                    <div>
-                        <h2 className="text-base font-bold tracking-tight text-[#0F172A]">
-                            Ringkasan Piutang Pelanggan Hak Bayar Akhir (KK-06)
-                        </h2>
-                        <p className="mt-0.5 text-xs text-[#475569]">
-                            Nota berstatus <strong>DIAMBIL</strong> yang masih
-                            memiliki sisa tagihan (
-                            <strong>BELUM_LUNAS</strong>).
-                        </p>
+            <section className="overflow-hidden rounded-2xl border border-amber-200/90 bg-white shadow-xs transition hover:shadow-sm">
+                <div className="flex flex-col justify-between gap-4 border-b border-amber-100 bg-gradient-to-r from-amber-50/70 via-white to-white px-5 py-4 sm:flex-row sm:items-center">
+                    <div className="flex items-start gap-3">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-[#B45309]">
+                            <Wallet className="h-5 w-5" aria-hidden="true" />
+                        </span>
+                        <div>
+                            <h2 className="text-base font-bold tracking-tight text-[#0F172A]">
+                                Ringkasan Piutang Pelanggan Hak Bayar Akhir (KK-06)
+                            </h2>
+                            <p className="mt-0.5 text-xs text-slate-500">
+                                Rekap transaksi berstatus <strong className="text-slate-700">DIAMBIL</strong> yang masih memiliki sisa tagihan (<strong className="text-rose-600">BELUM_LUNAS</strong>).
+                            </p>
+                        </div>
                     </div>
                     <div className="flex flex-wrap items-center gap-3 text-xs">
-                        <div className="rounded-xl border border-amber-300 bg-white px-3.5 py-2">
-                            <span className="text-[#5B697A]">Total Nota: </span>
-                            <strong className="font-mono text-sm tabular-nums text-[#78350F]">
+                        <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-white px-3.5 py-2 shadow-2xs">
+                            <span className="text-slate-500 font-medium">Total Nota:</span>
+                            <strong className="font-mono text-sm font-bold tabular-nums text-amber-800">
                                 {piutangSummary.total_nota_piutang}
                             </strong>
                         </div>
-                        <div className="rounded-xl border border-rose-200 bg-white px-3.5 py-2">
-                            <span className="text-[#5B697A]">
-                                Total Nominal:{' '}
-                            </span>
-                            <strong className="font-mono text-sm tabular-nums text-[#9F1239]">
-                                {formatRupiah(
-                                    piutangSummary.total_nominal_piutang,
-                                )}
+                        <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-white px-3.5 py-2 shadow-2xs">
+                            <span className="text-slate-500 font-medium">Total Nominal:</span>
+                            <strong className="font-mono text-sm font-bold tabular-nums text-rose-600">
+                                {formatRupiah(piutangSummary.total_nominal_piutang)}
                             </strong>
                         </div>
                     </div>

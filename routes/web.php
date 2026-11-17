@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InsidenController;
 use App\Http\Controllers\JenisLayananController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PengantaranController;
@@ -13,14 +14,10 @@ use App\Http\Controllers\SerahTerimaController;
 use App\Http\Controllers\TransaksiAdjustmentController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\VoucherController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function (Request $request) {
-    return $request->user()
-        ? redirect()->route('dashboard')
-        : redirect()->route('login');
-})->name('home');
+Route::get('/', [LandingController::class, 'index'])->name('home');
+Route::get('/lacak/{nota}', [LandingController::class, 'track'])->name('lacak');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

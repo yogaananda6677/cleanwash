@@ -298,9 +298,69 @@ export default function ProduksiIndex({
         >
             <Head title="Antrean Produksi" />
 
-            {/* 5 Stage Summary Quick-Filter Cards */}
+            {/* 5 Stage Summary Quick-Filter Cards (Mobile Horizontal Pills + Desktop StatTiles) */}
             <section aria-label="Ringkasan tahap produksi">
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                {/* Mobile Stage Selector Pills */}
+                <div className="flex sm:hidden items-center gap-2 overflow-x-auto pb-1.5 -mx-4 px-4 no-scrollbar">
+                    <button
+                        type="button"
+                        onClick={() => setTahapStatus('')}
+                        className={`flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition active:scale-95 ${
+                            tahapStatus === ''
+                                ? 'bg-[#0F766E] text-white shadow-xs ring-1 ring-[#14B8A6]/40'
+                                : 'border border-[#CBD5E1] bg-white text-slate-700 hover:bg-slate-50'
+                        }`}
+                    >
+                        <span>Semua</span>
+                        <span
+                            className={`rounded-full px-1.5 py-0.5 text-[0.6875rem] font-bold ${
+                                tahapStatus === ''
+                                    ? 'bg-white/20 text-white'
+                                    : 'bg-slate-100 text-slate-600'
+                            }`}
+                        >
+                            {STAGE_ORDER.reduce(
+                                (acc, s) => acc + (stageCounts[s] ?? 0),
+                                0,
+                            )}
+                        </span>
+                    </button>
+                    {STAGE_ORDER.map((stage) => {
+                        const selected = tahapStatus === stage;
+                        const meta = STAGE_TILE_META[stage];
+                        const count = stageCounts[stage] ?? 0;
+
+                        return (
+                            <button
+                                key={`mobile-${stage}`}
+                                type="button"
+                                onClick={() => handleStageCardClick(stage)}
+                                className={`flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition active:scale-95 ${
+                                    selected
+                                        ? 'bg-[#0F766E] text-white shadow-xs ring-1 ring-[#14B8A6]/40'
+                                        : 'border border-[#CBD5E1] bg-white text-slate-700 hover:bg-slate-50'
+                                }`}
+                            >
+                                <span className={selected ? 'text-white' : 'text-[#0F766E]'}>
+                                    {meta.icon}
+                                </span>
+                                <span>{formatTahapProduksi(stage)}</span>
+                                <span
+                                    className={`rounded-full px-1.5 py-0.5 text-[0.6875rem] font-bold ${
+                                        selected
+                                            ? 'bg-white/20 text-white'
+                                            : 'bg-slate-100 text-slate-600'
+                                    }`}
+                                >
+                                    {count}
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Desktop StatTiles Grid */}
+                <div className="hidden sm:grid sm:grid-cols-3 lg:grid-cols-5 gap-3">
                     {STAGE_ORDER.map((stage) => {
                         const selected = tahapStatus === stage;
                         const meta = STAGE_TILE_META[stage];
@@ -503,14 +563,14 @@ export default function ProduksiIndex({
                                             </p>
                                         </div>
 
-                                        <div className="flex flex-wrap items-center gap-2">
+                                        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                                             {item.bisa_timbang_ulang && (
                                                 <button
                                                     type="button"
                                                     onClick={() =>
                                                         openTimbangModal(item)
                                                     }
-                                                    className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl border border-amber-400 bg-amber-50 px-3.5 py-2 text-xs font-semibold text-amber-900 transition hover:bg-amber-100"
+                                                    className="flex-1 sm:flex-initial inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl border border-amber-400 bg-amber-50 px-3.5 py-2 text-xs font-semibold text-amber-900 transition hover:bg-amber-100 active:scale-95"
                                                 >
                                                     <Scale
                                                         className="h-4 w-4 shrink-0"
@@ -530,7 +590,7 @@ export default function ProduksiIndex({
                                                             ),
                                                         )
                                                     }
-                                                    className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-[#9F1239] transition hover:bg-rose-100"
+                                                    className="flex-1 sm:flex-initial inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-3.5 py-2 text-xs font-semibold text-[#9F1239] transition hover:bg-rose-100 active:scale-95"
                                                 >
                                                     <AlertTriangle
                                                         className="h-4 w-4 shrink-0"
@@ -555,7 +615,7 @@ export default function ProduksiIndex({
                                                             nextStage,
                                                         )
                                                     }
-                                                    className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
+                                                    className="hidden sm:inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
                                                 >
                                                     <span>
                                                         {advancingNota ===
@@ -762,7 +822,7 @@ export default function ProduksiIndex({
                                                 <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-[#475569]">
                                                     Alur Tahap Produksi Layanan
                                                 </p>
-                                                <ol className="mt-2.5 flex flex-wrap items-center gap-2">
+                                                <ol className="mt-2.5 flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar sm:flex-wrap">
                                                     {orderedStages.map(
                                                         (tahap, index) => {
                                                             const isCompleted =
@@ -865,6 +925,40 @@ export default function ProduksiIndex({
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* Mobile-Only Primary Advance Action (Full Width, Easy Thumb Target) */}
+                                    {nextStage && (
+                                        <div className="mt-4 pt-3.5 border-t border-[#D8E2E6] sm:hidden">
+                                            <button
+                                                type="button"
+                                                disabled={
+                                                    advancingNota ===
+                                                    item.nomor_nota
+                                                }
+                                                onClick={() =>
+                                                    handleAdvanceStage(
+                                                        item,
+                                                        nextStage,
+                                                    )
+                                                }
+                                                className="flex min-h-[3rem] w-full items-center justify-center gap-2 rounded-xl bg-[#0F766E] px-4 py-2.5 text-sm font-bold text-white shadow-sm active:scale-[0.98] transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                                <span>
+                                                    {advancingNota ===
+                                                    item.nomor_nota
+                                                        ? 'Memproses...'
+                                                        : `Lanjut ke ${formatTahapProduksi(nextStage)}`}
+                                                </span>
+                                                {advancingNota !==
+                                                    item.nomor_nota && (
+                                                    <ArrowRight
+                                                        className="h-4 w-4 shrink-0"
+                                                        aria-hidden="true"
+                                                    />
+                                                )}
+                                            </button>
+                                        </div>
+                                    )}
                                 </article>
                             );
                         })}

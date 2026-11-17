@@ -1063,6 +1063,11 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                                 </div>
                             </div>
                         </div>
+
+                        <div className="mt-4 border-t border-[#D8E2E6] pt-2 flex items-center justify-between text-[10px] text-[#7C8C9D]">
+                            <p>Sistem Informasi Manajemen Operasional Laundry CleanWash</p>
+                            <p>Copyright &copy; 2026 CleanWash &bull; Developed by <strong className="text-[#0F172A]">Yoga</strong></p>
+                        </div>
                     </footer>
                 </article>
             </div>

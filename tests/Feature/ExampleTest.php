@@ -11,11 +11,17 @@ class ExampleTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_the_application_redirects_guests_to_login_and_shares_inertia_props(): void
+    public function test_the_application_serves_landing_page_and_shares_inertia_props(): void
     {
         $this->withoutVite();
 
-        $this->get('/')->assertRedirect('/login');
+        $landing = $this->get('/');
+        $landing->assertOk();
+        $landing->assertInertia(fn (Assert $page) => $page
+            ->component('Welcome')
+            ->has('services')
+            ->has('activeVouchers')
+        );
 
         $response = $this->get('/login');
 

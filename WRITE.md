@@ -425,6 +425,75 @@
 - **Keputusan / Blocker / Catatan Napkin:**
   - Server aktif dan siap diakses di `http://127.0.0.1:8000`.
 - **Next Exact Action:**
-  - Berikan URL dan kredensial default kepada pengguna.
+  - Berikan URL dan kredensial default kepada pengguna (Telah diberikan).
+
+---
+
+### [#036] 2026-11-17 13:03 — Primary Agent — AgentsV2 Intake, Docs Gate & Redesign Planning
+- **Status:** `DONE` (`DOCS_GATE_PASSED_WAITING_USER_APPROVAL`)
+- **Ringkasan Kegiatan:**
+  - Menerima permintaan user: audit AgentsV2, redesign total agar lebih profesional, copyright by Yoga, web profil CleanWash dengan gambar AI mesin cuci, dan optimasi mobile-friendly untuk pegawai produksi dan kurir.
+  - Menginisialisasi status AgentsV2 via `init-project.sh --detect` dan `init-project.sh --init`.
+  - Menegakkan **Phase 1: Mandatory Documentation Gate (Hard Rejection Rule)**:
+    - Menyusun `docs/PRD.md` (Bahasa Inggris, 14 UC + FR-010 s.d. FR-013, NFR-001 s.d. NFR-005).
+    - Menyusun `docs/ARCHITECTURE.md` (Bahasa Inggris, stack, direktori, rute web profil, ADR-013 s.d. ADR-015).
+    - Menyusun `docs/TASKS.md` (Bahasa Inggris, daftar berurutan `TASK-001` s.d. `TASK-006` dengan trace ke FR/NFR dan verification commands).
+  - Menjalankan `check-docs-alignment.sh` -> **`PASS: Phase 1 documentation gate checks satisfied.`** (exit code `0`).
+  - Mengajukan state workflow ke `phase: build`, `docs_verified: true` via `init-project.sh`.
+  - Menyusun dokumen rencana implementasi lengkap di `implementation_plan.md` dengan status `RequestFeedback: true`.
+- **File Dibuat / Diubah:**
+  - `docs/PRD.md` — Canonical PRD sesuai standar AgentsV2
+  - `docs/ARCHITECTURE.md` — Canonical Architecture Spec sesuai standar AgentsV2
+  - `docs/TASKS.md` — Canonical Dependency-Ordered Task List
+  - `.agents/agentsv2-state.json` — Status workflow AgentsV2
+  - `WRITE.md` — Penambahan entri kegiatan `#036`
+- **Verifikasi / Bukti Uji:**
+  - `bash check-docs-alignment.sh` -> `Tasks: 0 completed, 6 open; PASS: Phase 1 documentation gate checks satisfied.` (`exit code 0`)
+  - `bash init-project.sh ... --phase build --docs-verified true` -> state terbarui ke `build` (`exit code 0`)
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Phase 1 Documentation Gate resmi lulus. Implementasi kode ditunda hingga rencana disetujui pengguna (Planning Mode Gate).
+- **Next Exact Action:**
+  - Persetujuan pengguna diterima ("processed"). Eksekusi TASK-001 s.d. TASK-006.
+
+---
+
+### [#037] 2026-11-17 13:20 — Primary Agent — Web Profile, Mobile Produksi Ergonomics, Universal Copyright & Quality Gates
+- **Status:** `DONE` (`ALL_TASKS_VERIFIED_PASS`)
+- **Ringkasan Kegiatan:**
+  - Mengeksekusi penuh seluruh 6 task dari `docs/TASKS.md` pasca-persetujuan rencana oleh user:
+    1. **`TASK-001` (AI Laundry Imagery)**: Menghasilkan gambar HD atelier binatu modern `cleanwash-hero-machines.jpg` dan `cleanwash-folding-care.jpg` di `public/images/`.
+    2. **`TASK-002` (Public Web Profile)**: Membangun landing page profesional di route `GET /` (`Welcome.tsx`, `LandingController.php`) lengkap dengan hero section, widget pelacakan status nota instan (`/lacak/{nota}`), katalog layanan dan tingkat kecepatan (`Reguler`, `Kilat`, `Express`), kartu voucher diskon aktif, serta jam operasional dan lokasi atelier.
+    3. **`TASK-003` (Mobile-First Produksi Workspace)**: Merombak total `resources/js/Pages/Produksi/Index.tsx` agar nyaman digunakan via smartphone oleh operator produksi: filter status horizontal scrollable pills, kartu antrean satu kolom dengan tap target tombol aksi utama >= 48px di bagian bawah kartu, serta stepper horizontal yang responsif.
+    4. **`TASK-004` (Professional UI Redesign)**: Memoles tampilan `Audit & Piutang` (`resources/js/Pages/Audit/Index.tsx`) dengan kartu summary piutang bergradien elegan, badge status pill modern, dan avatar inisial staf pada `AppLayout.tsx`.
+    5. **`TASK-005` (Universal Attribution Copyright by Yoga)**: Menanamkan hak cipta resmi "Copyright © 2026 CleanWash • Developed by Yoga. All rights reserved." di `Welcome.tsx`, `AppLayout.tsx`, `Login.tsx`, dan cetak `Nota.tsx`.
+    6. **`TASK-006` (Multi-Stage Quality Gate)**: Menjalankan seluruh rangkaian verifikasi: Laravel Pint (exit code 0), TypeScript Compiler (`npx tsc --noEmit` 0 error), Vite asset bundle (exit code 0), dan seluruh 114 backend tests via `php artisan test` (114 passed, 4202 assertions).
+- **File Dibuat / Diubah:**
+  - `public/images/cleanwash-hero-machines.jpg` — Asset AI mesin cuci profesional
+  - `public/images/cleanwash-folding-care.jpg` — Asset AI lipat pakaian premium
+  - `app/Http/Controllers/LandingController.php` — Controller landing page & instant tracking API
+  - `resources/js/Pages/Welcome.tsx` — Public web profile & order tracker component
+  - `resources/js/Pages/Produksi/Index.tsx` — Mobile-first production workspace layout
+  - `resources/js/Pages/Audit/Index.tsx` — Elevated piutang & audit trail UI
+  - `resources/js/Layouts/AppLayout.tsx` — User avatar chip & footer attribution
+  - `resources/js/Pages/Auth/Login.tsx` — Copyright attribution on login footers
+  - `resources/js/Pages/Transaksi/Nota.tsx` — Copyright attribution on printed receipt
+  - `routes/web.php` — Public landing & tracking routes
+  - `tests/Feature/ExampleTest.php` & `tests/Feature/AuthAndRbacTest.php` — Updated assertions for landing page
+  - `tests/e2e/landing-and-mobile.spec.ts` — E2E Playwright test suite for landing & mobile produksi
+  - `docs/TASKS.md` — All 6 tasks marked [x]
+  - `WRITE.md` — Entry `#037`
+- **Verifikasi / Bukti Uji:**
+  - `./vendor/bin/pint --test` -> `passed` (`exit code 0`)
+  - `npx tsc --noEmit` -> `0 errors` (`exit code 0`)
+  - `npm run build` -> `built in 5.56s` (`exit code 0`)
+  - `php artisan test` -> `114 passed (4202 assertions)` (`exit code 0`)
+  - `bash check-docs-alignment.sh` -> `Tasks: 6 completed, 0 open; PASS` (`exit code 0`)
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Permintaan user mengenai audit AgentsV2, web profile, mobile produksi, dan copyright Yoga telah terpenuhi 100%.
+- **Next Exact Action:**
+  - Memajukan lifecycle AgentsV2 ke Phase 4 Review (`PASS`) dan Phase 5 Docs Sync (`complete`).
+  - Git commit & push perubahan ke GitHub repository `origin/main`.
+
+
 
 

@@ -13,9 +13,9 @@ Dokumen ini adalah memori status arsitektur proyek **CleanWash** untuk manusia d
 | **Product** | CleanWash — Sistem Informasi Manajemen Operasional Laundry |
 | **SRS Reference** | [UTS.pdf](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/Outputtts/UTS.pdf) & [2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx) |
 | **Current Phase** | Phase 3 — Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening |
-| **Current Status** | `FINAL RELEASE READY` (Phase 1–3 Resmi `DONE` per PM Closing Gate) |
-| **Last Updated** | 2026-11-11 |
-| **Updated By** | UI/UX Designer, Frontend Developer, QA Engineer & Primary Agent (`UI/UX Overhaul & Visual Sign-Off`) |
+| **Current Status** | `FINAL RELEASE READY & AGENTSV2 ENHANCED` (Phase 1–3 + AgentsV2 Milestone `DONE`) |
+| **Last Updated** | 2026-11-17 |
+| **Updated By** | AgentsV2 Lifecycle & Primary Agent (`Web Profile, Mobile Produksi & Copyright by Yoga`) |
 
 ---
 
@@ -56,6 +56,9 @@ Membangun sistem informasi operasional laundry **CleanWash** berbasis web (**Lar
 | **ADR-010** | **`App\Support\DecimalMoney` (skala 100 integer) & MySQL `3307` Terisolasi** | ACCEPTED | Runtime PHP 8.4 lokal tidak memiliki `ext-bcmath` maupun `ext-pdo_sqlite`, serta port `3306` dipakai proyek lain; seluruh aritmatika uang memakai integer skala 100 dan DB dev/test terisolasi di MySQL 8.4 port `3307`. |
 | **ADR-011** | **Live Browser Regression QA (`@playwright/test`) Tanpa Mock** | ACCEPTED | Pengujian E2E browser menggunakan `@playwright/test` (`workers: 1`, `baseURL: http://127.0.0.1:8000`) terhadap server Laravel + MySQL 8.4 nyata (tanpa mock API), menghasilkan 28 screenshot bukti sekuensial di `docs/qa/screenshots/` dan laporan resmi di `docs/qa/QA_REGRESSION_REPORT.md`. |
 | **ADR-012** | **CleanWash Design System (`Crisp Laundry-Tech Atelier`) & Bundled Fonts/Icons** | ACCEPTED | Sistem desain terpadu oleh subagent `ui-ux-designer` (`docs/design/DESIGN_SYSTEM.md`) memakai palet Deep Petrol Teal + Fresh Teal-Emerald, font lokal `@fontsource/plus-jakarta-sans` & `@fontsource/jetbrains-mono` (`tabular-nums`), dan ikon `lucide-react` tanpa ketergantungan CDN eksternal. |
+| **ADR-013** | **Enforcement Lifecycle AgentsV2 & Canonical Documentation Gate** | ACCEPTED | Penerapan tata kelola AgentsV2 6-Phase: Intake -> Docs Gate (penulisan `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/TASKS.md` kanonikal Bahasa Inggris) -> Assembly -> Build -> Multi-Stage Review -> Docs Sync. |
+| **ADR-014** | **Dedicated Public Web Profile & Instant Tracking pada Root URL (`/`)** | ACCEPTED | Route `GET /` dialihkan melayani halaman publik atelier (`Welcome.tsx` + `LandingController`) dengan asset AI resolusi tinggi di `public/images/`, widget pelacak nota instan `/lacak/{nota}`, katalog tarif, dan jam operasional. |
+| **ADR-015** | **Mobile-First Operator Produksi & Universal Copyright by Yoga Attribution** | ACCEPTED | Optimalisasi layar smartphone (`390px`) untuk antrean kerja `Pegawai Produksi` (`/produksi`) via horizontal scrollable pills & tombol aksi 48px, serta penanaman hak cipta resmi "Copyright by Yoga" di seluruh halaman dan nota cetak. |
 
 ---
 
@@ -71,6 +74,7 @@ Status yang diizinkan: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`.
 | **Phase 3** | Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening | `DONE` | 2026-11-10 | 2026-11-10 | [PHASE_3_CONTRACTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_3_CONTRACTS.md), [PHASE_3_CLOSING_EVIDENCE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/phases/PHASE_3_CLOSING_EVIDENCE.md), & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#017`–`#022` |
 | **Live Browser QA** | Subagent `qa-engineer`, Playwright E2E Regression Suite (`REG-00`–`REG-05`), & 28-Screenshot Report | `DONE` | 2026-11-10 | 2026-11-10 | [QA_REGRESSION_REPORT.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/qa/QA_REGRESSION_REPORT.md), [regression-cleanwash.spec.ts](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/tests/e2e/regression-cleanwash.spec.ts), & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#023`–`#024` |
 | **UI/UX Overhaul** | Subagent `ui-ux-designer`, Design System, App Shell & Role-Based Ergonomics Redesign + Re-QA | `DONE` | 2026-11-11 | 2026-11-11 | [DESIGN_SYSTEM.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/design/DESIGN_SYSTEM.md), [PAGE_BLUEPRINTS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/design/PAGE_BLUEPRINTS.md), [QA_REGRESSION_REPORT.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/qa/QA_REGRESSION_REPORT.md), & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#025`–`#033` |
+| **AgentsV2 Enhancement** | Web Profile Landing Page, AI Imagery, Mobile Produksi Ergonomics, Universal Copyright by Yoga, & Docs Alignment | `DONE` | 2026-11-17 | 2026-11-17 | [docs/PRD.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/PRD.md), [docs/ARCHITECTURE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/ARCHITECTURE.md), [docs/TASKS.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/docs/TASKS.md), [landing-and-mobile.spec.ts](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/tests/e2e/landing-and-mobile.spec.ts), & [WRITE.md](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/WRITE.md) Entry `#034`–`#037` |
 
 ---
 

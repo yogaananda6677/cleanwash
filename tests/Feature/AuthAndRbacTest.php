@@ -24,9 +24,16 @@ class AuthAndRbacTest extends TestCase
         $this->withoutVite();
     }
 
-    public function test_guest_is_redirected_from_root_and_dashboard_to_login_page(): void
+    public function test_guest_sees_landing_page_and_is_redirected_from_dashboard_to_login_page(): void
     {
-        $this->get('/')->assertRedirect('/login');
+        $landing = $this->get('/');
+        $landing->assertOk();
+        $landing->assertInertia(fn (Assert $page) => $page
+            ->component('Welcome')
+            ->has('services')
+            ->has('activeVouchers')
+        );
+
         $this->get('/dashboard')->assertRedirect('/login');
 
         $response = $this->get('/login');
@@ -83,7 +90,13 @@ class AuthAndRbacTest extends TestCase
             $loginResponse->assertRedirect('/dashboard');
             $this->assertAuthenticatedAs($user);
 
-            $this->get('/')->assertRedirect('/dashboard');
+            $landingResponse = $this->get('/');
+            $landingResponse->assertOk();
+            $landingResponse->assertInertia(fn (Assert $page) => $page
+                ->component('Welcome')
+                ->where('auth.user.id', $user->id)
+                ->where('auth.user.role', $expectedRole)
+            );
 
             $dashboardResponse = $this->get('/dashboard');
             $dashboardResponse->assertOk();
