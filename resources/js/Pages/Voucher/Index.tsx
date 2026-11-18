@@ -328,7 +328,7 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                                                         : '—'}
                                                 </td>
                                                 <td className="whitespace-nowrap px-5 py-3.5 text-right">
-                                                    <div className="inline-flex items-center gap-2">
+                                                    <div className="inline-flex items-center gap-1.5">
                                                         <button
                                                             type="button"
                                                             disabled={isUsed}
@@ -342,10 +342,10 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                                                                     item,
                                                                 )
                                                             }
-                                                            className="inline-flex min-h-[2.25rem] items-center gap-1 rounded-xl border border-[#7C8C9D] bg-white px-3 py-1.5 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-40"
+                                                            className="group inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 shadow-2xs transition-colors hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#2563EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:bg-white disabled:hover:text-slate-700"
                                                         >
                                                             <Pencil
-                                                                className="h-3.5 w-3.5 shrink-0"
+                                                                className="h-3.5 w-3.5 shrink-0 text-slate-400 transition-colors group-hover:text-[#2563EB] group-disabled:text-slate-400"
                                                                 aria-hidden="true"
                                                             />
                                                             <span>Edit</span>
@@ -363,10 +363,10 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                                                                     item,
                                                                 )
                                                             }
-                                                            className="inline-flex min-h-[2.25rem] items-center gap-1 rounded-xl border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-[#9F1239] transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-40"
+                                                            className="group inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-600 shadow-2xs transition-colors hover:border-[#FECDD3] hover:bg-[#FFF1F2] hover:text-[#E11D48] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:bg-white disabled:hover:text-slate-600"
                                                         >
                                                             <Trash2
-                                                                className="h-3.5 w-3.5 shrink-0"
+                                                                className="h-3.5 w-3.5 shrink-0 text-slate-400 transition-colors group-hover:text-[#E11D48] group-disabled:text-slate-400"
                                                                 aria-hidden="true"
                                                             />
                                                             <span>Hapus</span>

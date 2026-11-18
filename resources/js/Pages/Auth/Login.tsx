@@ -75,13 +75,24 @@ export default function Login() {
                     />
 
                     <div className="relative">
-                        <div>
+                        <div className="flex items-start gap-3.5">
                             <CleanWashLogo
-                                variant="full"
+                                variant="mark"
                                 theme="dark"
                                 size="lg"
-                                subtext="MANAJEMEN OPERASIONAL"
                             />
+                            <div>
+                                <h1
+                                    id="main-content"
+                                    tabIndex={-1}
+                                    className="text-xl font-bold tracking-tight text-white focus:outline-none sm:text-2xl"
+                                >
+                                    CleanWash Laundry
+                                </h1>
+                                <p className="mt-0.5 text-xs text-[#94A3B8] sm:text-sm">
+                                    Manajemen Operasional Laundry Terpadu
+                                </p>
+                            </div>
                         </div>
 
                         <div className="mt-10 hidden space-y-4 lg:block">

@@ -1,9 +1,11 @@
+import { execSync } from 'node:child_process';
 import { expect, test } from '@playwright/test';
 import {
     attachRuntimeMonitor,
     captureScreenshot,
     loginAs,
     verifyLiveServerReachable,
+    PROJECT_ROOT,
     type RuntimeMonitor,
 } from './helpers/qa-harness';
 
@@ -62,12 +64,18 @@ test.describe('CleanWash Web Profile, Mobile Produksi, and Attribution E2E Suite
         await expect(page.getByText(/tidak ditemukan/i)).toBeVisible();
 
         // Live Order Tracking widget interaction - Valid nota check
-        await trackingInput.fill('CW-20261111-0001');
+        const validNota =
+            execSync(
+                'php artisan tinker --execute="echo App\\Models\\Transaksi::first()?->nomor_nota ?? \'\';"',
+                { cwd: PROJECT_ROOT, encoding: 'utf-8' },
+            ).trim() || 'CW-20261119-0001';
+
+        await trackingInput.fill(validNota);
         await page.getByRole('button', { name: /Cek Status/i }).click();
 
         // Verify tracking details appear
         await expect(page.getByText(/Tahapan Pengerjaan Pakaian/i)).toBeVisible();
-        await expect(page.getByText(/CW-20261111-0001/).first()).toBeVisible();
+        await expect(page.getByText(new RegExp(validNota)).first()).toBeVisible();
         await expect(page.getByRole('link', { name: /Buka & Cetak Nota Resmi/i })).toBeVisible();
 
         // Footer copyright by Yoga verification
@@ -77,7 +85,7 @@ test.describe('CleanWash Web Profile, Mobile Produksi, and Attribution E2E Suite
         await captureScreenshot(page, '29-landing-page-profile.png');
 
         // Verify guest can access public official receipt directly
-        await page.goto('/nota/CW-20261111-0001');
+        await page.goto(`/nota/${validNota}`);
         await expect(page.getByText(/Nota Transaksi Resmi/i)).toBeVisible();
         await expect(page.getByRole('heading', { name: /CleanWash Laundry/i })).toBeVisible();
         await expect(page.getByRole('link', { name: /Beranda CleanWash/i })).toBeVisible();

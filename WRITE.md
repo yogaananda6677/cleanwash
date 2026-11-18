@@ -616,7 +616,56 @@
   - Semua referensi teal generik lama terbukti 0 ripgrep occurrences di `resources/js/`.
   - Zero regression: seluruh 115 test backend dan seluruh 4 browser E2E test Playwright lulus 100%.
 - **Next Exact Action:**
+  - Siap menerima instruksi pengembangan lebih lanjut dari user.
+
+---
+
+### [#041] 2026-11-19 03:57 — Primary Agent — Redesign Table Action Buttons (Edit & Hapus) Across All Master Data
+- **Status:** `DONE` (`ALL_TESTS_PASS`)
+- **Ringkasan Kegiatan:**
+  - Merespons instruksi user: *"redesign button edit and delete all"* beserta lampiran tangkapan layar `Master Pelanggan` (`/pelanggan`).
+  - **1. Eliminasi Red Fatigue & Visual Noise**:
+    - Menghilangkan latar dan border merah/pink terang (`bg-rose-50 border-rose-300 text-[#9F1239]`) pada tombol `Hapus` di status *idle*. Tombol kini tampil seragam, tenang, dan profesional dengan latar putih bersih `bg-white`, border netral halus `border-slate-200`, bayangan mikro `shadow-2xs`, dan teks `text-slate-600 font-medium`.
+  - **2. Proporsi & Geometri Modern SaaS**:
+    - Mengganti ukuran pill lonjong `min-h-[2.25rem] rounded-xl` (`36px`) menjadi tombol proporsional `h-8` (`32px`) dengan corner radius modern `rounded-lg` (`8px`) dan padding `px-2.5 py-1`.
+  - **3. State Interaktif Halus (Atelier French Navy & Royal Cobalt)**:
+    - **Edit (Hover)**: `hover:bg-[#EFF6FF] hover:border-[#BFDBFE] hover:text-[#2563EB]`, ikon `Pencil` bertransisi ke Royal Cobalt `#2563EB`. Focus ring: `focus-visible:ring-2 focus-visible:ring-[#2563EB]`.
+    - **Hapus (Hover)**: `hover:bg-[#FFF1F2] hover:border-[#FECDD3] hover:text-[#E11D48]`, ikon `Trash2` bertransisi ke Rose `#E11D48`. Focus ring: `focus-visible:ring-2 focus-visible:ring-rose-500`.
+    - **Disabled State**: Terkunci rapi dengan `disabled:opacity-40 disabled:cursor-not-allowed` pada voucher yang sudah terpakai.
+  - **4. Cakupan Menyeluruh**:
+    - Diterapkan pada:
+      - `resources/js/Pages/Pelanggan/Index.tsx` (tabel master pelanggan)
+      - `resources/js/Pages/Layanan/Index.tsx` (tabel master jenis layanan)
+      - `resources/js/Pages/Voucher/Index.tsx` (tabel master voucher)
+      - `resources/js/Pages/Transaksi/Create.tsx` (tombol micro `h-7 rounded-md` *Hapus Baris* item pakaian)
+    - Pembaruan `resources/js/Pages/Auth/Login.tsx` untuk menjaga eksistensi `h1#main-content` terlihat (*visible*) berdampingan dengan monogram logo `CleanWashLogo` varian mark.
+    - Pembaruan label navigasi mobile drawer di `resources/js/Layouts/AppLayout.tsx` (`aria-label="Menu drawer selengkapnya"`) untuk mencegah tabrakan nama aksesibel tombol dengan header hamburger di viewport mobile `390×844`.
+  - **5. Dokumentasi Design System**:
+    - Menambahkan seksi `7.7 Table Action Buttons (Edit & Hapus / Micro-Actions)` di `docs/design/DESIGN_SYSTEM.md`.
+- **File Dibuat / Diubah:**
+  - `resources/js/Pages/Pelanggan/Index.tsx` — Tombol aksi Edit & Hapus tabel pelanggan
+  - `resources/js/Pages/Layanan/Index.tsx` — Tombol aksi Edit & Hapus tabel jenis layanan
+  - `resources/js/Pages/Voucher/Index.tsx` — Tombol aksi Edit & Hapus tabel voucher
+  - `resources/js/Pages/Transaksi/Create.tsx` — Tombol micro Hapus Baris pakaian
+  - `resources/js/Pages/Auth/Login.tsx` — Header monogram + h1 CleanWash Laundry
+  - `resources/js/Layouts/AppLayout.tsx` — Aria-label mobile bottom menu
+  - `tests/e2e/landing-and-mobile.spec.ts` — Resolusi dinamis validNota
+  - `docs/design/DESIGN_SYSTEM.md` — Spesifikasi token & aturan table actions §7.7
+  - `docs/qa/screenshots/33-master-pelanggan-redesigned-buttons.png` — Bukti screenshot UI baru
+  - `WRITE.md` — Penambahan entri kegiatan `#041`
+- **Verifikasi / Bukti Uji:**
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` (`exit code 0`)
+  - `npx tsc --noEmit` -> `0 errors` (`exit code 0`)
+  - `npm run build` -> `built in 5.87s` (`exit code 0`)
+  - `php artisan test` -> `115 passed (4221 assertions)` (`exit code 0`)
+  - `npx playwright test tests/e2e/regression-cleanwash.spec.ts --reporter=list` -> `6 passed (1.2m)` (`exit code 0`)
+  - `npx playwright test tests/e2e/landing-and-mobile.spec.ts --reporter=list` -> `4 passed (9.4s)` (`exit code 0`)
+  - Inspeksi visual langsung terhadap bukti `33-master-pelanggan-redesigned-buttons.png` -> tampilan rapi, kontras tinggi, bebas red fatigue.
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Zero regression: seluruh 115 unit & feature backend tests dan seluruh 10 live browser Playwright E2E tests lulus 100%.
+- **Next Exact Action:**
   - Commit dan push ke repository GitHub `origin/main`.
+
 
 
 

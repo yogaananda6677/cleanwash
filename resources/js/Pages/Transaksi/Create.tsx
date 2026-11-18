@@ -658,10 +658,10 @@ export default function TransaksiCreate({
                                                             index,
                                                         )
                                                     }
-                                                    className="inline-flex min-h-[2rem] items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-[#9F1239] transition hover:bg-[#FFF1F2]"
+                                                    className="group inline-flex h-7 items-center gap-1 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-medium text-slate-600 shadow-2xs transition-colors hover:border-[#FECDD3] hover:bg-[#FFF1F2] hover:text-[#E11D48] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-1"
                                                 >
                                                     <Trash2
-                                                        className="h-3.5 w-3.5 shrink-0"
+                                                        className="h-3 w-3 shrink-0 text-slate-400 transition-colors group-hover:text-[#E11D48]"
                                                         aria-hidden="true"
                                                     />
                                                     <span>Hapus Baris</span>

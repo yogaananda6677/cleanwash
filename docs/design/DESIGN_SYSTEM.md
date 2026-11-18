@@ -319,6 +319,16 @@ Setiap `StatusBadge` wajib memenuhi:
 - Body: `px-5 py-4 sm:px-6 sm:py-5 overflow-y-auto`.
 - Footer: `bg-[#F8FAFC] border-t border-[#D8E2E6] px-5 py-3.5 sm:px-6 flex flex-wrap justify-end gap-2.5`.
 
+### 7.7 Table Action Buttons (Edit & Hapus / Micro-Actions)
+
+- Menggantikan tombol pill besar `rounded-xl` (`36px`) dengan format terstandarisasi yang proporsional dan tenang:
+  - **Dimensi**: `h-8` (`32px`), `rounded-lg` (`8px`), padding `px-2.5 py-1`, teks `text-xs font-medium`.
+  - **Idle State**: Latar putih bersih `bg-white`, border halus `border-slate-200`, bayangan mikro `shadow-2xs`, ikon netral `text-slate-400`. Tombol `Hapus` tidak lagi menampilkan latar merah/pink solid di idle state guna menghilangkan *red fatigue* dan visual noise di tabel.
+  - **Edit (Hover)**: `hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#2563EB]` dengan ikon bertransisi ke Royal Cobalt `#2563EB`. Focus ring: `focus-visible:ring-2 focus-visible:ring-[#2563EB]`.
+  - **Hapus (Hover)**: `hover:border-[#FECDD3] hover:bg-[#FFF1F2] hover:text-[#E11D48]` dengan ikon bertransisi ke Rose `#E11D48`. Focus ring: `focus-visible:ring-2 focus-visible:ring-rose-500`.
+  - **Disabled State**: `disabled:opacity-40 disabled:cursor-not-allowed` dengan hover styling yang terkunci.
+  - **Preservasi Pengujian**: Tetap merender teks semantik `<span>Edit</span>` dan `<span>Hapus</span>` di dalam elemen `<button type="button">` demi keandalan penuh Playwright E2E (`getByRole('button', { name: 'Edit' })` & `getByRole('button', { name: 'Hapus' })`).
+
 ---
 
 ## 8. Checklist Aksesibilitas & Web Modern (Wajib Lulus Sebelum QA Sign-Off)

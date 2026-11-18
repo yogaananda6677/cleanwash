@@ -806,7 +806,7 @@ export default function AppLayout({
                         <button
                             type="button"
                             onClick={() => setSidebarOpen(true)}
-                            aria-label="Buka menu navigasi lengkap"
+                            aria-label="Menu drawer selengkapnya"
                             className="flex flex-1 flex-col items-center justify-center py-1 text-center text-[#5B697A] transition hover:text-[#0F172A]"
                         >
                             <Menu className="h-5 w-5" aria-hidden="true" />
