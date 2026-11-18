@@ -8,6 +8,7 @@ use App\Models\JenisLayanan;
 use App\Models\Pelanggan;
 use App\Models\Transaksi;
 use App\Models\Voucher;
+use App\Services\TransaksiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -77,7 +78,20 @@ class LandingController extends Controller
     }
 
     /**
-     * Sanitize and format tracking info without leaking private customer data.
+     * Public endpoint to view and print official laundry receipt by receipt number.
+     */
+    public function publicNota(string $nota, TransaksiService $transaksiService): Response
+    {
+        $transaksi = $transaksiService->findForDetail(trim($nota));
+
+        return Inertia::render('Transaksi/Nota', [
+            'transaksi' => $transaksiService->formatTransaksiDetail($transaksi),
+            'isPublicView' => true,
+        ]);
+    }
+
+    /**
+     * Sanitize and format tracking info with clothes breakdown and financial summary.
      *
      * @return array<string, mixed>|null
      */
@@ -86,6 +100,7 @@ class LandingController extends Controller
         $transaksi = Transaksi::query()
             ->where('nomor_nota', $nota)
             ->with([
+                'pelanggan',
                 'layanan.tahapLayanan' => fn ($q) => $q->orderBy('urutan'),
                 'riwayatStatusProduksi' => fn ($q) => $q->orderBy('waktu_update'),
                 'detailPakaian',
@@ -114,8 +129,13 @@ class LandingController extends Controller
 
         return [
             'nomor_nota' => $transaksi->nomor_nota,
+            'nama_pelanggan' => $transaksi->pelanggan->nama,
             'status_transaksi' => $transaksi->status_transaksi->value,
             'status_pembayaran' => $transaksi->status_pembayaran->value,
+            'total_harga' => (string) $transaksi->total_harga,
+            'diskon_voucher' => (string) $transaksi->diskon_voucher,
+            'total_dibayar' => (string) $transaksi->total_dibayar,
+            'sisa_tagihan' => (string) $transaksi->sisa_tagihan,
             'layanan' => [
                 'nama' => $transaksi->layanan->nama_layanan,
                 'kecepatan' => $transaksi->layanan->tingkat_kecepatan->value,
@@ -123,6 +143,14 @@ class LandingController extends Controller
             ],
             'berat_atau_jumlah' => (string) $transaksi->berat_atau_jumlah,
             'total_potong' => $transaksi->detailPakaian->sum('jumlah_potong'),
+            'detail_pakaian' => $transaksi->detailPakaian->map(fn ($dp) => [
+                'id_detail' => $dp->id_detail,
+                'jenis_pakaian' => $dp->jenis_pakaian,
+                'nama_pakaian' => $dp->jenis_pakaian,
+                'jumlah_potong' => (int) $dp->jumlah_potong,
+                'kondisi_pakaian' => $dp->kondisi_pakaian,
+                'kondisi_khusus' => $dp->kondisi_pakaian,
+            ])->all(),
             'tanggal_penerimaan' => $transaksi->tanggal_penerimaan->toIso8601String(),
             'tahap_terakhir' => $latestStage,
             'stages' => $stages,

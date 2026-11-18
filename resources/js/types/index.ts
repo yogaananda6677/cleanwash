@@ -346,6 +346,7 @@ export interface TransaksiShowProps extends SharedPageProps {
 
 export interface TransaksiNotaProps extends SharedPageProps {
     transaksi: TransaksiDetail;
+    isPublicView?: boolean;
 }
 
 export interface ProduksiIndexProps extends SharedPageProps {

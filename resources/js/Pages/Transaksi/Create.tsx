@@ -80,12 +80,9 @@ export default function TransaksiCreate({
 
     const { data, setData, post, transform, processing, errors } =
         useForm<TransaksiCreateForm>({
-            id_pelanggan: pelangganOptions[0]
-                ? String(pelangganOptions[0].id_pelanggan)
-                : '',
-            id_layanan: defaultLayanan ? String(defaultLayanan.id_layanan) : '',
-            berat_atau_jumlah:
-                defaultLayanan?.metode_hitung === 'JUMLAH' ? '1' : '1.00',
+            id_pelanggan: '',
+            id_layanan: '',
+            berat_atau_jumlah: '',
             nomor_voucher: '',
             nominal_dp: '0',
             catatan_khusus: '',
@@ -168,7 +165,10 @@ export default function TransaksiCreate({
 
         setData((prev) => {
             let nextQty = prev.berat_atau_jumlah;
-            if (nextLayanan?.metode_hitung === 'JUMLAH') {
+            if (!nextQty || Number.parseFloat(nextQty) <= 0) {
+                nextQty =
+                    nextLayanan?.metode_hitung === 'JUMLAH' ? '1' : '1.00';
+            } else if (nextLayanan?.metode_hitung === 'JUMLAH') {
                 const parsed = Number.parseFloat(prev.berat_atau_jumlah);
                 nextQty =
                     Number.isFinite(parsed) && parsed >= 1
@@ -395,8 +395,8 @@ export default function TransaksiCreate({
                                     }
                                     className={CONTROL_INPUT_CLASS}
                                 >
-                                    <option value="" disabled>
-                                        Pilih pelanggan...
+                                    <option value="">
+                                        -- Pilih Pelanggan --
                                     </option>
                                     {pelangganOptions.map((pelanggan) => (
                                         <option
@@ -454,8 +454,8 @@ export default function TransaksiCreate({
                                     }
                                     className={CONTROL_INPUT_CLASS}
                                 >
-                                    <option value="" disabled>
-                                        Pilih jenis layanan...
+                                    <option value="">
+                                        -- Pilih Jenis Layanan --
                                     </option>
                                     {layananOptions.map((layanan) => (
                                         <option
@@ -1026,83 +1026,98 @@ export default function TransaksiCreate({
                             nota diterbitkan.
                         </p>
 
-                        <dl className="mt-5 space-y-3 border-t border-[#D8E2E6] pt-4 text-sm">
-                            <div className="flex items-center justify-between gap-2">
-                                <dt className="text-xs text-[#5B697A]">
-                                    Pelanggan
-                                </dt>
-                                <dd className="text-right text-xs font-semibold text-[#0F172A]">
-                                    {selectedPelanggan?.nama ?? '—'}
-                                </dd>
+                        {!data.id_pelanggan || !data.id_layanan ? (
+                            <div className="mt-5 rounded-2xl border border-dashed border-[#B8C8D0] bg-white p-6 text-center text-xs text-[#5B697A]">
+                                <ReceiptText
+                                    className="mx-auto h-8 w-8 text-[#9FB7C0] mb-2"
+                                    aria-hidden="true"
+                                />
+                                <p className="font-bold text-sm text-[#0F172A]">
+                                    Belum Ada Transaksi Dipilih
+                                </p>
+                                <p className="mt-1 leading-relaxed">
+                                    Silakan pilih pelanggan dan jenis layanan pada formulir untuk melihat rincian estimasi tagihan dan menerbitkan nota.
+                                </p>
                             </div>
-                            <div className="flex items-center justify-between gap-2">
-                                <dt className="text-xs text-[#5B697A]">
-                                    Layanan
-                                </dt>
-                                <dd className="text-right text-xs font-semibold text-[#0F172A]">
-                                    {selectedLayanan
-                                        ? `${selectedLayanan.nama_layanan} (${selectedLayanan.tingkat_kecepatan})`
-                                        : '—'}
-                                </dd>
-                            </div>
-                            <div className="flex items-center justify-between gap-2">
-                                <dt className="text-xs text-[#5B697A]">
-                                    Subtotal ({data.berat_atau_jumlah || 0}{' '}
-                                    {selectedLayanan?.satuan ?? 'kg'})
-                                </dt>
-                                <dd className="font-mono font-semibold tabular-nums text-[#0F172A]">
-                                    {formatRupiah(preview.subtotalDecimal)}
-                                </dd>
-                            </div>
-                            <div className="flex items-center justify-between gap-2">
-                                <dt className="text-xs text-[#5B697A]">
-                                    Potongan Voucher
-                                </dt>
-                                <dd className="font-mono font-semibold tabular-nums text-[#065F46]">
-                                    -{formatRupiah(preview.voucherDecimal)}
-                                </dd>
-                            </div>
-                            <div className="flex items-center justify-between gap-2 border-t border-[#D8E2E6] pt-3">
-                                <dt className="text-sm font-bold text-[#0F172A]">
-                                    Estimasi Total
-                                </dt>
-                                <dd className="font-mono text-lg font-bold tabular-nums text-[#0F172A]">
-                                    {formatRupiah(preview.totalDecimal)}
-                                </dd>
-                            </div>
-                            <div className="flex items-center justify-between gap-2">
-                                <dt className="text-xs text-[#5B697A]">
-                                    Dibayar Awal (DP)
-                                </dt>
-                                <dd className="font-mono font-semibold tabular-nums text-[#0F766E]">
-                                    {formatRupiah(preview.dpDecimal)}
-                                </dd>
-                            </div>
-                            <div className="flex items-center justify-between gap-2 border-t border-[#D8E2E6] pt-3">
-                                <dt className="text-xs font-semibold text-[#0F172A]">
-                                    Estimasi Sisa Tagihan
-                                </dt>
-                                <dd
-                                    className={`font-mono text-base font-bold tabular-nums ${
-                                        preview.sisaCents > 0
-                                            ? 'text-[#78350F]'
-                                            : 'text-[#065F46]'
-                                    }`}
-                                >
-                                    {formatRupiah(preview.sisaDecimal)}
-                                </dd>
-                            </div>
-                            <div className="flex items-center justify-between gap-2">
-                                <dt className="text-xs text-[#5B697A]">
-                                    Estimasi Status
-                                </dt>
-                                <dd>
-                                    <PaymentStatusBadge
-                                        status={preview.previewStatus}
-                                    />
-                                </dd>
-                            </div>
-                        </dl>
+                        ) : (
+                            <dl className="mt-5 space-y-3 border-t border-[#D8E2E6] pt-4 text-sm">
+                                <div className="flex items-center justify-between gap-2">
+                                    <dt className="text-xs text-[#5B697A]">
+                                        Pelanggan
+                                    </dt>
+                                    <dd className="text-right text-xs font-semibold text-[#0F172A]">
+                                        {selectedPelanggan?.nama ?? '—'}
+                                    </dd>
+                                </div>
+                                <div className="flex items-center justify-between gap-2">
+                                    <dt className="text-xs text-[#5B697A]">
+                                        Layanan
+                                    </dt>
+                                    <dd className="text-right text-xs font-semibold text-[#0F172A]">
+                                        {selectedLayanan
+                                            ? `${selectedLayanan.nama_layanan} (${selectedLayanan.tingkat_kecepatan})`
+                                            : '—'}
+                                    </dd>
+                                </div>
+                                <div className="flex items-center justify-between gap-2">
+                                    <dt className="text-xs text-[#5B697A]">
+                                        Subtotal ({data.berat_atau_jumlah || 0}{' '}
+                                        {selectedLayanan?.satuan ?? 'kg'})
+                                    </dt>
+                                    <dd className="font-mono font-semibold tabular-nums text-[#0F172A]">
+                                        {formatRupiah(preview.subtotalDecimal)}
+                                    </dd>
+                                </div>
+                                <div className="flex items-center justify-between gap-2">
+                                    <dt className="text-xs text-[#5B697A]">
+                                        Potongan Voucher
+                                    </dt>
+                                    <dd className="font-mono font-semibold tabular-nums text-[#065F46]">
+                                        -{formatRupiah(preview.voucherDecimal)}
+                                    </dd>
+                                </div>
+                                <div className="flex items-center justify-between gap-2 border-t border-[#D8E2E6] pt-3">
+                                    <dt className="text-sm font-bold text-[#0F172A]">
+                                        Estimasi Total
+                                    </dt>
+                                    <dd className="font-mono text-lg font-bold tabular-nums text-[#0F172A]">
+                                        {formatRupiah(preview.totalDecimal)}
+                                    </dd>
+                                </div>
+                                <div className="flex items-center justify-between gap-2">
+                                    <dt className="text-xs text-[#5B697A]">
+                                        Dibayar Awal (DP)
+                                    </dt>
+                                    <dd className="font-mono font-semibold tabular-nums text-[#0F766E]">
+                                        {formatRupiah(preview.dpDecimal)}
+                                    </dd>
+                                </div>
+                                <div className="flex items-center justify-between gap-2 border-t border-[#D8E2E6] pt-3">
+                                    <dt className="text-xs font-semibold text-[#0F172A]">
+                                        Estimasi Sisa Tagihan
+                                    </dt>
+                                    <dd
+                                        className={`font-mono text-base font-bold tabular-nums ${
+                                            preview.sisaCents > 0
+                                                ? 'text-[#78350F]'
+                                                : 'text-[#065F46]'
+                                        }`}
+                                    >
+                                        {formatRupiah(preview.sisaDecimal)}
+                                    </dd>
+                                </div>
+                                <div className="flex items-center justify-between gap-2">
+                                    <dt className="text-xs text-[#5B697A]">
+                                        Estimasi Status
+                                    </dt>
+                                    <dd>
+                                        <PaymentStatusBadge
+                                            status={preview.previewStatus}
+                                        />
+                                    </dd>
+                                </div>
+                            </dl>
+                        )}
 
                         {preview.isOverpaid && (
                             <div
@@ -1126,7 +1141,11 @@ export default function TransaksiCreate({
                                 disabled={
                                     processing ||
                                     hasMissingMasterData ||
-                                    preview.isOverpaid
+                                    preview.isOverpaid ||
+                                    !data.id_pelanggan ||
+                                    !data.id_layanan ||
+                                    !data.berat_atau_jumlah ||
+                                    Number.parseFloat(data.berat_atau_jumlah) <= 0
                                 }
                                 className="flex min-h-[2.75rem] w-full items-center justify-center rounded-xl bg-[#0F766E] px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-60"
                             >

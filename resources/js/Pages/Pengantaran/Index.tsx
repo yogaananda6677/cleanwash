@@ -525,11 +525,108 @@ export default function PengantaranIndex({
                     </div>
                 ) : (
                     <>
+                        {/* Mobile Card List View (< md screens) */}
+                        <div className="block divide-y divide-[#D8E2E6] md:hidden">
+                            {pengantaran.data.map((sesi) => {
+                                const visibleItems = sesi.items.slice(0, 3);
+                                const remainingCount = Math.max(
+                                    0,
+                                    sesi.items.length - visibleItems.length,
+                                );
+
+                                return (
+                                    <article
+                                        key={`mobile-${sesi.id_pengantaran}`}
+                                        className="p-4 transition hover:bg-[#F8FAFC]"
+                                    >
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div>
+                                                <Link
+                                                    href={`/pengantaran/${sesi.id_pengantaran}`}
+                                                    className="font-mono text-base font-bold text-[#0F766E] hover:underline"
+                                                >
+                                                    Sesi #{sesi.id_pengantaran}
+                                                </Link>
+                                                <p className="mt-0.5 text-xs font-semibold text-[#0F172A]">
+                                                    {formatTanggal(sesi.tanggal_pengantaran)}
+                                                </p>
+                                            </div>
+                                            <div className="flex flex-col items-end gap-1">
+                                                <PengantaranStatusBadge
+                                                    status={sesi.status_pengantaran}
+                                                />
+                                                {sesi.item_gagal_count > 0 && (
+                                                    <StatusBadge tone="rose">
+                                                        {sesi.item_gagal_count} Gagal
+                                                    </StatusBadge>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-3 rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] p-3 text-xs">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[#5B697A]">Kurir:</span>
+                                                <span className="font-bold text-[#0F172A]">
+                                                    {sesi.petugas_pengantaran.nama_petugas_antar}
+                                                </span>
+                                            </div>
+                                            <div className="mt-1 flex items-center justify-between">
+                                                <span className="text-[#5B697A]">Progres:</span>
+                                                <span className="font-mono font-bold text-[#0F766E]">
+                                                    {sesi.item_selesai_count}/{sesi.total_item} item tuntas
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-3">
+                                            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#5B697A] mb-1.5">
+                                                Pelanggan &amp; Nota:
+                                            </p>
+                                            <ul className="space-y-1.5 text-xs">
+                                                {visibleItems.map((item) => (
+                                                    <li
+                                                        key={`mobile-item-${item.id_item_antar}`}
+                                                        className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5 border border-slate-200/60"
+                                                    >
+                                                        <div className="min-w-0">
+                                                            <span className="font-mono font-bold text-[#0F172A]">
+                                                                {item.nomor_nota}
+                                                            </span>
+                                                            <span className="ml-1.5 truncate text-[#475569]">
+                                                                {item.transaksi.pelanggan.nama}
+                                                            </span>
+                                                        </div>
+                                                        <ItemPengantaranStatusBadge
+                                                            status={item.status_terima_pelanggan}
+                                                        />
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            {remainingCount > 0 && (
+                                                <p className="mt-1 text-[11px] font-medium text-[#5B697A]">
+                                                    +{remainingCount} item lainnya dalam sesi ini
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <Link
+                                            href={`/pengantaran/${sesi.id_pengantaran}`}
+                                            className="mt-4 flex min-h-[3rem] w-full items-center justify-center gap-2 rounded-xl bg-[#0F766E] px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#115E59]"
+                                        >
+                                            <span>Buka Rute &amp; Detail Pengantaran</span>
+                                            <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
+                                        </Link>
+                                    </article>
+                                );
+                            })}
+                        </div>
+
+                        {/* Desktop Table View (>= md screens) */}
                         <div
                             tabIndex={0}
                             role="region"
                             aria-labelledby={tableCaptionId}
-                            className="overflow-x-auto"
+                            className="hidden overflow-x-auto md:block"
                         >
                             <table className="min-w-full divide-y divide-[#D8E2E6] text-left text-sm">
                                 <caption

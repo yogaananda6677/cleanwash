@@ -158,7 +158,7 @@ export default function Modal({
                     </div>
 
                     {footer && (
-                        <div className="flex flex-wrap items-center justify-end gap-2.5 border-t border-[#D8E2E6] bg-[#F8FAFC] px-5 py-3.5 sm:px-6">
+                        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 border-t border-[#D8E2E6] bg-[#F8FAFC] px-5 py-3.5 sm:px-6">
                             {footer}
                         </div>
                     )}

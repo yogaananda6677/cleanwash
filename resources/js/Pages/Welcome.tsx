@@ -16,6 +16,7 @@ import {
     MapPin,
     PackageCheck,
     Phone,
+    Printer,
     ReceiptText,
     Scale,
     Search,
@@ -62,8 +63,13 @@ interface TrackingStage {
 
 interface TrackingResult {
     nomor_nota: string;
+    nama_pelanggan?: string;
     status_transaksi: string;
     status_pembayaran: string;
+    total_harga?: string;
+    diskon_voucher?: string;
+    total_dibayar?: string;
+    sisa_tagihan?: string;
     layanan: {
         nama: string;
         kecepatan: string;
@@ -71,6 +77,14 @@ interface TrackingResult {
     };
     berat_atau_jumlah: string;
     total_potong: number;
+    detail_pakaian?: Array<{
+        id_detail: number;
+        jenis_pakaian?: string;
+        nama_pakaian?: string;
+        jumlah_potong: number;
+        kondisi_pakaian?: string | null;
+        kondisi_khusus?: string | null;
+    }>;
     tanggal_penerimaan: string;
     tahap_terakhir: string;
     stages: TrackingStage[];
@@ -419,6 +433,81 @@ export default function Welcome({
                                             </div>
                                         </div>
 
+                                        {/* Rincian Pakaian & Status Keuangan */}
+                                        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                                            {/* Rincian Pakaian */}
+                                            {trackingResult.detail_pakaian && trackingResult.detail_pakaian.length > 0 && (
+                                                <div className="rounded-xl border border-slate-200/80 bg-white p-4">
+                                                    <p className="text-xs font-bold uppercase tracking-wider text-[#0F2933] mb-2.5">
+                                                        Rincian Pakaian ({trackingResult.total_potong} Potong)
+                                                    </p>
+                                                    <ul className="divide-y divide-slate-100 text-xs">
+                                                        {trackingResult.detail_pakaian.map((item) => (
+                                                            <li key={item.id_detail} className="py-2 flex items-center justify-between gap-2">
+                                                                <span className="font-medium text-[#0F2933]">
+                                                                    {item.jenis_pakaian ?? item.nama_pakaian}
+                                                                    {(item.kondisi_pakaian ?? item.kondisi_khusus) && (
+                                                                        <span className="ml-1.5 text-[11px] text-amber-700 font-normal">
+                                                                            ({item.kondisi_pakaian ?? item.kondisi_khusus})
+                                                                        </span>
+                                                                    )}
+                                                                </span>
+                                                                <span className="font-mono font-bold text-slate-700 shrink-0">
+                                                                    {item.jumlah_potong} pcs
+                                                                </span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+
+                                            {/* Ringkasan Biaya */}
+                                            {trackingResult.total_harga && (
+                                                <div className="rounded-xl border border-slate-200/80 bg-white p-4">
+                                                    <div className="flex items-center justify-between gap-2 mb-2.5">
+                                                        <p className="text-xs font-bold uppercase tracking-wider text-[#0F2933]">
+                                                            Status Tagihan
+                                                        </p>
+                                                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                                                            trackingResult.status_pembayaran === 'LUNAS'
+                                                                ? 'bg-emerald-100 text-emerald-800'
+                                                                : 'bg-amber-100 text-amber-800'
+                                                        }`}>
+                                                            {trackingResult.status_pembayaran}
+                                                        </span>
+                                                    </div>
+                                                    <dl className="space-y-1.5 text-xs">
+                                                        <div className="flex justify-between text-slate-600">
+                                                            <dt>Total Tagihan</dt>
+                                                            <dd className="font-mono font-semibold text-slate-900">
+                                                                {formatRupiah(trackingResult.total_harga)}
+                                                            </dd>
+                                                        </div>
+                                                        {trackingResult.diskon_voucher && trackingResult.diskon_voucher !== '0.00' && (
+                                                            <div className="flex justify-between text-emerald-700">
+                                                                <dt>Diskon Voucher</dt>
+                                                                <dd className="font-mono font-semibold">
+                                                                    -{formatRupiah(trackingResult.diskon_voucher)}
+                                                                </dd>
+                                                            </div>
+                                                        )}
+                                                        <div className="flex justify-between text-slate-600">
+                                                            <dt>Sudah Dibayar</dt>
+                                                            <dd className="font-mono font-semibold text-[#0F766E]">
+                                                                {formatRupiah(trackingResult.total_dibayar ?? '0.00')}
+                                                            </dd>
+                                                        </div>
+                                                        <div className="flex justify-between border-t border-slate-200 pt-1.5 font-bold text-slate-900">
+                                                            <dt>Sisa Tagihan</dt>
+                                                            <dd className={`font-mono ${trackingResult.sisa_tagihan && trackingResult.sisa_tagihan !== '0.00' ? 'text-amber-800' : 'text-emerald-700'}`}>
+                                                                {formatRupiah(trackingResult.sisa_tagihan ?? '0.00')}
+                                                            </dd>
+                                                        </div>
+                                                    </dl>
+                                                </div>
+                                            )}
+                                        </div>
+
                                         {trackingResult.siap_diambil && (
                                             <div className="mt-6 flex items-center gap-3 rounded-xl bg-teal-50 border border-teal-200 p-4 text-xs text-[#0F766E]">
                                                 <PackageCheck className="h-5 w-5 shrink-0 text-[#0F766E]" aria-hidden="true" />
@@ -427,6 +516,22 @@ export default function Welcome({
                                                 </p>
                                             </div>
                                         )}
+
+                                        {/* Aksi Buka & Cetak Nota Resmi */}
+                                        <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-emerald-200/80 pt-4">
+                                            <p className="text-xs text-slate-600">
+                                                Pelanggan: <strong className="text-slate-900">{trackingResult.nama_pelanggan ?? 'Pelanggan CleanWash'}</strong> &bull; Nomor Nota: <strong className="font-mono text-slate-900">{trackingResult.nomor_nota}</strong>
+                                            </p>
+                                            <a
+                                                href={`/nota/${encodeURIComponent(trackingResult.nomor_nota)}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex min-h-[2.5rem] items-center justify-center gap-2 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
+                                            >
+                                                <Printer className="h-4 w-4 shrink-0" aria-hidden="true" />
+                                                <span>Buka &amp; Cetak Nota Resmi</span>
+                                            </a>
+                                        </div>
                                     </div>
                                 )}
 

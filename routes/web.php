@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LandingController::class, 'index'])->name('home');
 Route::get('/lacak/{nota}', [LandingController::class, 'track'])->name('lacak');
+Route::get('/nota/{nota}', [LandingController::class, 'publicNota'])->name('nota.public');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

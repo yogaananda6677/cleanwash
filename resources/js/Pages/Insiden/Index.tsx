@@ -289,11 +289,121 @@ export default function InsidenIndex({
                     </div>
                 ) : (
                     <>
+                        {/* Mobile Card List View (< md screens) */}
+                        <div className="block divide-y divide-[#D8E2E6] md:hidden">
+                            {laporan.data.map((item) => {
+                                const isPending =
+                                    item.status_konfirmasi ===
+                                    'MENUNGGU_KONFIRMASI';
+                                const hasKelebihan =
+                                    parseDecimalToCents(
+                                        item.kelebihan_ganti_rugi,
+                                    ) > 0;
+
+                                return (
+                                    <article
+                                        key={`mobile-insiden-${item.id_laporan}`}
+                                        className="p-4 transition hover:bg-[#F8FAFC]"
+                                    >
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    {isPetugas ? (
+                                                        <Link
+                                                            href={`/transaksi/${item.nomor_nota}`}
+                                                            className="font-mono text-sm font-bold text-[#0F766E] hover:underline"
+                                                        >
+                                                            {item.nomor_nota}
+                                                        </Link>
+                                                    ) : (
+                                                        <span className="font-mono text-sm font-bold text-[#0F172A]">
+                                                            {item.nomor_nota}
+                                                        </span>
+                                                    )}
+                                                    <TransactionStatusBadge
+                                                        status={item.transaksi.status_transaksi}
+                                                    />
+                                                </div>
+                                                <p className="mt-1 text-xs font-bold text-[#0F172A]">
+                                                    {item.transaksi.pelanggan.nama}
+                                                </p>
+                                                <p className="text-[11px] text-[#5B697A]">
+                                                    {item.transaksi.layanan.nama_layanan} &bull; Laporan #{item.id_laporan}
+                                                </p>
+                                            </div>
+                                            <div className="flex flex-col items-end gap-1">
+                                                <JenisInsidenBadge jenis={item.jenis_insiden} />
+                                                <StatusKonfirmasiBadge status={item.status_konfirmasi} />
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-3 rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] p-3 text-xs">
+                                            <p className="font-semibold text-[#0F172A]">
+                                                {item.detail_pakaian.jenis_pakaian} &times; {item.detail_pakaian.jumlah_potong} pcs
+                                            </p>
+                                            <p className="mt-1 leading-relaxed text-[#475569]">
+                                                {item.keterangan}
+                                            </p>
+                                            <p className="mt-1.5 text-[11px] text-[#5B697A]">
+                                                Kondisi awal: {item.detail_pakaian.kondisi_pakaian}
+                                            </p>
+                                        </div>
+
+                                        <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                            <div className="rounded-lg bg-slate-50 p-2.5 border border-slate-200/60">
+                                                <span className="text-[10px] uppercase tracking-wider text-[#5B697A] block">
+                                                    Estimasi:
+                                                </span>
+                                                <span className="font-mono font-bold text-slate-800">
+                                                    {formatRupiah(item.estimasi_kompensasi)}
+                                                </span>
+                                            </div>
+                                            <div className="rounded-lg bg-slate-50 p-2.5 border border-slate-200/60">
+                                                <span className="text-[10px] uppercase tracking-wider text-[#5B697A] block">
+                                                    Nilai Kompensasi:
+                                                </span>
+                                                <span className={`font-mono font-bold ${isPending ? 'text-slate-400' : 'text-[#0F766E]'}`}>
+                                                    {isPending ? 'Menunggu' : formatRupiah(item.nilai_kompensasi)}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {hasKelebihan && (
+                                            <p className="mt-2 rounded-md border border-amber-300 bg-[#FFFBEB] px-2.5 py-1 font-mono text-[11px] font-semibold text-[#78350F]">
+                                                Ganti rugi tunai: {formatRupiah(item.kelebihan_ganti_rugi)}
+                                            </p>
+                                        )}
+
+                                        <div className="mt-2.5 flex items-center justify-between text-[11px] text-[#5B697A]">
+                                            <span>
+                                                Pelapor: <strong className="text-[#0F172A]">{item.pegawai_pelapor?.nama_pegawai ?? 'Petugas'}</strong>
+                                            </span>
+                                            <span>
+                                                {formatTanggal(item.created_at)}
+                                            </span>
+                                        </div>
+
+                                        {isPetugas && isPending && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setKonfirmasiTarget(toConfirmationTarget(item))}
+                                                className="mt-3 flex min-h-[3rem] w-full items-center justify-center gap-2 rounded-xl bg-[#047857] px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-emerald-800"
+                                            >
+                                                <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+                                                <span>Konfirmasi &amp; Potong Saldo</span>
+                                            </button>
+                                        )}
+                                    </article>
+                                );
+                            })}
+                        </div>
+
+                        {/* Desktop Table View (>= md screens) */}
                         <div
                             tabIndex={0}
                             role="region"
                             aria-labelledby={tableCaptionId}
-                            className="overflow-x-auto"
+                            className="hidden overflow-x-auto md:block"
                         >
                             <table className="min-w-full divide-y divide-[#D8E2E6] text-left text-sm">
                                 <caption

@@ -575,7 +575,7 @@ export default function AppLayout({
                     </div>
                 </header>
 
-                <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+                <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-5 pb-24 sm:px-6 sm:py-6 sm:pb-6 lg:px-8">
                     {(visibleSuccess || visibleError || visibleWarning) && (
                         <div className="mb-5 space-y-3">
                             {visibleSuccess && (
@@ -673,7 +673,7 @@ export default function AppLayout({
                     {children}
                 </main>
 
-                <footer className="mt-auto border-t border-slate-200/80 bg-white/70 py-4 px-4 sm:px-6 lg:px-8 text-xs text-slate-500">
+                <footer className="mt-auto border-t border-slate-200/80 bg-white/70 py-4 pb-20 sm:pb-4 px-4 sm:px-6 lg:px-8 text-xs text-slate-500">
                     <div className="mx-auto flex max-w-7xl flex-col sm:flex-row items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                             <span className="font-semibold text-[#0F2933]">CleanWash Operations Console</span>
@@ -687,6 +687,138 @@ export default function AppLayout({
                         </p>
                     </div>
                 </footer>
+
+                {/* Mobile Bottom Navigation Bar (Thumb Ergonomics for Smartphone Users) */}
+                {user && (
+                    <nav
+                        aria-label="Navigasi cepat ponsel"
+                        className="fixed bottom-0 left-0 right-0 z-30 flex items-center justify-around border-t border-[#D8E2E6] bg-white/95 px-2 py-1.5 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] backdrop-blur-md lg:hidden print:hidden"
+                    >
+                        {user.role === 'PEGAWAI' && (
+                            <>
+                                <Link
+                                    href="/dashboard"
+                                    className={`flex flex-1 flex-col items-center justify-center py-1 text-center transition ${
+                                        page.url === '/dashboard' || page.url.startsWith('/dashboard?')
+                                            ? 'text-[#0F766E] font-bold'
+                                            : 'text-[#5B697A] font-medium hover:text-[#0F172A]'
+                                    }`}
+                                >
+                                    <LayoutDashboard className="h-5 w-5" aria-hidden="true" />
+                                    <span className="text-[10px] mt-0.5">Dashboard</span>
+                                </Link>
+                                <Link
+                                    href="/produksi"
+                                    className={`flex flex-1 flex-col items-center justify-center py-1 text-center transition ${
+                                        page.url.startsWith('/produksi')
+                                            ? 'text-[#0F766E] font-bold'
+                                            : 'text-[#5B697A] font-medium hover:text-[#0F172A]'
+                                    }`}
+                                >
+                                    <WashingMachine className="h-5 w-5" aria-hidden="true" />
+                                    <span className="text-[10px] mt-0.5">Produksi</span>
+                                </Link>
+                                <Link
+                                    href="/insiden"
+                                    className={`flex flex-1 flex-col items-center justify-center py-1 text-center transition ${
+                                        page.url.startsWith('/insiden')
+                                            ? 'text-[#0F766E] font-bold'
+                                            : 'text-[#5B697A] font-medium hover:text-[#0F172A]'
+                                    }`}
+                                >
+                                    <AlertTriangle className="h-5 w-5" aria-hidden="true" />
+                                    <span className="text-[10px] mt-0.5">Insiden</span>
+                                </Link>
+                            </>
+                        )}
+
+                        {user.role === 'PENGANTAR' && (
+                            <>
+                                <Link
+                                    href="/dashboard"
+                                    className={`flex flex-1 flex-col items-center justify-center py-1 text-center transition ${
+                                        page.url === '/dashboard' || page.url.startsWith('/dashboard?')
+                                            ? 'text-[#0F766E] font-bold'
+                                            : 'text-[#5B697A] font-medium hover:text-[#0F172A]'
+                                    }`}
+                                >
+                                    <LayoutDashboard className="h-5 w-5" aria-hidden="true" />
+                                    <span className="text-[10px] mt-0.5">Dashboard</span>
+                                </Link>
+                                <Link
+                                    href="/pengantaran"
+                                    className={`flex flex-1 flex-col items-center justify-center py-1 text-center transition ${
+                                        page.url.startsWith('/pengantaran')
+                                            ? 'text-[#0F766E] font-bold'
+                                            : 'text-[#5B697A] font-medium hover:text-[#0F172A]'
+                                    }`}
+                                >
+                                    <Truck className="h-5 w-5" aria-hidden="true" />
+                                    <span className="text-[10px] mt-0.5">Pengantaran</span>
+                                </Link>
+                            </>
+                        )}
+
+                        {user.role === 'PETUGAS' && (
+                            <>
+                                <Link
+                                    href="/dashboard"
+                                    className={`flex flex-1 flex-col items-center justify-center py-1 text-center transition ${
+                                        page.url === '/dashboard' || page.url.startsWith('/dashboard?')
+                                            ? 'text-[#0F766E] font-bold'
+                                            : 'text-[#5B697A] font-medium hover:text-[#0F172A]'
+                                    }`}
+                                >
+                                    <LayoutDashboard className="h-5 w-5" aria-hidden="true" />
+                                    <span className="text-[10px] mt-0.5">Dashboard</span>
+                                </Link>
+                                <Link
+                                    href="/transaksi/create"
+                                    className={`flex flex-1 flex-col items-center justify-center py-1 text-center transition ${
+                                        page.url.startsWith('/transaksi/create')
+                                            ? 'text-[#0F766E] font-bold'
+                                            : 'text-[#5B697A] font-medium hover:text-[#0F172A]'
+                                    }`}
+                                >
+                                    <PlusCircle className="h-5 w-5" aria-hidden="true" />
+                                    <span className="text-[10px] mt-0.5">Nota Baru</span>
+                                </Link>
+                                <Link
+                                    href="/transaksi"
+                                    className={`flex flex-1 flex-col items-center justify-center py-1 text-center transition ${
+                                        page.url.startsWith('/transaksi') && !page.url.startsWith('/transaksi/create')
+                                            ? 'text-[#0F766E] font-bold'
+                                            : 'text-[#5B697A] font-medium hover:text-[#0F172A]'
+                                    }`}
+                                >
+                                    <ReceiptText className="h-5 w-5" aria-hidden="true" />
+                                    <span className="text-[10px] mt-0.5">Transaksi</span>
+                                </Link>
+                                <Link
+                                    href="/serah-terima"
+                                    className={`flex flex-1 flex-col items-center justify-center py-1 text-center transition ${
+                                        page.url.startsWith('/serah-terima')
+                                            ? 'text-[#0F766E] font-bold'
+                                            : 'text-[#5B697A] font-medium hover:text-[#0F172A]'
+                                    }`}
+                                >
+                                    <PackageCheck className="h-5 w-5" aria-hidden="true" />
+                                    <span className="text-[10px] mt-0.5">Ambil</span>
+                                </Link>
+                            </>
+                        )}
+
+                        <button
+                            type="button"
+                            onClick={() => setSidebarOpen(true)}
+                            aria-label="Buka menu navigasi lengkap"
+                            className="flex flex-1 flex-col items-center justify-center py-1 text-center text-[#5B697A] transition hover:text-[#0F172A]"
+                        >
+                            <Menu className="h-5 w-5" aria-hidden="true" />
+                            <span className="text-[10px] mt-0.5 font-medium">Menu</span>
+                        </button>
+                    </nav>
+                )}
             </div>
         </div>
     );

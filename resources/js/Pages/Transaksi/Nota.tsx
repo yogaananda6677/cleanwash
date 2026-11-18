@@ -21,7 +21,10 @@ import {
 } from '@/lib/format';
 import type { TransaksiNotaProps } from '@/types';
 
-export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
+export default function TransaksiNota({
+    transaksi,
+    isPublicView = false,
+}: TransaksiNotaProps) {
     const layananCaptionId = useId();
     const pakaianCaptionId = useId();
     const riwayatCaptionId = useId();
@@ -76,18 +79,29 @@ export default function TransaksiNota({ transaksi }: TransaksiNotaProps) {
                 {/* Baris aksi navigasi & cetak (disembunyikan saat print) */}
                 <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#D8E2E6] bg-white px-5 py-3.5 shadow-[0_1px_2px_rgba(15,41,51,0.04)] print:hidden">
                     <div className="flex flex-wrap items-center gap-2">
-                        <Link
-                            href={`/transaksi/${transaksi.nomor_nota}`}
-                            className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
-                        >
-                            &larr; Kembali ke Detail
-                        </Link>
-                        <Link
-                            href="/transaksi"
-                            className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
-                        >
-                            Daftar Transaksi
-                        </Link>
+                        {isPublicView ? (
+                            <Link
+                                href="/"
+                                className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
+                            >
+                                &larr; Beranda CleanWash
+                            </Link>
+                        ) : (
+                            <>
+                                <Link
+                                    href={`/transaksi/${transaksi.nomor_nota}`}
+                                    className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
+                                >
+                                    &larr; Kembali ke Detail
+                                </Link>
+                                <Link
+                                    href="/transaksi"
+                                    className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]"
+                                >
+                                    Daftar Transaksi
+                                </Link>
+                            </>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-3">

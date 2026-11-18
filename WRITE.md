@@ -494,6 +494,56 @@
   - Memajukan lifecycle AgentsV2 ke Phase 4 Review (`PASS`) dan Phase 5 Docs Sync (`complete`).
   - Git commit & push perubahan ke GitHub repository `origin/main`.
 
+---
+
+### [#038] 2026-11-18 23:35 — Primary Agent — Mobile-First Ergonomics for Pegawai & Kurir, Customer Public Nota & Clean Empty Defaults
+- **Status:** `DONE` (`ALL_TESTS_PASS`)
+- **Ringkasan Kegiatan:**
+  - **Formulir Transaksi Bersih (`Transaksi/Create.tsx`)**: Mengatur nilai default input form kosong (`id_pelanggan: ''`, `id_layanan: ''`, `berat_atau_jumlah: ''`), menampilkan empty state informatif di panel kalkulasi sebelah kanan ("Belum Ada Transaksi Dipilih"), dan menonaktifkan tombol terbitkan nota sampai pengguna memilih pelanggan, layanan, serta berat/jumlah yang valid.
+  - **Layanan Cek Nota Publik Pelanggan (`routes/web.php`, `LandingController.php`, `Welcome.tsx`, `Transaksi/Nota.tsx`)**:
+    - Menambahkan rute publik `GET /nota/{nota}` (`nota.public`) yang dapat diakses langsung oleh pelanggan tanpa harus login.
+    - Menghubungkan fitur pelacakan nota di landing page (`#lacak`) dengan rincian per potong pakaian (`detail_pakaian`), rincian status tagihan (`total_harga`, `diskon_voucher`, `total_dibayar`, `sisa_tagihan`), serta tombol aksi *"Buka & Cetak Nota Resmi"* yang membuka nota digital printable CleanWash.
+    - Pada tampilan publik `Transaksi/Nota.tsx` (`isPublicView: true`), tombol navigasi mengarahkan pelanggan kembali ke `&larr; Beranda CleanWash` tanpa mengekspos rute internal staf kasir.
+  - **Ergonomi Mobile-First Pegawai & Kurir (`AppLayout.tsx`, `Pengantaran/Index.tsx`, `Pengantaran/Show.tsx`, `Insiden/Index.tsx`, `Modal.tsx`)**:
+    - Menambahkan Mobile Bottom Navigation Bar (`nav.fixed.bottom-0`) responsif di bawah layar smartphone (`< lg`) yang thumb-friendly:
+      - Pegawai: `Dashboard`, `Produksi`, `Insiden`, `Menu`.
+      - Kurir (Pengantar): `Dashboard`, `Pengantaran`, `Menu`.
+      - Petugas: `Dashboard`, `Nota Baru`, `Transaksi`, `Ambil`, `Menu`.
+    - Merombak daftar sesi pengantaran kurir (`Pengantaran/Index.tsx`) dan daftar insiden (`Insiden/Index.tsx`): menggunakan layout kartu mobile terstruktur (`block md:hidden`) yang nyaman dibaca pada layar kecil tanpa scroll horizontal, berdampingan dengan tabel desktop (`hidden md:block`).
+    - Mengoptimalkan run-sheet pengantaran kurir (`Pengantaran/Show.tsx`): menambahkan tombol panggilan langsung `tel:{phone}` untuk menghubungi pelanggan satu ketukan, tombol direct route Google Maps (`https://www.google.com/maps/search/?api=1&query=...`), dan memperbesar seluruh tombol aksi menjadi `min-h-[3rem]` (>= 48px touch target).
+    - Menyesuaikan tombol aksi footer modal (`Modal.tsx`) menjadi full-width di mobile (`flex-col-reverse sm:flex-row`).
+  - **Pengujian & Verifikasi Kualitas**:
+    - Menambahkan automated feature test di `tests/Feature/ExampleTest.php` untuk verifikasi endpoint pelacakan publik dan tampilan nota publik (115 backend test lulus).
+    - Memperbarui suite E2E Playwright `tests/e2e/landing-and-mobile.spec.ts` (skenario tracking publik, nota printable, mobile produksi, dan mobile kurir run sheet dengan viewport smartphone `390×844`). Mengambil screenshot bukti `32-mobile-kurir-run-sheet.png`.
+- **File Dibuat / Diubah:**
+  - `resources/js/Pages/Transaksi/Create.tsx` — Default kosong dan disabled submit
+  - `routes/web.php` — Route publik `/nota/{nota}`
+  - `app/Http/Controllers/LandingController.php` — Action `publicNota` dan ekspansi `lookupReceipt`
+  - `resources/js/types/index.ts` — Prop `isPublicView` di `TransaksiNotaProps`
+  - `resources/js/Pages/Transaksi/Nota.tsx` — Kompatibilitas tampilan publik & link kembali ke beranda
+  - `resources/js/Pages/Welcome.tsx` — Tampilan rincian pakaian, biaya, & tombol cetak nota resmi
+  - `resources/js/Layouts/AppLayout.tsx` — Mobile bottom navigation bar per peran & safe padding
+  - `resources/js/Pages/Pengantaran/Index.tsx` — Tampilan kartu list mobile
+  - `resources/js/Pages/Pengantaran/Show.tsx` — Tombol hubungi `tel:`, Google Maps, & target sentuh 48px
+  - `resources/js/Pages/Insiden/Index.tsx` — Tampilan kartu list mobile & tombol konfirmasi responsif
+  - `resources/js/Components/Modal.tsx` — Modal action button mobile stacking
+  - `tests/Feature/ExampleTest.php` — Automated feature test pelacakan & nota publik
+  - `tests/e2e/landing-and-mobile.spec.ts` — E2E Playwright test kurir mobile & nota publik
+  - `docs/qa/screenshots/32-mobile-kurir-run-sheet.png` — Bukti screenshot UI mobile kurir
+  - `WRITE.md`, `MEMORY.md` — Pencatatan entri kegiatan & snapshot memori
+- **Verifikasi / Bukti Uji:**
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` (`exit code 0`)
+  - `npx tsc --noEmit` -> `0 errors` (`exit code 0`)
+  - `npm run build` -> `built in 5.92s` (`exit code 0`)
+  - `php artisan test` -> `115 passed (4221 assertions)` (`exit code 0`)
+  - `npx playwright test tests/e2e/landing-and-mobile.spec.ts` -> `4 passed (9.3s)` (`exit code 0`)
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Semua kebutuhan user (default form kosong, cek nota pelanggan publik, mobile-friendly pegawai & kurir) tuntas terimplementasi dan terverifikasi penuh.
+  - Zero regression: seluruh 115 test backend dan seluruh 4 E2E test browser live hijau 100%.
+- **Next Exact Action:**
+  - Commit dan push ke repository GitHub `origin/main`.
+
+
 
 
 
