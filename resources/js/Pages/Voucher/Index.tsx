@@ -158,7 +158,7 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                 <button
                     type="button"
                     onClick={openCreateModal}
-                    className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
+                    className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8]"
                 >
                     <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
                     <span>
@@ -410,7 +410,7 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                             type="submit"
                             form={formId}
                             disabled={processing}
-                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:opacity-60"
+                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8] disabled:opacity-60"
                         >
                             {processing
                                 ? 'Menyimpan...'
@@ -461,7 +461,7 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                             className={`mt-1.5 block min-h-[2.625rem] w-full rounded-xl border px-3.5 py-2 font-mono text-sm uppercase focus:outline-none focus:ring-2 ${
                                 editingItem
                                     ? 'cursor-not-allowed border-[#D8E2E6] bg-[#EEF2F5] text-[#5B697A]'
-                                    : 'border-[#7C8C9D] bg-white text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#0F766E] focus:ring-[#0F766E]/20'
+                                    : 'border-[#7C8C9D] bg-white text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#2563EB] focus:ring-[#2563EB]/20'
                             }`}
                         />
                         {errors.nomor_voucher && (
@@ -489,7 +489,7 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                                 setData('nilai', event.target.value)
                             }
                             placeholder="mis. 10000"
-                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm tabular-nums text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm tabular-nums text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                         />
                         {errors.nilai && (
                             <p className="mt-1.5 text-xs font-medium text-rose-600">
@@ -513,7 +513,7 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                             onChange={(event) =>
                                 setData('masa_berlaku', event.target.value)
                             }
-                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                         />
                         {errors.masa_berlaku && (
                             <p className="mt-1.5 text-xs font-medium text-rose-600">
@@ -541,7 +541,7 @@ export default function VoucherIndex({ voucher, filters }: VoucherIndexProps) {
                                             | 'KEDALUWARSA',
                                     )
                                 }
-                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                             >
                                 <option value="TERSEDIA">TERSEDIA</option>
                                 <option value="KEDALUWARSA">KEDALUWARSA</option>

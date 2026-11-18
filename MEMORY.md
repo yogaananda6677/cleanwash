@@ -13,9 +13,9 @@ Dokumen ini adalah memori status arsitektur proyek **CleanWash** untuk manusia d
 | **Product** | CleanWash — Sistem Informasi Manajemen Operasional Laundry |
 | **SRS Reference** | [UTS.pdf](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/Outputtts/UTS.pdf) & [2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx](file:///home/yoga/Data/Kuliah/Sistem%20Informasi/Archive/2UTS_CleanWash_Revisi_Parafrase_Format_Gambar_Jernih.docx) |
 | **Current Phase** | Phase 3 — Pengantaran Multi-Pelanggan, Pelunasan Akhir, Serah Terima & Hardening |
-| **Current Status** | `FINAL RELEASE READY & AGENTSV2 ENHANCED` (Phase 1–3 + AgentsV2 Milestone `DONE`) |
-| **Last Updated** | 2026-11-17 |
-| **Updated By** | AgentsV2 Lifecycle & Primary Agent (`Web Profile, Mobile Produksi & Copyright by Yoga`) |
+| **Current Status** | `FINAL RELEASE READY & BRAND OVERHAULED` (Phase 1–3 + AgentsV2 + Logo & Palette Overhaul `DONE`) |
+| **Last Updated** | 2026-11-19 |
+| **Updated By** | Primary Agent (`Bespoke Vector Logo & Atelier French Navy Palette Overhaul`) |
 
 ---
 
@@ -60,6 +60,7 @@ Membangun sistem informasi operasional laundry **CleanWash** berbasis web (**Lar
 | **ADR-014** | **Dedicated Public Web Profile & Instant Tracking pada Root URL (`/`)** | ACCEPTED | Route `GET /` dialihkan melayani halaman publik atelier (`Welcome.tsx` + `LandingController`) dengan asset AI resolusi tinggi di `public/images/`, widget pelacak nota instan `/lacak/{nota}`, katalog tarif, dan jam operasional. |
 | **ADR-015** | **Mobile-First Operator Produksi & Universal Copyright by Yoga Attribution** | ACCEPTED | Optimalisasi layar smartphone (`390px`) untuk antrean kerja `Pegawai Produksi` (`/produksi`) via horizontal scrollable pills & tombol aksi 48px, serta penanaman hak cipta resmi "Copyright by Yoga" di seluruh halaman dan nota cetak. |
 | **ADR-016** | **Mobile-First Kurir Ergonomics & Public Digital Receipt Viewing (`/nota/{nota}`)** | ACCEPTED | Penyediaan Mobile Bottom Navigation Bar (`nav.fixed.bottom-0`) per peran, layout kartu mobile kurir dengan aksi one-tap call `tel:` & direct Google Maps, default form nota kosong, dan akses publik cetak nota resmi tanpa login. |
+| **ADR-017** | **Bespoke Hydro-Textile Monogram & Atelier French Navy Color Palette Overhaul** | ACCEPTED | Menggantikan logo template generik `<Droplets>` dengan monogram vektor bespoke `CleanWashLogo.tsx` (kurva putaran air C + rajutan serat kain W + bintang permata) dan merombak palet teal SaaS generik ke Atelier French Navy (`#0B132B`) & Royal Cobalt (`#2563EB` / `#1D4ED8` / `#EFF6FF`) di seluruh 15 halaman dan komponen. |
 
 ---
 

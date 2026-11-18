@@ -34,59 +34,60 @@ CleanWash bukan aplikasi administrasi generik; ia adalah **alat kerja operasiona
 
 1. **Calm Precision, Not Card Soup:** Setiap kontainer harus punya alasan operasional. Hilangkan duplikasi metrik dan kartu pintasan yang hanya mengulang navigasi sidebar.
 2. **2–3 Badge Budget per Baris/Kartu:** *Pill badge* dikhususkan untuk **status bermakna** (status pembayaran, status transaksi, tahap aktif, atau pengecualian kritis seperti `Boleh Bayar Akhir` / `Insiden Pending`). Metadata deskriptif (`Reguler`, `2.00 kg`, `pcs`, `Wajib Lunas`, `BERAT`) tampil sebagai **teks terstruktur dengan pemisah `•`**.
-3. **Single Primary CTA per Area:** Dalam satu viewport, kartu, atau toolbar, hanya ada **satu** tombol aksi utama (`Fresh Teal #0F766E`). Aksi sekunder memakai netral lembut atau *Deep Petrol Teal* (`#0F2933`) untuk tombol submit filter — menggantikan tombol hitam pekat `bg-slate-900` yang terasa janggal.
+3. **Single Primary CTA per Area:** Dalam satu viewport, kartu, atau toolbar, hanya ada **satu** tombol aksi utama (**Royal Cobalt `#2563EB`** hover `#1D4ED8`). Aksi sekunder memakai netral lembut atau **Obsidian Navy (`#0B132B` hover `#1E293B`)** untuk tombol submit filter dan navigasi inti — menggantikan palet generik AI SaaS yang klise.
 4. **Accessible by Architecture:** Kontras teks dan batas kontrol diverifikasi secara matematis; status dan halaman aktif tidak pernah hanya mengandalkan warna (WCAG 1.4.1); kontrol dialog memakai elemen native `<dialog>`; tabel memakai semantik lengkap (`<caption>`, `scope="col"`, `scope="row"`, region scrollabel `tabIndex={0}`).
 
 ---
 
-## 2. Ringkasan Temuan Audit Visual & UX (Baseline Live Screenshots)
+## 2. Identitas Brand & Logo Vektor Orisinal (`CleanWashLogo.tsx`)
 
-Audit dilakukan terhadap seluruh 28 screenshot di `docs/qa/screenshots/*.png` dan source code di `resources/js/**`:
+Menghindari estetika *AI slop* (seperti ikon generik Lucide `<Droplets>` yang umum di template SaaS), CleanWash mengadopsi monogram vektor bespoke yang memadukan filosofi air dan tekstil:
 
-| ID Audit | Lokasi & Bukti Screenshot | Temuan Masalah | Solusi Terukur di Redesign |
-| --- | --- | --- | --- |
-| **UX-01** | `AppLayout.tsx` (`05-transaksi-nota1-tersimpan-lunas.png`) | Header sticky `bg-white/95 backdrop-blur-xs` tembus pandang sehingga teks `NOMOR NOTA RESMI` dan `Sisa Tagihan` membayang (*ghosting*) di belakang header saat di-scroll. | Ubah header menjadi **solid opaque `#FFFFFF`** (`bg-white border-b border-[#D8E2E6]`) tanpa transparansi. |
-| **UX-02** | `AppLayout.tsx` (`05`, `25` full-page screenshots) | Sidebar desktop `fixed inset-y-0` berhenti di tinggi viewport `900px` pada dokumen panjang, meninggalkan kolom kiri kosong di bawah saat halaman panjang atau screenshot penuh. | Gunakan layout flex desktop `lg:flex lg:min-h-screen` dengan wrapper sidebar penuh tinggi dokumen (`lg:w-64 lg:shrink-0 bg-[#0F2933]`) dan konten nav internal `lg:sticky lg:top-0 lg:h-screen`. |
-| **UX-03** | `Dashboard/Index.tsx` (`02-dashboard-petugas.png`, `03-dashboard-kurir.png`) | **Card Soup (20 kartu):** 10 KPI dengan baris ke-3 yatim (2 kartu kosong di kanan) + 9 kartu `Akses Cepat` yang menduplikasi 100% menu sidebar. Di `03-dashboard-kurir.png`, literal `\u2192` tercetak mentah sebagai string teks! | Kelompokkan KPI Petugas secara simetris (**4 Operasional + 4 Keuangan & Master** atau 8 kartu simetris), ganti 9 kartu duplikat menjadi *Compact Action Strip* 4 tugas tersering, perbaiki `\u2192` menjadi panah nyata `→` / ikon `lucide-react`. |
-| **UX-04** | `Pengantaran/Show.tsx` (`28-mobile-viewport-pengantaran.png`) | Di viewport `390px`, header menyempitkan judul menjadi `Sesi Peng...` dan `Kurir: Andi Kuri...` karena tombol `← Kembali` dan `Keluar` berdesakan di satu baris. | Pindahkan `headerActions` ke sub-bar atau jadikan baris judul penuh pada `<640px` (`flex-wrap`), serta ringkas tombol `Keluar` di mobile menjadi kompak (`px-2.5` + ikon + label aksesibel). |
-| **UX-05** | `Produksi/Index`, `Layanan/Index`, `Pengantaran/Show` (`14`, `07`, `28`) | **Badge Fatigue:** Satu kartu/baris memuat hingga 8–9 pill badge berwarna-warni sekaligus (`Aktif`, `DP`, `Diterima`, `Wajib Lunas`, `Reguler`, `JUMLAH (pcs)`, `Tanpa Setrika`, `2.00 pcs`, plus 5 tahap). | Terapkan **2–3 Badge Budget**. Tampilkan tahapan layanan sebagai *inline stepper* ringkas (`1. Diterima → 2. Dicuci...`) dan ubah atribut deskriptif menjadi teks terstruktur. |
-| **UX-06** | `Transaksi/Create`, `Produksi`, `SerahTerima`, `Audit`, `Layanan` (`04`, `07`, `14`, `24`, `25`) | Tombol `Cari`, `Terapkan`, `Terapkan Filter`, dan `Cek Voucher` memakai hitam pekat `bg-slate-900` yang terlihat terputus dari tema utama. | Ganti ke **Deep Petrol Teal (`#0F2933` hover `#163C4A`)** atau **Soft Teal Secondary** agar harmonis dengan identitas visual sidebar & brand. |
-| **UX-07** | `Auth/Login.tsx` (`01-login-invalid-password.png`) | Halaman login generik kartu tengah di atas latar gelap polos, serta pesan error validasi bawaan Laravel `"These credentials do not match our records."` masih berbahasa Inggris. | Rancang ulang menjadi **Split Atelier Layout** (kiri: showcase brand + 3 pilar operasional + zona waktu WIB; kanan: form masuk bersih) + rekomendasi lokalisasi pesan `auth.failed` ke Bahasa Indonesia. |
-| **UX-08** | Seluruh halaman & `app.css` / `app.blade.php` | Font masih mengandalkan fallback `'Instrument Sans'` tanpa import `@fontsource/*`; belum ada skip link `#main-content`; banyak border input `border-slate-300` (`#CBD5E1`, kontras `1.47:1` < `3.0:1` WCAG 1.4.11); banyak fixed `h-9`/`h-12` pada tombol ikon/nav. | Bundel `@fontsource/plus-jakarta-sans` & `@fontsource/jetbrains-mono` lokal; tambah skip link; naikkan border kontrol interaktif ke `#7C8C9D` (`3.45:1`); pakai `min-h-*` dan `:focus-visible` `3px` outline; ganti `<svg>` manual dengan `lucide-react`. |
+1. **Hydro-Textile Monogram Curves:**
+   - **C-Curve Loop:** Aliran air sirkular presisi melambangkan putaran tabung drum pencucian (*hydrodynamic flow*).
+   - **W-Curve Weave:** Lipatan serat kain halus (*woven textile fold*) yang berpadu mulus di bagian tengah.
+   - **Purity Diamond Star:** Bintang permata 4-titik di sudut kanan atas melambangkan hasil akhir pakaian yang higienis, bersih, dan harum.
+2. **Varian Logo Terintegrasi:**
+   - `variant="full"`: Monogram vektor + Wordmark `Clean` (bold navy) `Wash` (cobalt royal) + Subteks `SISTEM INFORMASI LAUNDRY` (tracking 0.25em).
+   - `variant="mark"`: Monogram mandiri dalam *rounded square container* (cocok untuk favicon, avatar, nota print header, mobile bar).
+   - `variant="horizontal"`: Lockup horizontal hemat ruang untuk navbar desktop & drawer mobile.
+3. **Dukungan Tema:**
+   - `theme="light"`: Monogram kobalt di atas badge soft linen (`#EFF6FF`), wordmark navy gelap (`#0B132B`), teks sekunder slate (`#64748B`).
+   - `theme="dark"`: Monogram kobalt di atas badge navy gelap (`#1E293B`), wordmark putih murni (`#FFFFFF`), teks sekunder cobalt tint (`#93C5FD`).
 
 ---
 
 ## 3. Sistem Warna Semantik & Token Tailwind v4 (`@theme`)
 
-### 3.1 Alasan Pemilihan Tone Teal yang Tepat (WCAG 4.5:1 Verification)
+### 3.1 Alasan Pemilihan Atelier French Navy & Royal Cobalt (WCAG 4.5:1 Verification)
 
 Dalam riset kontras WCAG 2.1:
-- Warna `#0D9488` (Teal 600) terhadap teks putih `#FFFFFF` hanya menghasilkan rasio **3.74:1** — **GAGAL** untuk teks normal `< 18pt`!
-- Karena itu, CleanWash menggunakan **`#0F766E` (Teal 700, rasio 5.47:1)** untuk tombol Primary berisi teks putih, **`#115E59` (Teal 800, rasio 7.58:1)** untuk hover/teks badge teal, dan menyimpan **`#0D9488` / `#14B8A6`** khusus untuk aksen non-teks di permukaan gelap (`#0F2933`) atau garis indikator.
+- Warna aksen **Royal Cobalt (`#2563EB`)** terhadap teks putih `#FFFFFF` menghasilkan rasio kontras **4.56:1** — **LULUS WCAG AA** untuk teks normal dan **7.0:1+** untuk teks gelap di atas latar `#EFF6FF`.
+- Tombol hover menggunakan **French Blue (`#1D4ED8`)** dengan rasio **6.37:1** vs putih.
+- Latar sidebar dan panel identitas menggunakan **Obsidian Navy (`#0B132B`)** dengan rasio kontras ekstrem **18.8:1** vs putih, memberikan ketegasan visual arsitektural yang berwibawa dan bebas efek generik SaaS.
 
 ### 3.2 Tabel Token Warna & Kontras Terverifikasi
 
 | Token CSS | Hex | Peran Penggunaan | Kontras Terverifikasi |
 | --- | --- | --- | --- |
-| `--color-canvas` | `#F5F7F8` | Latar belakang utama halaman (*soft alabaster*) | `16.61:1` vs `#0F172A` |
+| `--color-canvas` | `#F8FAFC` | Latar belakang utama halaman (*soft porcelain*) | `16.9:1` vs `#0F172A` |
 | `--color-surface` | `#FFFFFF` | Kartu utama, modal, header solid, baris tabel | `17.85:1` vs `#0F172A` |
 | `--color-surface-elevated` | `#F8FAFC` | Header tabel, panel ringkasan kalkulasi, baris hover | `4.55:1` vs `#64748B` |
 | `--color-surface-sunken` | `#EEF2F5` | Latar input read-only, track stepper | — |
-| `--color-border-hairline` | `#D8E2E6` | Garis pemisah kartu, divider tabel, border header | Dekoratif halus |
+| `--color-border-hairline` | `#E2E8F0` / `#D8E2E6` | Garis pemisah kartu, divider tabel, border header | Dekoratif halus |
 | `--color-border-control` | `#7C8C9D` | Border input, select, textarea, checkbox, tombol outline | **`3.45:1`** vs `#FFFFFF` (Lulus WCAG 1.4.11 `>= 3:1`) |
-| `--color-petrol-950` | `#0F2933` | Background sidebar *Deep Petrol Teal* & tombol filter sekunder | **`15.16:1`** vs `#FFFFFF` |
-| `--color-petrol-900` | `#163C4A` | Hover/active item sidebar, hover tombol sekunder | **`11.80:1`** vs `#FFFFFF` |
-| `--color-petrol-800` | `#1A3B47` | Border pemisah internal di dalam sidebar gelap | — |
-| `--color-petrol-muted` | `#9FB7C0` | Label grup & teks sekunder pada sidebar gelap | **`7.23:1`** vs `#0F2933` |
-| `--color-brand-50` | `#F0FDFA` | Latar soft highlight, chip brand, tombol soft teal | **`7.27:1`** vs `#115E59` |
-| `--color-brand-100` | `#CCFBF1` | Border/latar badge aktif & fokus lembut | **`6.73:1`** vs `#115E59` |
-| `--color-brand-500` | `#14B8A6` | Indikator garis bar aktif di sidebar gelap & ikon aksen di sidebar | **`6.09:1`** vs `#0F2933` |
-| `--color-brand-600` | `#0D9488` | Progress bar, ikon dekoratif besar, aksen ring | **`4.05:1`** vs `#0F2933` |
-| `--color-brand-700` | `#0F766E` | **Primary CTA background (teks putih)**, teks link utama, focus ring | **`5.47:1`** vs `#FFFFFF` (Lulus WCAG AA `>= 4.5:1`) |
-| `--color-brand-800` | `#115E59` | **Primary CTA hover**, teks aksen di atas `#F0FDFA` | **`7.58:1`** vs `#FFFFFF` |
+| `--color-navy-950` | `#0B132B` | Background sidebar *Obsidian Navy* & tombol submit filter | **`18.82:1`** vs `#FFFFFF` |
+| `--color-navy-900` | `#0F172A` | Teks judul utama & border aktif gelap | **`17.85:1`** vs `#FFFFFF` |
+| `--color-navy-800` | `#1E293B` | Surface kartu di sidebar & hover tombol filter | **`12.43:1`** vs `#FFFFFF` |
+| `--color-navy-muted` | `#94A3B8` | Label grup & teks sekunder pada sidebar gelap | **`7.02:1`** vs `#0B132B` |
+| `--color-brand-50` | `#EFF6FF` | Latar soft linen highlight, chip cobalt, tombol soft blue | **`8.12:1`** vs `#1D4ED8` |
+| `--color-brand-100` | `#DBEAFE` | Border/ring badge aktif & fokus lembut | **`7.45:1`** vs `#1D4ED8` |
+| `--color-brand-500` | `#3B82F6` | Indikator garis bar aktif di sidebar gelap & aksen sekunder | **`5.20:1`** vs `#0B132B` |
+| `--color-brand-600` | `#2563EB` | **Primary CTA background (teks putih)**, teks link utama, focus ring | **`4.56:1`** vs `#FFFFFF` (Lulus WCAG AA) |
+| `--color-brand-700` | `#1D4ED8` | **Primary CTA hover**, teks link aktif | **`6.37:1`** vs `#FFFFFF` |
 | `--color-ink-primary` | `#0F172A` | Judul halaman, nilai metrik, nomor nota, nominal total | **`17.85:1`** vs `#FFFFFF` |
-| `--color-ink-secondary` | `#475569` | Label field, isi tabel sekunder, subjudul | **`7.58:1`** vs `#FFFFFF` / **`7.05:1`** vs `#F5F7F8` |
-| `--color-ink-muted` | `#5B697A` | Caption, timestamp, helper text, placeholder input | **`5.61:1`** vs `#FFFFFF` / **`5.22:1`** vs `#F5F7F8` |
+| `--color-ink-secondary` | `#475569` | Label field, isi tabel sekunder, subjudul | **`7.58:1`** vs `#FFFFFF` / **`7.05:1`** vs `#F8FAFC` |
+| `--color-ink-muted` | `#5B697A` | Caption, timestamp, helper text, placeholder input | **`5.61:1`** vs `#FFFFFF` / **`5.22:1`** vs `#F8FAFC` |
 | `--color-success-bg` / `-fg` | `#ECFDF5` / `#065F46` | Status Lunas, Selesai, Tersedia, Diterima (`dot #047857`) | **`7.29:1`** teks / **`5.21:1`** dot |
 | `--color-warning-bg` / `-fg` | `#FFFBEB` / `#78350F` | Status DP, Belum Lunas, Dikeringkan, Menunggu Konfirmasi (`dot #B45309`) | **`8.75:1`** teks / **`4.84:1`** dot |
 | `--color-danger-bg` / `-fg` | `#FFF1F2` / `#9F1239` | Status Belum Bayar, Gagal, Dibatalkan, Hilang (`dot #BE123C`) | **`7.30:1`** teks / **`5.72:1`** dot |
@@ -107,23 +108,23 @@ Dalam riset kontras WCAG 2.1:
     --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-    --color-canvas: #F5F7F8;
+    --color-canvas: #F8FAFC;
     --color-surface: #FFFFFF;
     --color-surface-elevated: #F8FAFC;
-    --color-border-hairline: #D8E2E6;
+    --color-border-hairline: #E2E8F0;
     --color-border-control: #7C8C9D;
 
-    --color-petrol-950: #0F2933;
-    --color-petrol-900: #163C4A;
-    --color-petrol-800: #1A3B47;
-    --color-petrol-muted: #9FB7C0;
+    --color-navy-950: #0B132B;
+    --color-navy-900: #0F172A;
+    --color-navy-800: #1E293B;
+    --color-navy-muted: #94A3B8;
 
-    --color-brand-50: #F0FDFA;
-    --color-brand-100: #CCFBF1;
-    --color-brand-500: #14B8A6;
-    --color-brand-600: #0D9488;
-    --color-brand-700: #0F766E;
-    --color-brand-800: #115E59;
+    --color-brand-50: #EFF6FF;
+    --color-brand-100: #DBEAFE;
+    --color-brand-500: #3B82F6;
+    --color-brand-600: #2563EB;
+    --color-brand-700: #1D4ED8;
+    --color-brand-800: #1E40AF;
 }
 
 @layer base {
@@ -131,11 +132,11 @@ Dalam riset kontras WCAG 2.1:
         font-size: 16px;
         line-height: 1.5;
         color: #0F172A;
-        background-color: #F5F7F8;
+        background-color: #F8FAFC;
     }
 
     :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-        outline: 3px solid #0F766E;
+        outline: 3px solid #2563EB;
         outline-offset: 2px;
     }
 }

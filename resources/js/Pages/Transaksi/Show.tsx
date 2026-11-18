@@ -476,7 +476,7 @@ export default function TransaksiShow({
                     </Link>
                     <Link
                         href={`/transaksi/${transaksi.nomor_nota}/nota`}
-                        className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
+                        className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8]"
                     >
                         <Printer
                             className="h-4 w-4 shrink-0"
@@ -540,7 +540,7 @@ export default function TransaksiShow({
                             <button
                                 type="button"
                                 onClick={() => setPelunasanModalOpen(true)}
-                                className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
+                                className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8]"
                             >
                                 <Wallet
                                     className="h-4 w-4 shrink-0"
@@ -577,7 +577,7 @@ export default function TransaksiShow({
                             transaksi.pengantaran_aktif && (
                                 <Link
                                     href={`/pengantaran/${transaksi.pengantaran_aktif.id_pengantaran}`}
-                                    className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl border border-teal-200 bg-[#F0FDFA] px-3.5 py-2 text-xs font-semibold text-[#115E59] transition hover:bg-[#CCFBF1]"
+                                    className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl border border-[#DBEAFE] bg-[#EFF6FF] px-3.5 py-2 text-xs font-semibold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
                                 >
                                     <Truck
                                         className="h-4 w-4 shrink-0"
@@ -643,9 +643,9 @@ export default function TransaksiShow({
                 <div className="mt-4 space-y-2.5 empty:hidden">
                     {transaksi.sedang_diantar_kurir &&
                         transaksi.pengantaran_aktif && (
-                            <div className="flex items-start gap-2.5 rounded-xl border border-teal-200 border-l-4 border-l-[#0F766E] bg-[#F0FDFA] px-4 py-3 text-xs text-[#115E59]">
+                            <div className="flex items-start gap-2.5 rounded-xl border border-blue-200 border-l-4 border-l-[#2563EB] bg-[#EFF6FF] px-4 py-3 text-xs text-[#1D4ED8]">
                                 <Truck
-                                    className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]"
+                                    className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]"
                                     aria-hidden="true"
                                 />
                                 <p>
@@ -1014,7 +1014,7 @@ export default function TransaksiShow({
                         </div>
                         <div className="flex justify-between gap-4 text-xs">
                             <dt className="text-[#5B697A]">Total Dibayar</dt>
-                            <dd className="font-mono font-semibold tabular-nums text-[#0F766E]">
+                            <dd className="font-mono font-semibold tabular-nums text-[#2563EB]">
                                 {formatRupiah(transaksi.total_dibayar)}
                             </dd>
                         </div>
@@ -1267,7 +1267,7 @@ export default function TransaksiShow({
                                             aria-hidden="true"
                                             className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
                                                 isCurrent
-                                                    ? 'bg-[#0F766E] text-white ring-2 ring-[#CCFBF1]'
+                                                    ? 'bg-[#2563EB] text-white ring-2 ring-[#DBEAFE]'
                                                     : isDone
                                                       ? 'bg-[#047857] text-white'
                                                       : 'border border-[#7C8C9D] bg-white text-[#5B697A]'
@@ -1282,7 +1282,7 @@ export default function TransaksiShow({
                                         <span
                                             className={
                                                 isCurrent
-                                                    ? 'font-bold text-[#0F766E]'
+                                                    ? 'font-bold text-[#2563EB]'
                                                     : isDone
                                                       ? 'font-semibold text-[#065F46]'
                                                       : 'font-medium text-[#5B697A]'
@@ -1306,7 +1306,7 @@ export default function TransaksiShow({
                             >
                                 <span
                                     aria-hidden="true"
-                                    className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full bg-[#0F766E] ring-4 ring-white"
+                                    className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full bg-[#2563EB] ring-4 ring-white"
                                 />
                                 <div className="flex flex-wrap items-center justify-between gap-2">
                                     <ProductionStageBadge
@@ -1532,7 +1532,7 @@ export default function TransaksiShow({
                                     key={item.id_item_antar}
                                     className={`rounded-xl border p-4 text-xs ${
                                         isActive
-                                            ? 'border-teal-200 bg-[#F0FDFA]'
+                                            ? 'border-[#DBEAFE] bg-[#EFF6FF]'
                                             : 'border-[#D8E2E6] bg-[#F8FAFC]'
                                     }`}
                                 >
@@ -1541,7 +1541,7 @@ export default function TransaksiShow({
                                             {item.pengantaran ? (
                                                 <Link
                                                     href={`/pengantaran/${item.pengantaran.id_pengantaran}`}
-                                                    className="font-mono font-bold text-[#0F766E] hover:text-[#115E59] hover:underline"
+                                                    className="font-mono font-bold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
                                                 >
                                                     Sesi #
                                                     {
@@ -1568,7 +1568,7 @@ export default function TransaksiShow({
                                                 />
                                             )}
                                             {isActive && (
-                                                <span className="text-[11px] font-bold text-[#0F766E]">
+                                                <span className="text-[11px] font-bold text-[#2563EB]">
                                                     Sesi Aktif
                                                 </span>
                                             )}
@@ -1670,7 +1670,7 @@ export default function TransaksiShow({
                                     {(log.payload_before !== null ||
                                         log.payload_after !== null) && (
                                         <details className="mt-2.5">
-                                            <summary className="cursor-pointer text-[11px] font-semibold text-[#0F766E] hover:text-[#115E59] hover:underline">
+                                            <summary className="cursor-pointer text-[11px] font-semibold text-[#2563EB] hover:text-[#1D4ED8] hover:underline">
                                                 Lihat detail payload JSON
                                             </summary>
                                             <div className="mt-2 grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -1684,7 +1684,7 @@ export default function TransaksiShow({
                                                                 log.payload_before,
                                                                 null,
                                                                 2,
-                                                            )}
+                                                             )}
                                                         </pre>
                                                     </div>
                                                 )}
@@ -1698,7 +1698,7 @@ export default function TransaksiShow({
                                                                 log.payload_after,
                                                                 null,
                                                                 2,
-                                                            )}
+                                                             )}
                                                         </pre>
                                                     </div>
                                                 )}
@@ -1737,7 +1737,7 @@ export default function TransaksiShow({
                                 ubahForm.processing ||
                                 eligibleLayananOptions.length === 0
                             }
-                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
+                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {ubahForm.processing
                                 ? 'Memproses...'
@@ -1829,7 +1829,7 @@ export default function TransaksiShow({
                                         ? ubahLayananErrId
                                         : undefined
                                 }
-                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                             >
                                 {eligibleLayananOptions.map((option) => (
                                     <option
@@ -1916,7 +1916,7 @@ export default function TransaksiShow({
                                             ? ubahQtyErrId
                                             : undefined
                                     }
-                                    className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm tabular-nums text-[#0F172A] placeholder-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                    className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm tabular-nums text-[#0F172A] placeholder-[#5B697A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                                 />
                                 {ubahForm.errors.berat_atau_jumlah_baru && (
                                     <p
@@ -2028,7 +2028,7 @@ export default function TransaksiShow({
                                         ? ubahAlasanErrId
                                         : undefined
                                 }
-                                className="mt-1.5 block min-h-[4.25rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                className="mt-1.5 block min-h-[4.25rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder-[#5B697A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                             />
                             {ubahForm.errors.alasan_perubahan && (
                                 <p
@@ -2199,7 +2199,7 @@ export default function TransaksiShow({
                                             ? batalBiayaErrId
                                             : undefined
                                     }
-                                    className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm font-semibold tabular-nums text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                    className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm font-semibold tabular-nums text-[#0F172A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                                 />
                                 <p className="mt-1 text-[11px] text-[#5B697A]">
                                     Rentang sah: lebih dari Rp 0 s.d. subtotal{' '}
@@ -2244,7 +2244,7 @@ export default function TransaksiShow({
                                 <dt className="text-[#5B697A]">
                                     Sudah Dibayar
                                 </dt>
-                                <dd className="font-mono font-semibold tabular-nums text-[#0F766E]">
+                                <dd className="font-mono font-semibold tabular-nums text-[#2563EB]">
                                     {formatRupiah(transaksi.total_dibayar)}
                                 </dd>
                             </div>
@@ -2313,7 +2313,7 @@ export default function TransaksiShow({
                                     ? batalAlasanErrId
                                     : undefined
                             }
-                            className="mt-1.5 block min-h-[4.25rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                            className="mt-1.5 block min-h-[4.25rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder-[#5B697A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                         />
                         {batalForm.errors.alasan_pembatalan && (
                             <p

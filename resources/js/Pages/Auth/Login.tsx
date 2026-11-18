@@ -3,13 +3,13 @@ import {
     AlertCircle,
     CheckCircle2,
     Clock,
-    Droplets,
     Eye,
     EyeOff,
     ReceiptText,
     Truck,
     WashingMachine,
 } from 'lucide-react';
+import CleanWashLogo from '@/Components/CleanWashLogo';
 import { useState, type FormEvent } from 'react';
 import type { SharedPageProps } from '@/types';
 
@@ -58,46 +58,34 @@ export default function Login() {
             <div className="min-h-screen bg-[#F5F7F8] text-[#0F172A] lg:grid lg:grid-cols-12">
                 <a
                     href="#email"
-                    className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-[#0F2933] focus:px-4 focus:py-2.5 focus:text-xs focus:font-semibold focus:text-white focus:shadow-lg"
+                    className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-[#0B132B] focus:px-4 focus:py-2.5 focus:text-xs focus:font-semibold focus:text-white focus:shadow-lg"
                 >
                     Lewati ke formulir masuk
                 </a>
 
                 {/* Left Showcase Panel (Compact mobile header + full desktop split showcase) */}
-                <section className="relative overflow-hidden bg-[#0F2933] px-5 py-6 text-white sm:px-8 lg:col-span-5 lg:flex lg:flex-col lg:justify-between lg:px-10 lg:py-12">
+                <section className="relative overflow-hidden bg-[#0B132B] px-5 py-6 text-white sm:px-8 lg:col-span-5 lg:flex lg:flex-col lg:justify-between lg:px-10 lg:py-12">
                     <div
                         aria-hidden="true"
-                        className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#14B8A6]/10 blur-2xl"
+                        className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#2563EB]/15 blur-2xl"
                     />
                     <div
                         aria-hidden="true"
-                        className="pointer-events-none absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-[#0F766E]/15 blur-3xl"
+                        className="pointer-events-none absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-[#1E40AF]/20 blur-3xl"
                     />
 
                     <div className="relative">
-                        <div className="flex items-center gap-3.5">
-                            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#0F766E] text-white shadow-sm ring-1 ring-[#14B8A6]/40">
-                                <Droplets
-                                    className="h-6 w-6"
-                                    aria-hidden="true"
-                                />
-                            </span>
-                            <div>
-                                <h1
-                                    id="main-content"
-                                    tabIndex={-1}
-                                    className="text-xl font-bold tracking-tight text-white focus:outline-none sm:text-2xl"
-                                >
-                                    CleanWash Laundry
-                                </h1>
-                                <p className="mt-0.5 text-xs text-[#9FB7C0] sm:text-sm">
-                                    Manajemen Operasional Laundry Terpadu
-                                </p>
-                            </div>
+                        <div>
+                            <CleanWashLogo
+                                variant="full"
+                                theme="dark"
+                                size="lg"
+                                subtext="MANAJEMEN OPERASIONAL"
+                            />
                         </div>
 
                         <div className="mt-10 hidden space-y-4 lg:block">
-                            <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-[#2DD4BF]">
+                            <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-[#60A5FA]">
                                 3 Pilar Operasional Terkendali
                             </p>
                             <ul className="space-y-3">
@@ -106,9 +94,9 @@ export default function Login() {
                                     return (
                                         <li
                                             key={pillar.title}
-                                            className="flex items-start gap-3.5 rounded-2xl border border-[#1A3B47] bg-[#163C4A]/70 p-4"
+                                            className="flex items-start gap-3.5 rounded-2xl border border-[#1E293B] bg-[#1E293B]/70 p-4"
                                         >
-                                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#0F2933] text-[#2DD4BF] ring-1 ring-[#14B8A6]/25">
+                                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#0B132B] text-[#60A5FA] ring-1 ring-[#3B82F6]/25">
                                                 <Icon
                                                     className="h-4 w-4"
                                                     aria-hidden="true"
@@ -118,7 +106,7 @@ export default function Login() {
                                                 <p className="text-sm font-semibold text-white">
                                                     {pillar.title}
                                                 </p>
-                                                <p className="mt-1 text-xs leading-relaxed text-[#D5E1E5]">
+                                                <p className="mt-1 text-xs leading-relaxed text-[#CBD5E1]">
                                                     {pillar.description}
                                                 </p>
                                             </div>
@@ -129,10 +117,10 @@ export default function Login() {
                         </div>
                     </div>
 
-                    <div className="relative mt-8 hidden flex-col gap-1.5 border-t border-[#1A3B47] pt-5 text-xs text-[#9FB7C0] lg:flex">
+                    <div className="relative mt-8 hidden flex-col gap-1.5 border-t border-[#1E293B] pt-5 text-xs text-[#94A3B8] lg:flex">
                         <div className="flex items-center gap-2">
                             <Clock
-                                className="h-4 w-4 shrink-0 text-[#2DD4BF]"
+                                className="h-4 w-4 shrink-0 text-[#60A5FA]"
                                 aria-hidden="true"
                             />
                             <span>
@@ -140,9 +128,9 @@ export default function Login() {
                                 Asia/Jakarta (WIB)
                             </span>
                         </div>
-                        <p className="text-[11px] text-[#718F9C]">
+                        <p className="text-[11px] text-[#94A3B8]">
                             Copyright &copy; 2026 CleanWash &bull; Developed by{' '}
-                            <strong className="text-[#2DD4BF] font-semibold">Yoga</strong>. All rights reserved.
+                            <strong className="text-[#60A5FA] font-semibold">Yoga</strong>. All rights reserved.
                         </p>
                     </div>
                 </section>
@@ -219,7 +207,7 @@ export default function Login() {
                                         className={`mt-1.5 block min-h-[2.75rem] w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:outline-none focus:ring-2 ${
                                             errors.email
                                                 ? 'border-[#BE123C] focus:border-[#BE123C] focus:ring-rose-200'
-                                                : 'border-[#7C8C9D] focus:border-[#0F766E] focus:ring-[#0F766E]/20'
+                                                : 'border-[#7C8C9D] focus:border-[#2563EB] focus:ring-[#2563EB]/20'
                                         }`}
                                     />
                                     {errors.email && (
@@ -267,7 +255,7 @@ export default function Login() {
                                             className={`block min-h-[2.75rem] w-full rounded-xl border bg-white py-2.5 pl-3.5 pr-22 text-sm text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:outline-none focus:ring-2 ${
                                                 errors.password
                                                     ? 'border-[#BE123C] focus:border-[#BE123C] focus:ring-rose-200'
-                                                    : 'border-[#7C8C9D] focus:border-[#0F766E] focus:ring-[#0F766E]/20'
+                                                    : 'border-[#7C8C9D] focus:border-[#2563EB] focus:ring-[#2563EB]/20'
                                             }`}
                                         />
                                         <button
@@ -318,7 +306,7 @@ export default function Login() {
                                                     event.target.checked,
                                                 )
                                             }
-                                            className="h-4 w-4 rounded border-[#7C8C9D] text-[#0F766E] accent-[#0F766E]"
+                                            className="h-4 w-4 rounded border-[#7C8C9D] text-[#2563EB] accent-[#2563EB]"
                                         />
                                         <span>Ingat sesi saya</span>
                                     </label>
@@ -327,7 +315,7 @@ export default function Login() {
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="flex min-h-[2.75rem] w-full items-center justify-center gap-2 rounded-xl bg-[#0F766E] px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-60"
+                                    className="flex min-h-[2.75rem] w-full items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                     {processing ? 'Memverifikasi...' : 'Masuk'}
                                 </button>
@@ -337,7 +325,7 @@ export default function Login() {
                         <div className="mt-5 space-y-1 text-center text-xs text-[#5B697A] lg:hidden">
                             <p className="flex items-center justify-center gap-1.5">
                                 <Clock
-                                    className="h-3.5 w-3.5 shrink-0 text-[#0F766E]"
+                                    className="h-3.5 w-3.5 shrink-0 text-[#2563EB]"
                                     aria-hidden="true"
                                 />
                                 <span>
@@ -347,7 +335,7 @@ export default function Login() {
                             </p>
                             <p className="text-[11px] text-slate-500">
                                 Copyright &copy; 2026 CleanWash &bull; Developed by{' '}
-                                <strong className="text-[#0F766E] font-semibold">Yoga</strong>
+                                <strong className="text-[#2563EB] font-semibold">Yoga</strong>
                             </p>
                         </div>
                     </div>

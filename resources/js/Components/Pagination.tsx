@@ -82,7 +82,7 @@ export default function Pagination<T>({
                                 aria-current={link.active ? 'page' : undefined}
                                 className={`inline-flex min-h-[2.375rem] min-w-[2.375rem] items-center justify-center rounded-xl border px-3 py-1.5 text-xs font-semibold tabular-nums transition ${
                                     link.active
-                                        ? 'border-[#0F766E] bg-[#0F766E] text-white shadow-xs'
+                                        ? 'border-[#2563EB] bg-[#2563EB] text-white shadow-xs'
                                         : 'border-[#7C8C9D] bg-white text-[#0F172A] hover:bg-[#F8FAFC]'
                                 }`}
                             >

@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, ArrowRight, Droplets, Printer } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Printer } from 'lucide-react';
+import CleanWashLogo from '@/Components/CleanWashLogo';
 import { Fragment, useId } from 'react';
 import MetadataRow from '@/Components/MetadataRow';
 import {
@@ -111,7 +112,7 @@ export default function TransaksiNota({
                         <button
                             type="button"
                             onClick={() => window.print()}
-                            className="inline-flex min-h-[2.5rem] items-center gap-2 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
+                            className="inline-flex min-h-[2.5rem] items-center gap-2 rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8]"
                         >
                             <Printer
                                 className="h-4 w-4 shrink-0"
@@ -125,16 +126,15 @@ export default function TransaksiNota({
                 {/* Lembar Nota Resmi CleanWash */}
                 <article className="rounded-2xl border border-[#D8E2E6] bg-white p-6 shadow-[0_1px_2px_rgba(15,41,51,0.04)] sm:p-8 print:rounded-none print:border-0 print:p-0 print:shadow-none">
                     {/* Header Brand & Nomor Nota */}
-                    <header className="flex flex-col justify-between gap-4 border-b-2 border-[#0F2933] pb-5 sm:flex-row sm:items-start print:flex-row print:items-start">
-                        <div className="flex items-start gap-3.5">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0F2933] text-white ring-1 ring-[#14B8A6]/40">
-                                <Droplets
-                                    className="h-6 w-6 text-[#2DD4BF]"
-                                    aria-hidden="true"
-                                />
-                            </div>
+                    <header className="flex flex-col justify-between gap-4 border-b-2 border-[#0B132B] pb-5 sm:flex-row sm:items-start print:flex-row print:items-start">
+                        <div className="flex items-start gap-4">
+                            <CleanWashLogo
+                                variant="mark"
+                                theme="light"
+                                size="lg"
+                            />
                             <div>
-                                <p className="text-[11px] font-bold uppercase tracking-widest text-[#0F766E]">
+                                <p className="text-[11px] font-bold uppercase tracking-widest text-[#2563EB]">
                                     Nota Transaksi Resmi
                                 </p>
                                 <h1
@@ -972,7 +972,7 @@ export default function TransaksiNota({
                                     <dt className="text-[#475569]">
                                         Total Dibayar
                                     </dt>
-                                    <dd className="font-mono font-semibold tabular-nums text-[#0F766E]">
+                                    <dd className="font-mono font-semibold tabular-nums text-[#2563EB]">
                                         {formatRupiah(transaksi.total_dibayar)}
                                     </dd>
                                 </div>

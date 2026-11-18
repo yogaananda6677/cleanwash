@@ -5,13 +5,13 @@ export const FILTER_LABEL_CLASS =
     'block text-xs font-semibold text-[#475569]';
 
 export const FILTER_INPUT_CLASS =
-    'mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20';
+    'mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20';
 
 export const FILTER_SELECT_CLASS =
-    'mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20';
+    'mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] shadow-xs transition focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20';
 
 export const FILTER_SUBMIT_BUTTON_CLASS =
-    'inline-flex min-h-[2.625rem] items-center justify-center gap-2 rounded-xl bg-[#0F2933] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#163C4A]';
+    'inline-flex min-h-[2.625rem] items-center justify-center gap-2 rounded-xl bg-[#0B132B] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1E293B]';
 
 export const FILTER_RESET_BUTTON_CLASS =
     'inline-flex min-h-[2.625rem] items-center justify-center gap-1.5 rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-xs font-semibold text-[#0F172A] transition hover:bg-[#F8FAFC]';
@@ -57,7 +57,7 @@ export default function FilterToolbar({
     return (
         <search
             aria-label={ariaLabel}
-            className={`block rounded-2xl border border-[#D8E2E6] bg-white p-4 shadow-[0_1px_2px_rgba(15,41,51,0.04)] sm:p-5 ${className}`}
+            className={`block rounded-2xl border border-[#D8E2E6] bg-white p-4 shadow-[0_1px_2px_rgba(11,19,43,0.04)] sm:p-5 ${className}`}
         >
             <form onSubmit={onSubmit} className="space-y-4">
                 {usesBuiltInSearch ? (
@@ -83,7 +83,7 @@ export default function FilterToolbar({
                                         onSearchChange(event.target.value)
                                     }
                                     placeholder={searchPlaceholder}
-                                    className="block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white py-2 pl-10 pr-3.5 text-sm text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                    className="block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white py-2 pl-10 pr-3.5 text-sm text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                                 />
                             </div>
                         </div>

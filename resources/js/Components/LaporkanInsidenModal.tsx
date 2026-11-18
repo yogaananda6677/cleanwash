@@ -246,7 +246,7 @@ export default function LaporkanInsidenModal({
                                     handleNotaChange(event.target.value)
                                 }
                                 aria-invalid={Boolean(errors.nomor_nota)}
-                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                             >
                                 {transaksiOptions.map((option) => (
                                     <option
@@ -309,7 +309,7 @@ export default function LaporkanInsidenModal({
                                 setData('id_detail', event.target.value)
                             }
                             aria-invalid={Boolean(errors.id_detail)}
-                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                         >
                             {activeDetails.map((detail) => (
                                 <option
@@ -407,11 +407,11 @@ export default function LaporkanInsidenModal({
                     </fieldset>
 
                     {compensationPreview && selectedDetail && activeTransaksi && (
-                        <div className="rounded-xl border border-teal-200 border-l-4 border-l-[#0F766E] bg-[#F0FDFA] px-4 py-3 text-xs text-[#115E59]">
+                        <div className="rounded-xl border border-blue-200 border-l-4 border-l-[#2563EB] bg-[#EFF6FF] px-4 py-3 text-xs text-[#1D4ED8]">
                             <div className="flex flex-wrap items-center justify-between gap-2">
                                 <span className="inline-flex items-center gap-1.5 font-semibold">
                                     <Info
-                                        className="h-4 w-4 shrink-0 text-[#0F766E]"
+                                        className="h-4 w-4 shrink-0 text-[#2563EB]"
                                         aria-hidden="true"
                                     />
                                     <span>
@@ -420,13 +420,13 @@ export default function LaporkanInsidenModal({
                                         &times;):
                                     </span>
                                 </span>
-                                <span className="font-mono text-sm font-bold tabular-nums text-[#0F766E]">
+                                <span className="font-mono text-sm font-bold tabular-nums text-[#2563EB]">
                                     {formatRupiah(
                                         compensationPreview.estimasiDecimal,
                                     )}
                                 </span>
                             </div>
-                            <p className="mt-1 text-[11px] text-[#115E59]">
+                            <p className="mt-1 text-[11px] text-[#1D4ED8]">
                                 Prorata {selectedDetail.jumlah_potong}/
                                 {activeTransaksi.total_potong} potong dari
                                 subtotal{' '}
@@ -481,7 +481,7 @@ export default function LaporkanInsidenModal({
                                         ? nilaiErrorId
                                         : undefined
                                 }
-                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm tabular-nums text-[#0F172A] placeholder-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm tabular-nums text-[#0F172A] placeholder-[#5B697A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                             />
                             <p className="mt-1 text-[11px] text-[#5B697A]">
                                 Sebagai Petugas, laporan langsung berstatus{' '}
@@ -543,7 +543,7 @@ export default function LaporkanInsidenModal({
                                     ? keteranganErrorId
                                     : undefined
                             }
-                            className="mt-1.5 block min-h-[5.5rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                            className="mt-1.5 block min-h-[5.5rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder-[#5B697A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                         />
                         {errors.keterangan && (
                             <p

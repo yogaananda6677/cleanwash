@@ -306,7 +306,7 @@ export default function PengantaranIndex({
                     <button
                         type="button"
                         onClick={openCreateModal}
-                        className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
+                        className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8]"
                     >
                         <Plus
                             className="h-4 w-4 shrink-0"
@@ -382,7 +382,7 @@ export default function PengantaranIndex({
                                     setSearch(event.target.value)
                                 }
                                 placeholder="Nomor nota, nama/telepon pelanggan, atau kurir..."
-                                className="block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white py-2 pl-10 pr-3.5 text-sm text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                className="block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white py-2 pl-10 pr-3.5 text-sm text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                             />
                         </div>
                     </div>
@@ -543,7 +543,7 @@ export default function PengantaranIndex({
                                             <div>
                                                 <Link
                                                     href={`/pengantaran/${sesi.id_pengantaran}`}
-                                                    className="font-mono text-base font-bold text-[#0F766E] hover:underline"
+                                                    className="font-mono text-base font-bold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
                                                 >
                                                     Sesi #{sesi.id_pengantaran}
                                                 </Link>
@@ -572,7 +572,7 @@ export default function PengantaranIndex({
                                             </div>
                                             <div className="mt-1 flex items-center justify-between">
                                                 <span className="text-[#5B697A]">Progres:</span>
-                                                <span className="font-mono font-bold text-[#0F766E]">
+                                                <span className="font-mono font-bold text-[#2563EB]">
                                                     {sesi.item_selesai_count}/{sesi.total_item} item tuntas
                                                 </span>
                                             </div>
@@ -611,7 +611,7 @@ export default function PengantaranIndex({
 
                                         <Link
                                             href={`/pengantaran/${sesi.id_pengantaran}`}
-                                            className="mt-4 flex min-h-[3rem] w-full items-center justify-center gap-2 rounded-xl bg-[#0F766E] px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#115E59]"
+                                            className="mt-4 flex min-h-[3rem] w-full items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#1D4ED8]"
                                         >
                                             <span>Buka Rute &amp; Detail Pengantaran</span>
                                             <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -681,7 +681,7 @@ export default function PengantaranIndex({
                                                 >
                                                     <Link
                                                         href={`/pengantaran/${sesi.id_pengantaran}`}
-                                                        className="font-mono text-sm font-bold text-[#0F766E] hover:text-[#115E59] hover:underline"
+                                                        className="font-mono text-sm font-bold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
                                                     >
                                                         Sesi #
                                                         {sesi.id_pengantaran}
@@ -784,7 +784,7 @@ export default function PengantaranIndex({
                                                 <td className="whitespace-nowrap px-5 py-4 text-right">
                                                     <Link
                                                         href={`/pengantaran/${sesi.id_pengantaran}`}
-                                                        className="inline-flex min-h-[2.375rem] items-center gap-1 rounded-xl border border-teal-200 bg-[#F0FDFA] px-3 py-1.5 text-xs font-semibold text-[#115E59] transition hover:bg-[#CCFBF1]"
+                                                        className="inline-flex min-h-[2.375rem] items-center gap-1 rounded-xl border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1.5 text-xs font-semibold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
                                                     >
                                                         <span>Buka Sesi</span>
                                                         <ArrowRight
@@ -834,7 +834,7 @@ export default function PengantaranIndex({
                                     activeKurirOptions.length === 0 ||
                                     eligibleTransaksiOptions.length === 0
                                 }
-                                className="inline-flex min-h-[2.5rem] items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
+                                className="inline-flex min-h-[2.5rem] items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <Truck
                                     className="h-4 w-4 shrink-0"
@@ -888,7 +888,7 @@ export default function PengantaranIndex({
                                             ? createKurirErrId
                                             : undefined
                                     }
-                                    className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                    className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                                 >
                                     {activeKurirOptions.length === 0 ? (
                                         <option value="">
@@ -950,7 +950,7 @@ export default function PengantaranIndex({
                                             ? createTanggalErrId
                                             : undefined
                                     }
-                                    className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                    className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                                 />
                                 {createForm.errors.tanggal_pengantaran && (
                                     <p
@@ -1001,7 +1001,7 @@ export default function PengantaranIndex({
                                                     )
                                                 }
                                                 placeholder="Filter nota atau nama/alamat pelanggan..."
-                                                className="block min-h-[2.375rem] w-full rounded-xl border border-[#7C8C9D] bg-white py-1.5 pl-9 pr-3 text-xs text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                                className="block min-h-[2.375rem] w-full rounded-xl border border-[#7C8C9D] bg-white py-1.5 pl-9 pr-3 text-xs text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                                             />
                                         </div>
                                         <div className="flex flex-wrap items-center gap-2">
@@ -1056,7 +1056,7 @@ export default function PengantaranIndex({
                                                     key={opt.nomor_nota}
                                                     className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 text-xs transition ${
                                                         checked
-                                                            ? 'border-2 border-[#0F766E] bg-[#F0FDFA] shadow-xs'
+                                                            ? 'border-2 border-[#2563EB] bg-[#EFF6FF] shadow-xs'
                                                             : 'border-[#D8E2E6] bg-white hover:border-[#7C8C9D]'
                                                     }`}
                                                 >
@@ -1068,9 +1068,9 @@ export default function PengantaranIndex({
                                                         onChange={() =>
                                                             toggleNotaSelection(
                                                                 opt.nomor_nota,
-                                                            )
+                                                             )
                                                         }
-                                                        className="mt-1 h-4 w-4 shrink-0 rounded border-[#7C8C9D] accent-[#0F766E]"
+                                                        className="mt-1 h-4 w-4 shrink-0 rounded border-[#7C8C9D] accent-[#2563EB]"
                                                     />
                                                     <div className="min-w-0 flex-1">
                                                         {/* Max 2 status badges per card */}
@@ -1134,7 +1134,7 @@ export default function PengantaranIndex({
 
                                                         <p className="mt-1 flex items-start gap-1.5 text-[11px] leading-relaxed text-[#475569]">
                                                             <MapPin
-                                                                className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#0F766E]"
+                                                                className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#2563EB]"
                                                                 aria-hidden="true"
                                                             />
                                                             <span>

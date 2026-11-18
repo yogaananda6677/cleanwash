@@ -44,18 +44,18 @@ function CompactActionItem({
     return (
         <Link
             href={href}
-            className="group flex min-h-[4.25rem] items-start justify-between gap-3 rounded-xl border border-[#D8E2E6] bg-white px-4 py-3.5 shadow-[0_1px_2px_rgba(15,41,51,0.04)] transition hover:border-[#0F766E] hover:bg-[#F0FDFA]/50"
+            className="group flex min-h-[4.25rem] items-start justify-between gap-3 rounded-xl border border-[#D8E2E6] bg-white px-4 py-3.5 shadow-[0_1px_2px_rgba(11,19,43,0.04)] transition hover:border-[#2563EB] hover:bg-[#EFF6FF]/50"
         >
             <div className="flex min-w-0 items-start gap-3">
                 <span
                     aria-hidden="true"
-                    className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F0FDFA] text-[#0F766E] ring-1 ring-teal-200 transition group-hover:bg-[#0F766E] group-hover:text-white"
+                    className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EFF6FF] text-[#2563EB] ring-1 ring-blue-200 transition group-hover:bg-[#2563EB] group-hover:text-white"
                 >
                     {icon}
                 </span>
                 <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-sm font-semibold text-[#0F172A] group-hover:text-[#115E59]">
+                        <h3 className="text-sm font-semibold text-[#0F172A] group-hover:text-[#1D4ED8]">
                             {title}
                         </h3>
                         {badgeText && (
@@ -70,7 +70,7 @@ function CompactActionItem({
                 </div>
             </div>
             <ArrowRight
-                className="mt-1 h-4 w-4 shrink-0 text-[#5B697A] transition group-hover:translate-x-0.5 group-hover:text-[#0F766E]"
+                className="mt-1 h-4 w-4 shrink-0 text-[#5B697A] transition group-hover:translate-x-0.5 group-hover:text-[#2563EB]"
                 aria-hidden="true"
             />
         </Link>
@@ -111,7 +111,7 @@ export default function DashboardIndex({ auth, summary }: DashboardIndexProps) {
                     {summary.role === 'PETUGAS' && (
                         <Link
                             href="/transaksi/create"
-                            className="inline-flex min-h-[2.75rem] shrink-0 items-center justify-center gap-2 rounded-xl bg-[#0F766E] px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
+                            className="inline-flex min-h-[2.75rem] shrink-0 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8]"
                         >
                             <PlusCircle
                                 className="h-4 w-4 shrink-0"
@@ -127,7 +127,7 @@ export default function DashboardIndex({ auth, summary }: DashboardIndexProps) {
                     {summary.role === 'PEGAWAI' && (
                         <Link
                             href="/produksi"
-                            className="inline-flex min-h-[2.75rem] shrink-0 items-center justify-center gap-2 rounded-xl bg-[#0F766E] px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
+                            className="inline-flex min-h-[2.75rem] shrink-0 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8]"
                         >
                             <span>Buka Antrean Produksi</span>
                             <ArrowRight
@@ -140,7 +140,7 @@ export default function DashboardIndex({ auth, summary }: DashboardIndexProps) {
                     {summary.role === 'PENGANTAR' && (
                         <Link
                             href="/pengantaran"
-                            className="inline-flex min-h-[2.75rem] shrink-0 items-center justify-center gap-2 rounded-xl bg-[#0F766E] px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
+                            className="inline-flex min-h-[2.75rem] shrink-0 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8]"
                         >
                             <span>Buka Jadwal Pengantaran</span>
                             <ArrowRight
@@ -173,7 +173,7 @@ export default function DashboardIndex({ auth, summary }: DashboardIndexProps) {
                             </div>
                             <Link
                                 href="/insiden?status_konfirmasi=MENUNGGU_KONFIRMASI"
-                                className="inline-flex min-h-[2.5rem] shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#0F2933] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#163C4A]"
+                                className="inline-flex min-h-[2.5rem] shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#0B132B] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1E293B]"
                             >
                                 <span>Konfirmasi Sekarang</span>
                                 <ArrowRight
@@ -211,7 +211,7 @@ export default function DashboardIndex({ auth, summary }: DashboardIndexProps) {
                                 </div>
                                 <Link
                                     href="/serah-terima?mode=PIUTANG"
-                                    className="inline-flex min-h-[2.5rem] shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#0F2933] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#163C4A]"
+                                    className="inline-flex min-h-[2.5rem] shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#0B132B] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1E293B]"
                                 >
                                     <span>Kelola Piutang</span>
                                     <ArrowRight
@@ -579,7 +579,7 @@ export default function DashboardIndex({ auth, summary }: DashboardIndexProps) {
                             </div>
                             <Link
                                 href="/pengantaran"
-                                className="inline-flex min-h-[2.5rem] shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#0F2933] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#163C4A]"
+                                className="inline-flex min-h-[2.5rem] shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#0B132B] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1E293B]"
                             >
                                 <span>Tindak Lanjuti</span>
                                 <ArrowRight

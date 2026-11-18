@@ -240,7 +240,7 @@ export default function PelunasanModal({
                                 <dt className="text-[#5B697A]">
                                     Sudah Dibayar
                                 </dt>
-                                <dd className="font-mono font-semibold tabular-nums text-[#0F766E]">
+                                <dd className="font-mono font-semibold tabular-nums text-[#2563EB]">
                                     {formatRupiah(target.total_dibayar)}
                                 </dd>
                             </div>
@@ -303,7 +303,7 @@ export default function PelunasanModal({
                                 type="button"
                                 onClick={handleFillFull}
                                 disabled={sisaCents <= 0 || processing}
-                                className="inline-flex min-h-[2rem] items-center rounded-lg border border-teal-200 bg-[#F0FDFA] px-2.5 py-1 text-[11px] font-semibold text-[#115E59] transition hover:bg-[#CCFBF1] disabled:opacity-50"
+                                className="inline-flex min-h-[2rem] items-center rounded-lg border border-blue-200 bg-[#EFF6FF] px-2.5 py-1 text-[11px] font-semibold text-[#1D4ED8] transition hover:bg-[#DBEAFE] disabled:opacity-50"
                             >
                                 Isi Lunas Penuh (
                                 {formatRupiah(target.sisa_tagihan)})
@@ -339,7 +339,7 @@ export default function PelunasanModal({
                             onBlur={handleNominalBlur}
                             aria-invalid={Boolean(activeError)}
                             aria-describedby={describedByIds}
-                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm font-semibold tabular-nums text-[#0F172A] placeholder-[#5B697A] transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm font-semibold tabular-nums text-[#0F172A] placeholder-[#5B697A] transition focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                         />
 
                         {activeError && (

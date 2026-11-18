@@ -4,7 +4,6 @@ import {
     AlertTriangle,
     CheckCircle2,
     ClipboardCheck,
-    Droplets,
     LayoutDashboard,
     LogOut,
     Menu,
@@ -18,6 +17,7 @@ import {
     WashingMachine,
     X,
 } from 'lucide-react';
+import CleanWashLogo from '@/Components/CleanWashLogo';
 import {
     useEffect,
     useRef,
@@ -346,31 +346,26 @@ export default function AppLayout({
         .join('');
 
     const renderSidebarContent = (isMobileDrawer: boolean) => (
-        <div className="flex h-full flex-col bg-[#0F2933] text-white">
-            <div className="flex items-center justify-between gap-2 border-b border-[#1A3B47] px-4 py-4 sm:px-5">
+        <div className="flex h-full flex-col bg-[#0B132B] text-white">
+            <div className="flex items-center justify-between gap-2 border-b border-[#1E293B] px-4 py-4 sm:px-5">
                 <Link
                     href="/dashboard"
                     className="flex min-w-0 items-center gap-3 rounded-xl py-0.5 transition hover:opacity-95"
                     onClick={() => setSidebarOpen(false)}
                 >
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#0F766E] text-white shadow-xs ring-1 ring-[#14B8A6]/40">
-                        <Droplets className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                    <div className="min-w-0">
-                        <p className="truncate text-sm font-bold tracking-tight text-white">
-                            CleanWash
-                        </p>
-                        <p className="truncate text-[11px] text-[#9FB7C0]">
-                            Operasional Laundry
-                        </p>
-                    </div>
+                    <CleanWashLogo
+                        variant="full"
+                        theme="dark"
+                        size="sm"
+                        subtext="OPERASIONAL"
+                    />
                 </Link>
                 {isMobileDrawer && (
                     <button
                         type="button"
                         onClick={() => setSidebarOpen(false)}
                         aria-label="Tutup menu navigasi"
-                        className="inline-flex min-h-[2.75rem] min-w-[2.75rem] shrink-0 items-center justify-center rounded-xl border border-[#1A3B47] bg-[#163C4A] text-[#D5E1E5] transition hover:bg-[#1A3B47] hover:text-white"
+                        className="inline-flex min-h-[2.75rem] min-w-[2.75rem] shrink-0 items-center justify-center rounded-xl border border-[#1E293B] bg-[#1E293B] text-[#E2E8F0] transition hover:bg-[#334155] hover:text-white"
                     >
                         <X className="h-5 w-5" aria-hidden="true" />
                     </button>
@@ -383,7 +378,7 @@ export default function AppLayout({
             >
                 {navGroups.map((group) => (
                     <div key={group.label}>
-                        <p className="px-3 pb-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-[#9FB7C0]">
+                        <p className="px-3 pb-1.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-[#94A3B8]">
                             {group.label}
                         </p>
                         <ul className="space-y-1">
@@ -402,15 +397,15 @@ export default function AppLayout({
                                             }
                                             className={`group flex min-h-[2.625rem] items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm transition ${
                                                 active
-                                                    ? 'bg-[#163C4A] font-semibold text-white'
-                                                    : 'font-medium text-[#D5E1E5] hover:bg-[#163C4A]/70 hover:text-white'
+                                                    ? 'bg-[#1E293B] font-semibold text-white'
+                                                    : 'font-medium text-[#CBD5E1] hover:bg-[#1E293B]/70 hover:text-white'
                                             }`}
                                         >
                                             <span
                                                 aria-hidden="true"
                                                 className={`h-5 w-1 shrink-0 rounded-full transition ${
                                                     active
-                                                        ? 'bg-[#14B8A6]'
+                                                        ? 'bg-[#2563EB]'
                                                         : 'bg-transparent'
                                                 }`}
                                             />
@@ -418,8 +413,8 @@ export default function AppLayout({
                                                 aria-hidden="true"
                                                 className={
                                                     active
-                                                        ? 'text-[#2DD4BF]'
-                                                        : 'text-[#9FB7C0] group-hover:text-white'
+                                                        ? 'text-[#60A5FA]'
+                                                        : 'text-[#94A3B8] group-hover:text-white'
                                                 }
                                             >
                                                 {item.icon}
@@ -437,16 +432,16 @@ export default function AppLayout({
             </nav>
 
             {user && (
-                <div className="border-t border-[#1A3B47] p-4">
+                <div className="border-t border-[#1E293B] p-4">
                     <div className="flex items-center gap-3">
-                        <div className="flex min-h-9 min-w-9 shrink-0 items-center justify-center rounded-full bg-[#163C4A] px-1 text-xs font-bold text-[#2DD4BF] ring-1 ring-[#14B8A6]/35">
+                        <div className="flex min-h-9 min-w-9 shrink-0 items-center justify-center rounded-full bg-[#1E293B] px-1 text-xs font-bold text-[#93C5FD] ring-1 ring-[#3B82F6]/30">
                             {userInitials}
                         </div>
                         <div className="min-w-0 flex-1">
                             <p className="truncate text-xs font-semibold text-white">
                                 {user.name}
                             </p>
-                            <p className="truncate text-[11px] text-[#9FB7C0]">
+                            <p className="truncate text-[11px] text-[#94A3B8]">
                                 {user.email}
                             </p>
                         </div>
@@ -470,16 +465,16 @@ export default function AppLayout({
             : null;
 
     return (
-        <div className="min-h-screen bg-[#F5F7F8] text-[#0F172A] lg:flex lg:min-h-screen">
+        <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] lg:flex lg:min-h-screen">
             <a
                 href="#main-content"
-                className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-[#0F2933] focus:px-4 focus:py-2.5 focus:text-xs focus:font-semibold focus:text-white focus:shadow-lg"
+                className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-[#0B132B] focus:px-4 focus:py-2.5 focus:text-xs focus:font-semibold focus:text-white focus:shadow-lg"
             >
                 Lewati ke konten utama
             </a>
 
             {/* Desktop Full-Height Sidebar */}
-            <aside className="hidden border-r border-[#1A3B47] bg-[#0F2933] lg:block lg:w-64 lg:shrink-0 print:hidden">
+            <aside className="hidden border-r border-[#1E293B] bg-[#0B132B] lg:block lg:w-64 lg:shrink-0 print:hidden">
                 <div className="lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
                     {renderSidebarContent(false)}
                 </div>
@@ -501,7 +496,7 @@ export default function AppLayout({
                 }}
                 onPointerDown={handleDrawerPointerDown}
                 onPointerUp={handleDrawerPointerUp}
-                className="m-0 mr-auto h-dvh max-h-dvh w-72 max-w-[85vw] overflow-hidden border-0 border-r border-[#1A3B47] bg-[#0F2933] p-0 text-white shadow-2xl backdrop:bg-[#0F2933]/60 backdrop:backdrop-blur-[2px] lg:hidden print:hidden"
+                className="m-0 mr-auto h-dvh max-h-dvh w-72 max-w-[85vw] overflow-hidden border-0 border-r border-[#1E293B] bg-[#0B132B] p-0 text-white shadow-2xl backdrop:bg-[#0B132B]/60 backdrop:backdrop-blur-[2px] lg:hidden print:hidden"
             >
                 {sidebarOpen && renderSidebarContent(true)}
             </dialog>
@@ -544,7 +539,7 @@ export default function AppLayout({
                         <div className="order-2 flex shrink-0 items-center gap-2.5 sm:order-3">
                             {user && (
                                 <div className="hidden items-center gap-2.5 rounded-xl border border-slate-200/80 bg-slate-50/80 py-1 pl-1.5 pr-2.5 md:flex">
-                                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#0F766E] text-xs font-bold text-white shadow-2xs">
+                                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#2563EB] text-xs font-bold text-white shadow-2xs">
                                         {user.name.charAt(0).toUpperCase()}
                                     </span>
                                     <div className="text-left">
@@ -676,13 +671,13 @@ export default function AppLayout({
                 <footer className="mt-auto border-t border-slate-200/80 bg-white/70 py-4 pb-20 sm:pb-4 px-4 sm:px-6 lg:px-8 text-xs text-slate-500">
                     <div className="mx-auto flex max-w-7xl flex-col sm:flex-row items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
-                            <span className="font-semibold text-[#0F2933]">CleanWash Operations Console</span>
+                            <span className="font-semibold text-[#0B132B]">CleanWash Operations Console</span>
                             <span>&bull;</span>
                             <span>Versi 1.0</span>
                         </div>
                         <p className="flex items-center gap-1 text-[11px] sm:text-xs">
                             <span>Copyright &copy; 2026 CleanWash &bull; Developed by</span>
-                            <strong className="text-[#0F766E] font-bold">Yoga</strong>
+                            <strong className="text-[#2563EB] font-bold">Yoga</strong>
                             <span>&bull; All rights reserved.</span>
                         </p>
                     </div>
@@ -700,7 +695,7 @@ export default function AppLayout({
                                     href="/dashboard"
                                     className={`flex flex-1 flex-col items-center justify-center py-1 text-center transition ${
                                         page.url === '/dashboard' || page.url.startsWith('/dashboard?')
-                                            ? 'text-[#0F766E] font-bold'
+                                            ? 'text-[#2563EB] font-bold'
                                             : 'text-[#5B697A] font-medium hover:text-[#0F172A]'
                                     }`}
                                 >
@@ -711,7 +706,7 @@ export default function AppLayout({
                                     href="/produksi"
                                     className={`flex flex-1 flex-col items-center justify-center py-1 text-center transition ${
                                         page.url.startsWith('/produksi')
-                                            ? 'text-[#0F766E] font-bold'
+                                            ? 'text-[#2563EB] font-bold'
                                             : 'text-[#5B697A] font-medium hover:text-[#0F172A]'
                                     }`}
                                 >
@@ -722,7 +717,7 @@ export default function AppLayout({
                                     href="/insiden"
                                     className={`flex flex-1 flex-col items-center justify-center py-1 text-center transition ${
                                         page.url.startsWith('/insiden')
-                                            ? 'text-[#0F766E] font-bold'
+                                            ? 'text-[#2563EB] font-bold'
                                             : 'text-[#5B697A] font-medium hover:text-[#0F172A]'
                                     }`}
                                 >
@@ -738,7 +733,7 @@ export default function AppLayout({
                                     href="/dashboard"
                                     className={`flex flex-1 flex-col items-center justify-center py-1 text-center transition ${
                                         page.url === '/dashboard' || page.url.startsWith('/dashboard?')
-                                            ? 'text-[#0F766E] font-bold'
+                                            ? 'text-[#2563EB] font-bold'
                                             : 'text-[#5B697A] font-medium hover:text-[#0F172A]'
                                     }`}
                                 >
@@ -749,7 +744,7 @@ export default function AppLayout({
                                     href="/pengantaran"
                                     className={`flex flex-1 flex-col items-center justify-center py-1 text-center transition ${
                                         page.url.startsWith('/pengantaran')
-                                            ? 'text-[#0F766E] font-bold'
+                                            ? 'text-[#2563EB] font-bold'
                                             : 'text-[#5B697A] font-medium hover:text-[#0F172A]'
                                     }`}
                                 >
@@ -765,7 +760,7 @@ export default function AppLayout({
                                     href="/dashboard"
                                     className={`flex flex-1 flex-col items-center justify-center py-1 text-center transition ${
                                         page.url === '/dashboard' || page.url.startsWith('/dashboard?')
-                                            ? 'text-[#0F766E] font-bold'
+                                            ? 'text-[#2563EB] font-bold'
                                             : 'text-[#5B697A] font-medium hover:text-[#0F172A]'
                                     }`}
                                 >
@@ -776,7 +771,7 @@ export default function AppLayout({
                                     href="/transaksi/create"
                                     className={`flex flex-1 flex-col items-center justify-center py-1 text-center transition ${
                                         page.url.startsWith('/transaksi/create')
-                                            ? 'text-[#0F766E] font-bold'
+                                            ? 'text-[#2563EB] font-bold'
                                             : 'text-[#5B697A] font-medium hover:text-[#0F172A]'
                                     }`}
                                 >
@@ -787,7 +782,7 @@ export default function AppLayout({
                                     href="/transaksi"
                                     className={`flex flex-1 flex-col items-center justify-center py-1 text-center transition ${
                                         page.url.startsWith('/transaksi') && !page.url.startsWith('/transaksi/create')
-                                            ? 'text-[#0F766E] font-bold'
+                                            ? 'text-[#2563EB] font-bold'
                                             : 'text-[#5B697A] font-medium hover:text-[#0F172A]'
                                     }`}
                                 >
@@ -798,7 +793,7 @@ export default function AppLayout({
                                     href="/serah-terima"
                                     className={`flex flex-1 flex-col items-center justify-center py-1 text-center transition ${
                                         page.url.startsWith('/serah-terima')
-                                            ? 'text-[#0F766E] font-bold'
+                                            ? 'text-[#2563EB] font-bold'
                                             : 'text-[#5B697A] font-medium hover:text-[#0F172A]'
                                     }`}
                                 >

@@ -9,23 +9,33 @@
     --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-    --color-canvas: #F5F7F8;
+    --color-canvas: #F8FAFC;
     --color-surface: #FFFFFF;
-    --color-surface-elevated: #F8FAFC;
-    --color-border-hairline: #D8E2E6;
-    --color-border-control: #7C8C9D;
+    --color-surface-elevated: #F1F5F9;
+    --color-border-hairline: #E2E8F0;
+    --color-border-control: #94A3B8;
 
-    --color-petrol-950: #0F2933;
-    --color-petrol-900: #163C4A;
-    --color-petrol-800: #1A3B47;
-    --color-petrol-muted: #9FB7C0;
+    /* Primary Atelier French Navy */
+    --color-navy-950: #0B132B;
+    --color-navy-900: #0F172A;
+    --color-navy-800: #1E293B;
+    --color-navy-muted: #94A3B8;
 
-    --color-brand-50: #F0FDFA;
-    --color-brand-100: #CCFBF1;
-    --color-brand-500: #14B8A6;
-    --color-brand-600: #0D9488;
-    --color-brand-700: #0F766E;
-    --color-brand-800: #115E59;
+    /* Backward-compatible aliases for petrol mapped to elegant navy */
+    --color-petrol-950: #0B132B;
+    --color-petrol-900: #0F172A;
+    --color-petrol-800: #1E293B;
+    --color-petrol-muted: #94A3B8;
+
+    /* Heritage Cobalt & Pure Textile Blue */
+    --color-brand-50: #EFF6FF;
+    --color-brand-100: #DBEAFE;
+    --color-brand-200: #BFDBFE;
+    --color-brand-500: #3B82F6;
+    --color-brand-600: #2563EB;
+    --color-brand-700: #1D4ED8;
+    --color-brand-800: #1E40AF;
+    --color-brand-900: #172554;
 }
 
 @layer base {
@@ -33,12 +43,12 @@
         font-size: 16px;
         line-height: 1.5;
         color: #0F172A;
-        background-color: #F5F7F8;
+        background-color: #F8FAFC;
         overflow-x: clip;
     }
 
     :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-        outline: 3px solid #0F766E;
+        outline: 3px solid #2563EB;
         outline-offset: 2px;
     }
 }

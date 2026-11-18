@@ -311,7 +311,7 @@ export default function InsidenIndex({
                                                     {isPetugas ? (
                                                         <Link
                                                             href={`/transaksi/${item.nomor_nota}`}
-                                                            className="font-mono text-sm font-bold text-[#0F766E] hover:underline"
+                                                            className="font-mono text-sm font-bold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
                                                         >
                                                             {item.nomor_nota}
                                                         </Link>
@@ -362,7 +362,7 @@ export default function InsidenIndex({
                                                 <span className="text-[10px] uppercase tracking-wider text-[#5B697A] block">
                                                     Nilai Kompensasi:
                                                 </span>
-                                                <span className={`font-mono font-bold ${isPending ? 'text-slate-400' : 'text-[#0F766E]'}`}>
+                                                <span className={`font-mono font-bold ${isPending ? 'text-slate-400' : 'text-[#2563EB]'}`}>
                                                     {isPending ? 'Menunggu' : formatRupiah(item.nilai_kompensasi)}
                                                 </span>
                                             </div>
@@ -466,7 +466,7 @@ export default function InsidenIndex({
                                                         {isPetugas ? (
                                                             <Link
                                                                 href={`/transaksi/${item.nomor_nota}`}
-                                                                className="font-mono text-sm font-bold text-[#0F766E] hover:text-[#115E59] hover:underline"
+                                                                className="font-mono text-sm font-bold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
                                                             >
                                                                 {
                                                                     item.nomor_nota

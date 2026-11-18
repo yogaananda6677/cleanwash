@@ -24,7 +24,7 @@ function renderSubjectCell(log: AuditLogItem) {
         return (
             <Link
                 href={`/transaksi/${log.subject_id}`}
-                className="font-mono text-xs font-bold text-[#0F766E] hover:text-[#115E59] hover:underline"
+                className="font-mono text-xs font-bold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
             >
                 {log.subject_id}
             </Link>
@@ -35,7 +35,7 @@ function renderSubjectCell(log: AuditLogItem) {
         return (
             <Link
                 href={`/pengantaran/${log.subject_id}`}
-                className="font-mono text-xs font-bold text-[#0F766E] hover:text-[#115E59] hover:underline"
+                className="font-mono text-xs font-bold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
             >
                 Pengantaran #{log.subject_id}
             </Link>
@@ -256,7 +256,7 @@ export default function AuditIndex({
                                         >
                                             <Link
                                                 href={`/transaksi/${item.nomor_nota}`}
-                                                className="font-mono text-sm font-bold text-[#0F766E] hover:text-[#115E59] hover:underline"
+                                                className="font-mono text-sm font-bold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
                                             >
                                                 {item.nomor_nota}
                                             </Link>
@@ -316,7 +316,7 @@ export default function AuditIndex({
                                             <p className="text-[#475569]">
                                                 {formatRupiah(item.total_harga)}
                                             </p>
-                                            <p className="text-[11px] text-[#0F766E]">
+                                            <p className="text-[11px] text-[#2563EB]">
                                                 Dibayar:{' '}
                                                 {formatRupiah(
                                                     item.total_dibayar,
@@ -329,7 +329,7 @@ export default function AuditIndex({
                                         <td className="whitespace-nowrap px-5 py-3.5 text-right">
                                             <Link
                                                 href={`/transaksi/${item.nomor_nota}`}
-                                                className="inline-flex min-h-[2.25rem] items-center gap-1 rounded-xl border border-teal-200 bg-[#F0FDFA] px-3 py-1.5 text-xs font-semibold text-[#115E59] transition hover:bg-[#CCFBF1]"
+                                                className="inline-flex min-h-[2.25rem] items-center gap-1 rounded-xl border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1.5 text-xs font-semibold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
                                             >
                                                 <span>Buka Nota</span>
                                                 <ArrowRight
@@ -377,7 +377,7 @@ export default function AuditIndex({
                                         setSearch(event.target.value)
                                     }
                                     placeholder="Cari nomor nota/ID subjek, nama aktor, atau kode aksi..."
-                                    className="block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white py-2 pl-10 pr-3.5 text-sm text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                    className="block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white py-2 pl-10 pr-3.5 text-sm text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                                 />
                             </div>
                         </div>
@@ -561,7 +561,7 @@ export default function AuditIndex({
                                                     log.payload_after !==
                                                         null) && (
                                                     <details className="mt-1.5">
-                                                        <summary className="cursor-pointer text-[11px] font-semibold text-[#0F766E] hover:text-[#115E59] hover:underline">
+                                                        <summary className="cursor-pointer text-[11px] font-semibold text-[#2563EB] hover:text-[#1D4ED8] hover:underline">
                                                             Lihat detail payload
                                                         </summary>
                                                         <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">

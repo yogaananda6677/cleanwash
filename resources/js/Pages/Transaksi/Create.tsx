@@ -62,7 +62,7 @@ const REASON_LABELS: Record<
 };
 
 const CONTROL_INPUT_CLASS =
-    'mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20';
+    'mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20';
 
 function createEmptyDetailRow(): DetailPakaianFormRow {
     return {
@@ -362,11 +362,11 @@ export default function TransaksiCreate({
                 {/* Left Column — 3-Step Cashier Form */}
                 <div className="space-y-5 xl:col-span-8">
                     {/* Step 1: Identitas Pelanggan & Layanan */}
-                    <section className="rounded-2xl border border-[#D8E2E6] bg-white p-5 shadow-[0_1px_2px_rgba(15,41,51,0.04)] sm:p-6">
+                    <section className="rounded-2xl border border-[#D8E2E6] bg-white p-5 shadow-[0_1px_2px_rgba(11,19,43,0.04)] sm:p-6">
                         <div className="flex items-center gap-2.5">
                             <span
                                 aria-hidden="true"
-                                className="flex min-h-6 min-w-6 items-center justify-center rounded-full bg-[#0F766E] px-1.5 text-xs font-bold text-white"
+                                className="flex min-h-6 min-w-6 items-center justify-center rounded-full bg-[#2563EB] px-1.5 text-xs font-bold text-white"
                             >
                                 1
                             </span>
@@ -511,7 +511,7 @@ export default function TransaksiCreate({
                                                 ? 'mis. 2'
                                                 : 'mis. 2.50'
                                         }
-                                        className="block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white py-2 pl-3.5 pr-14 font-mono text-sm font-semibold tabular-nums text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                        className="block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white py-2 pl-3.5 pr-14 font-mono text-sm font-semibold tabular-nums text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                                     />
                                     <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-xs font-semibold text-[#475569]">
                                         {selectedLayanan?.satuan ?? 'kg'}
@@ -590,7 +590,7 @@ export default function TransaksiCreate({
                             <div className="flex items-start gap-2.5">
                                 <span
                                     aria-hidden="true"
-                                    className="mt-0.5 flex min-h-6 min-w-6 items-center justify-center rounded-full bg-[#0F766E] px-1.5 text-xs font-bold text-white"
+                                    className="mt-0.5 flex min-h-6 min-w-6 items-center justify-center rounded-full bg-[#2563EB] px-1.5 text-xs font-bold text-white"
                                 >
                                     2
                                 </span>
@@ -607,7 +607,7 @@ export default function TransaksiCreate({
                             <button
                                 type="button"
                                 onClick={handleAddDetailRow}
-                                className="inline-flex min-h-[2.375rem] items-center gap-1.5 rounded-xl border border-teal-200 bg-[#F0FDFA] px-3.5 py-2 text-xs font-semibold text-[#115E59] transition hover:bg-[#CCFBF1]"
+                                className="inline-flex min-h-[2.375rem] items-center gap-1.5 rounded-xl border border-blue-200 bg-[#EFF6FF] px-3.5 py-2 text-xs font-semibold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
                             >
                                 <Plus
                                     className="h-3.5 w-3.5 shrink-0"
@@ -724,7 +724,7 @@ export default function TransaksiCreate({
                                                             event.target.value,
                                                         )
                                                     }
-                                                    className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3 py-2 font-mono text-sm tabular-nums text-[#0F172A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                                    className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3 py-2 font-mono text-sm tabular-nums text-[#0F172A] shadow-xs transition focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                                                 />
                                                 {potongErr && (
                                                     <p className="mt-1 text-xs font-medium text-rose-600">
@@ -772,11 +772,11 @@ export default function TransaksiCreate({
                     </section>
 
                     {/* Step 3: Voucher, DP & Catatan */}
-                    <section className="rounded-2xl border border-[#D8E2E6] bg-white p-5 shadow-[0_1px_2px_rgba(15,41,51,0.04)] sm:p-6">
+                    <section className="rounded-2xl border border-[#D8E2E6] bg-white p-5 shadow-[0_1px_2px_rgba(11,19,43,0.04)] sm:p-6">
                         <div className="flex items-center gap-2.5">
                             <span
                                 aria-hidden="true"
-                                className="flex min-h-6 min-w-6 items-center justify-center rounded-full bg-[#0F766E] px-1.5 text-xs font-bold text-white"
+                                className="flex min-h-6 min-w-6 items-center justify-center rounded-full bg-[#2563EB] px-1.5 text-xs font-bold text-white"
                             >
                                 3
                             </span>
@@ -813,7 +813,7 @@ export default function TransaksiCreate({
                                             }
                                         }}
                                         placeholder="mis. HEMAT10K"
-                                        className="block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm uppercase text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                        className="block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm uppercase text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                                     />
                                     <button
                                         type="button"
@@ -821,7 +821,7 @@ export default function TransaksiCreate({
                                         disabled={
                                             voucherCheck.status === 'loading'
                                         }
-                                        className="inline-flex min-h-[2.625rem] shrink-0 items-center justify-center rounded-xl bg-[#0F2933] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#163C4A] disabled:opacity-60"
+                                        className="inline-flex min-h-[2.625rem] shrink-0 items-center justify-center rounded-xl bg-[#0B132B] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1E293B] disabled:opacity-60"
                                     >
                                         {voucherCheck.status === 'loading'
                                             ? 'Mengecek...'
@@ -945,7 +945,7 @@ export default function TransaksiCreate({
                                         )
                                     }
                                     placeholder="0"
-                                    className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm font-semibold tabular-nums text-[#0F172A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                    className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm font-semibold tabular-nums text-[#0F172A] shadow-xs transition focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                                 />
                                 <div className="mt-2 flex flex-wrap gap-1.5">
                                     <button
@@ -965,7 +965,7 @@ export default function TransaksiCreate({
                                     <button
                                         type="button"
                                         onClick={() => handleQuickDp('FULL')}
-                                        className="min-h-[2.125rem] rounded-lg border border-teal-200 bg-[#F0FDFA] px-3 py-1 text-xs font-semibold text-[#115E59] transition hover:bg-[#CCFBF1]"
+                                        className="min-h-[2.125rem] rounded-lg border border-blue-200 bg-[#EFF6FF] px-3 py-1 text-xs font-semibold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
                                     >
                                         Lunas
                                     </button>
@@ -997,7 +997,7 @@ export default function TransaksiCreate({
                                     )
                                 }
                                 placeholder="mis. Pisahkan pakaian putih, jangan pakai pemutih..."
-                                className="mt-1.5 block min-h-[4.5rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                className="mt-1.5 block min-h-[4.5rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder:text-[#5B697A] shadow-xs transition focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                             />
                             {errorMap.catatan_khusus && (
                                 <p className="mt-1.5 text-xs font-medium text-rose-600">
@@ -1010,10 +1010,10 @@ export default function TransaksiCreate({
 
                 {/* Right Column — Sticky Receipt Calculator */}
                 <aside className="xl:col-span-4">
-                    <div className="rounded-2xl border border-[#D8E2E6] bg-[#F8FAFC] p-5 shadow-[0_1px_2px_rgba(15,41,51,0.04)] sm:p-6 xl:sticky xl:top-24">
+                    <div className="rounded-2xl border border-[#D8E2E6] bg-[#F8FAFC] p-5 shadow-[0_1px_2px_rgba(11,19,43,0.04)] sm:p-6 xl:sticky xl:top-24">
                         <div className="flex items-center gap-2">
                             <ReceiptText
-                                className="h-4 w-4 shrink-0 text-[#0F766E]"
+                                className="h-4 w-4 shrink-0 text-[#2563EB]"
                                 aria-hidden="true"
                             />
                             <h2 className="text-base font-bold tracking-tight text-[#0F172A]">
@@ -1088,7 +1088,7 @@ export default function TransaksiCreate({
                                     <dt className="text-xs text-[#5B697A]">
                                         Dibayar Awal (DP)
                                     </dt>
-                                    <dd className="font-mono font-semibold tabular-nums text-[#0F766E]">
+                                    <dd className="font-mono font-semibold tabular-nums text-[#2563EB]">
                                         {formatRupiah(preview.dpDecimal)}
                                     </dd>
                                 </div>
@@ -1147,7 +1147,7 @@ export default function TransaksiCreate({
                                     !data.berat_atau_jumlah ||
                                     Number.parseFloat(data.berat_atau_jumlah) <= 0
                                 }
-                                className="flex min-h-[2.75rem] w-full items-center justify-center rounded-xl bg-[#0F766E] px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-60"
+                                className="flex min-h-[2.75rem] w-full items-center justify-center rounded-xl bg-[#2563EB] px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 {processing
                                     ? 'Menyimpan Transaksi...'

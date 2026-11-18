@@ -307,7 +307,7 @@ export default function ProduksiIndex({
                         onClick={() => setTahapStatus('')}
                         className={`flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition active:scale-95 ${
                             tahapStatus === ''
-                                ? 'bg-[#0F766E] text-white shadow-xs ring-1 ring-[#14B8A6]/40'
+                                ? 'bg-[#2563EB] text-white shadow-xs ring-1 ring-blue-300'
                                 : 'border border-[#CBD5E1] bg-white text-slate-700 hover:bg-slate-50'
                         }`}
                     >
@@ -337,11 +337,11 @@ export default function ProduksiIndex({
                                 onClick={() => handleStageCardClick(stage)}
                                 className={`flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition active:scale-95 ${
                                     selected
-                                        ? 'bg-[#0F766E] text-white shadow-xs ring-1 ring-[#14B8A6]/40'
+                                        ? 'bg-[#2563EB] text-white shadow-xs ring-1 ring-blue-300'
                                         : 'border border-[#CBD5E1] bg-white text-slate-700 hover:bg-slate-50'
                                 }`}
                             >
-                                <span className={selected ? 'text-white' : 'text-[#0F766E]'}>
+                                <span className={selected ? 'text-white' : 'text-[#2563EB]'}>
                                     {meta.icon}
                                 </span>
                                 <span>{formatTahapProduksi(stage)}</span>
@@ -615,7 +615,7 @@ export default function ProduksiIndex({
                                                             nextStage,
                                                         )
                                                     }
-                                                    className="hidden sm:inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
+                                                    className="hidden sm:inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-50"
                                                 >
                                                     <span>
                                                         {advancingNota ===
@@ -718,7 +718,7 @@ export default function ProduksiIndex({
                                                         </span>,
                                                         <strong
                                                             key="qty"
-                                                            className="font-mono font-bold tabular-nums text-[#0F766E]"
+                                                            className="font-mono font-bold tabular-nums text-[#2563EB]"
                                                         >
                                                             {
                                                                 item.berat_atau_jumlah
@@ -848,14 +848,14 @@ export default function ProduksiIndex({
                                                                         }
                                                                         className={`inline-flex min-h-[1.875rem] items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${
                                                                             isCurrent
-                                                                                ? 'bg-[#0F766E] text-white ring-[#0F766E] shadow-xs'
+                                                                                ? 'bg-[#2563EB] text-white ring-[#2563EB] shadow-xs'
                                                                                 : isCompleted
                                                                                   ? 'bg-[#ECFDF5] text-[#065F46] ring-emerald-200'
                                                                                   : 'bg-white text-[#5B697A] ring-[#CBD5E1]'
                                                                         }`}
                                                                     >
                                                                         {isCurrent ? (
-                                                                            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white text-[10px] font-bold text-[#0F766E] tabular-nums">
+                                                                            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white text-[10px] font-bold text-[#2563EB] tabular-nums">
                                                                                 {index +
                                                                                     1}
                                                                             </span>
@@ -941,7 +941,7 @@ export default function ProduksiIndex({
                                                         nextStage,
                                                     )
                                                 }
-                                                className="flex min-h-[3rem] w-full items-center justify-center gap-2 rounded-xl bg-[#0F766E] px-4 py-2.5 text-sm font-bold text-white shadow-sm active:scale-[0.98] transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
+                                                className="flex min-h-[3rem] w-full items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 py-2.5 text-sm font-bold text-white shadow-sm active:scale-[0.98] transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 <span>
                                                     {advancingNota ===
@@ -1003,7 +1003,7 @@ export default function ProduksiIndex({
                             type="submit"
                             form={timbangFormId}
                             disabled={timbangForm.processing || !timbangTarget}
-                            className="inline-flex min-h-[2.5rem] items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
+                            className="inline-flex min-h-[2.5rem] items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             <Scale
                                 className="h-4 w-4 shrink-0"
@@ -1024,9 +1024,9 @@ export default function ProduksiIndex({
                         onSubmit={handleTimbangSubmit}
                         className="space-y-4"
                     >
-                        <div className="flex items-start gap-2.5 rounded-xl border border-teal-200 border-l-4 border-l-[#0F766E] bg-[#F0FDFA] px-4 py-3 text-xs text-[#115E59]">
+                        <div className="flex items-start gap-2.5 rounded-xl border border-blue-200 border-l-4 border-l-[#2563EB] bg-[#EFF6FF] px-4 py-3 text-xs text-[#1D4ED8]">
                             <Info
-                                className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]"
+                                className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]"
                                 aria-hidden="true"
                             />
                             <div>
@@ -1088,7 +1088,7 @@ export default function ProduksiIndex({
                                         ? beratErrorId
                                         : undefined
                                 }
-                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm font-semibold tabular-nums text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm font-semibold tabular-nums text-[#0F172A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                             />
                             {timbangForm.errors.berat_aktual && (
                                 <p
@@ -1135,7 +1135,7 @@ export default function ProduksiIndex({
                                     <dt className="text-[#5B697A]">
                                         Sudah Dibayar
                                     </dt>
-                                    <dd className="font-mono font-semibold tabular-nums text-[#0F766E]">
+                                    <dd className="font-mono font-semibold tabular-nums text-[#2563EB]">
                                         {formatRupiah(
                                             timbangTarget.total_dibayar,
                                         )}
@@ -1249,7 +1249,7 @@ export default function ProduksiIndex({
                                         ? catatanErrorId
                                         : undefined
                                 }
-                                className="mt-1.5 block min-h-[4.25rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                className="mt-1.5 block min-h-[4.25rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder-[#5B697A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                             />
                             {timbangForm.errors.catatan && (
                                 <p

@@ -13,7 +13,7 @@ export type StatTileTone =
 
 const ICON_SURFACE_CLASSES: Record<StatTileTone, string> = {
     neutral: 'bg-[#F8FAFC] text-[#475569] ring-[#D8E2E6]',
-    brand: 'bg-[#F0FDFA] text-[#0F766E] ring-teal-200',
+    brand: 'bg-[#EFF6FF] text-[#2563EB] ring-blue-200',
     emerald: 'bg-[#ECFDF5] text-[#047857] ring-emerald-200',
     amber: 'bg-[#FFFBEB] text-[#B45309] ring-amber-200',
     rose: 'bg-[#FFF1F2] text-[#BE123C] ring-rose-200',
@@ -73,7 +73,7 @@ export default function StatTile({
                         {label}
                     </p>
                     {onClick && active ? (
-                        <span className="inline-flex min-h-[1.375rem] shrink-0 items-center gap-1 rounded-full bg-[#0F766E] px-2 py-0.5 text-[11px] font-semibold text-white">
+                        <span className="inline-flex min-h-[1.375rem] shrink-0 items-center gap-1 rounded-full bg-[#2563EB] px-2 py-0.5 text-[11px] font-semibold text-white">
                             <Check className="h-3 w-3 shrink-0" aria-hidden="true" />
                             {activeLabel}
                         </span>
@@ -111,7 +111,7 @@ export default function StatTile({
             {href && !onClick && (
                 <Link
                     href={href}
-                    className="mt-3 inline-flex min-h-[1.75rem] items-center gap-1 text-xs font-semibold text-[#0F766E] transition hover:text-[#115E59]"
+                    className="mt-3 inline-flex min-h-[1.75rem] items-center gap-1 text-xs font-semibold text-[#2563EB] transition hover:text-[#1D4ED8]"
                 >
                     <span>{hrefLabel}</span>
                     <ArrowRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
@@ -128,7 +128,7 @@ export default function StatTile({
                 aria-pressed={active}
                 className={`flex w-full flex-col justify-between rounded-2xl p-4 text-left transition sm:p-5 ${
                     active
-                        ? 'border-2 border-[#0F766E] bg-[#F0FDFA] shadow-xs'
+                        ? 'border-2 border-[#2563EB] bg-[#EFF6FF] shadow-xs'
                         : 'border border-[#D8E2E6] bg-white shadow-[0_1px_2px_rgba(15,41,51,0.04)] hover:border-[#7C8C9D] hover:bg-[#F8FAFC]'
                 } ${className}`}
             >

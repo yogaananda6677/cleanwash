@@ -233,7 +233,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                 <button
                     type="button"
                     onClick={openCreateModal}
-                    className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
+                    className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8]"
                 >
                     <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
                     <span>
@@ -384,7 +384,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                                 </td>
                                                 <td className="whitespace-nowrap px-5 py-3.5 text-xs">
                                                     {item.perlu_setrika ? (
-                                                        <span className="inline-flex items-center gap-1.5 font-medium text-[#0F766E]">
+                                                        <span className="inline-flex items-center gap-1.5 font-medium text-[#2563EB]">
                                                             <CheckCircle2
                                                                 className="h-3.5 w-3.5 shrink-0"
                                                                 aria-hidden="true"
@@ -512,7 +512,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                             type="submit"
                             form={formId}
                             disabled={processing}
-                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:opacity-60"
+                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8] disabled:opacity-60"
                         >
                             {processing
                                 ? 'Menyimpan...'
@@ -557,7 +557,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                     setData('nama_layanan', event.target.value)
                                 }
                                 placeholder="mis. Cuci Setrika / Cuci Sepatu"
-                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                             />
                             {errors.nama_layanan && (
                                 <p className="mt-1.5 text-xs font-medium text-rose-600">
@@ -582,7 +582,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                         event.target.value as TingkatKecepatan,
                                     )
                                 }
-                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                             >
                                 <option value="REGULER">REGULER</option>
                                 <option value="EXPRESS">EXPRESS</option>
@@ -611,7 +611,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                         event.target.value as MetodeHitung,
                                     )
                                 }
-                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                             >
                                 <option value="BERAT">BERAT (kg)</option>
                                 <option value="JUMLAH">JUMLAH (pcs)</option>
@@ -662,7 +662,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                     setData('harga_satuan', event.target.value)
                                 }
                                 placeholder="mis. 8000"
-                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm tabular-nums text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm tabular-nums text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                             />
                             {errors.harga_satuan && (
                                 <p className="mt-1.5 text-xs font-medium text-rose-600">
@@ -686,7 +686,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                         event.target.checked,
                                     )
                                 }
-                                className="mt-0.5 h-4 w-4 rounded border-[#7C8C9D] accent-[#0F766E]"
+                                className="mt-0.5 h-4 w-4 rounded border-[#7C8C9D] accent-[#2563EB]"
                             />
                             <div>
                                 <span className="block text-xs font-semibold text-[#0F172A]">
@@ -710,7 +710,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                 onChange={(event) =>
                                     setData('is_active', event.target.checked)
                                 }
-                                className="mt-0.5 h-4 w-4 rounded border-[#7C8C9D] accent-[#0F766E]"
+                                className="mt-0.5 h-4 w-4 rounded border-[#7C8C9D] accent-[#2563EB]"
                             />
                             <div>
                                 <span className="block text-xs font-semibold text-[#0F172A]">
@@ -739,7 +739,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                         ),
                                     )
                                 }
-                                className="text-xs font-semibold text-[#0F766E] hover:text-[#115E59] hover:underline"
+                                className="text-xs font-semibold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
                             >
                                 Reset Urutan Standar
                             </button>
@@ -757,7 +757,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                         </li>
                                     )}
                                     <li className="inline-flex items-center gap-1 rounded-lg border border-[#D8E2E6] bg-white px-2.5 py-1">
-                                        <span className="font-mono text-[11px] text-[#0F766E] tabular-nums">
+                                        <span className="font-mono text-[11px] text-[#2563EB] tabular-nums">
                                             {index + 1}.
                                         </span>
                                         <span>
@@ -795,7 +795,7 @@ export default function LayananIndex({ layanan, filters }: LayananIndexProps) {
                                             onChange={() =>
                                                 handleToggleStage(stage)
                                             }
-                                            className="h-3.5 w-3.5 rounded border-[#7C8C9D] accent-[#0F766E]"
+                                            className="h-3.5 w-3.5 rounded border-[#7C8C9D] accent-[#2563EB]"
                                         />
                                         <span>{stage}</span>
                                     </label>

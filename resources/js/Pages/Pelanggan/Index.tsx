@@ -122,7 +122,7 @@ export default function PelangganIndex({
                 <button
                     type="button"
                     onClick={openCreateModal}
-                    className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
+                    className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8]"
                 >
                     <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
                     <span>
@@ -309,7 +309,7 @@ export default function PelangganIndex({
                             type="submit"
                             form="pelanggan-form"
                             disabled={processing}
-                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:opacity-60"
+                            className="inline-flex min-h-[2.5rem] items-center justify-center rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8] disabled:opacity-60"
                         >
                             {processing
                                 ? 'Menyimpan...'
@@ -342,7 +342,7 @@ export default function PelangganIndex({
                                 setData('nama', event.target.value)
                             }
                             placeholder="mis. Siti Aminah"
-                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                         />
                         {errors.nama && (
                             <p className="mt-1.5 text-xs font-medium text-rose-600">
@@ -368,7 +368,7 @@ export default function PelangganIndex({
                                 setData('no_telepon', event.target.value)
                             }
                             placeholder="mis. 081234567890"
-                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                         />
                         {errors.no_telepon && (
                             <p className="mt-1.5 text-xs font-medium text-rose-600">
@@ -394,7 +394,7 @@ export default function PelangganIndex({
                                 setData('alamat', event.target.value)
                             }
                             placeholder="Alamat pengantaran / domisili pelanggan"
-                            className="mt-1.5 block min-h-[5.5rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                            className="mt-1.5 block min-h-[5.5rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder:text-[#5B697A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                         />
                         {errors.alamat && (
                             <p className="mt-1.5 text-xs font-medium text-rose-600">
@@ -418,7 +418,7 @@ export default function PelangganIndex({
                                         event.target.checked,
                                     )
                                 }
-                                className="mt-0.5 h-4 w-4 rounded border-[#7C8C9D] accent-[#0F766E]"
+                                className="mt-0.5 h-4 w-4 rounded border-[#7C8C9D] accent-[#2563EB]"
                             />
                             <div>
                                 <span className="block text-xs font-semibold text-[#0F172A]">

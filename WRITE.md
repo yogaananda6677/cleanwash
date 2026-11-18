@@ -573,6 +573,52 @@
 - **Next Exact Action:**
   - Commit dan push ke repository GitHub `origin/main`.
 
+---
+
+### [#040] 2026-11-19 02:08 — Primary Agent — Brand Logo Vector Monogram & Atelier French Navy Color Palette Overhaul
+- **Status:** `DONE` (`ALL_TESTS_PASS`)
+- **Ringkasan Kegiatan:**
+  - Merespons instruksi user: *"ganti logo clesn wash dan rombak semua color palletenya menjadi lebih baguus dan tidak terlalu ai slop"*.
+  - **1. Logo Vektor Orisinal Bespoke (`CleanWashLogo.tsx`)**:
+    - Menggantikan logo template generik `<Droplets>` dari Lucide dengan monogram vektor bertema *Hydro-Textile Curves*:
+      - Lengkungan 'C' sirkular melambangkan aliran air dan perputaran drum mesin cuci (*hydrodynamic flow*).
+      - Lipatan serat kain 'W' melambangkan rajutan tekstil (*woven textile folds*).
+      - Bintang permata 4-sudut melambangkan kemurnian, kebersihan, dan kesegaran pakaian (*purity star*).
+    - Menyediakan 3 varian fleksibel (`variant="full"` lengkap dengan wordmark & subtext, `variant="mark"` monogram mandiri, `variant="horizontal"` hemat ruang), ukuran responsif (`sm`, `md`, `lg`, `xl`), serta tema dinamis (`light` untuk background terang, `dark` untuk background navy/sidebar).
+    - Menerapkan logo baru pada seluruh titik brand: navbar landing page, footer, AppLayout desktop & mobile drawer, halaman Login split panel, serta lembar cetak Nota Resmi.
+  - **2. Rombak Total Color Palette (Anti-AI Slop)**:
+    - Menyingkirkan palet teal/petrol generik SaaS (`#0F2933`, `#0F766E`, `#115E59`, `#14B8A6`, `#2DD4BF`, `#F0FDFA`, `#CCFBF1`) dari seluruh codebase (0 sisa).
+    - Menggantinya dengan **Atelier French Navy & Royal Cobalt**:
+      - Obsidian Navy (`#0B132B` background sidebar & filter submit, `#0F172A` ink teks utama, `#1E293B` surface sekunder)
+      - Royal Cobalt (`#2563EB` primary CTA & brand highlight, `#1D4ED8` hover state, `#EFF6FF` soft linen background, `#DBEAFE` subtle ring & border)
+      - Porcelain Alabaster Canvas (`#F8FAFC`) dan Pure White Surface (`#FFFFFF`)
+      - Presisi Focus-Visible: `3px solid #2563EB` dengan offset `2px`
+  - **3. Pembaruan Menyeluruh 15 Halaman & Komponen**:
+    - `resources/css/app.css`: konfigurasi `@theme` `--color-navy-*`, `--color-brand-*`, fokus ring.
+    - `resources/js/Components/`: `CleanWashLogo.tsx` (NEW), `StatusBadge.tsx`, `StatTile.tsx`, `FilterToolbar.tsx`, `EmptyState.tsx`, `Pagination.tsx`, `Modal.tsx`, `PelunasanModal.tsx`, `LaporkanInsidenModal.tsx`, `KonfirmasiKompensasiModal.tsx`, `SerahTerimaModal.tsx`.
+    - `resources/js/Layouts/AppLayout.tsx`: logo lockup, sidebar obsidian navy, mobile bottom navigation.
+    - `resources/js/Pages/`: `Welcome.tsx`, `Auth/Login.tsx`, `Dashboard/Index.tsx`, `Transaksi/Create.tsx`, `Transaksi/Index.tsx`, `Transaksi/Show.tsx`, `Transaksi/Nota.tsx`, `Pelanggan/Index.tsx`, `Layanan/Index.tsx`, `Voucher/Index.tsx`, `Produksi/Index.tsx`, `Insiden/Index.tsx`, `Pengantaran/Index.tsx`, `Pengantaran/Show.tsx`, `SerahTerima/Index.tsx`, `Audit/Index.tsx`.
+  - **4. Pembaruan Dokumentasi Design System**:
+    - `docs/design/DESIGN_SYSTEM.md`: dokumentasi lengkap monogram vektor, varian logo, filosofi hydro-textile, dan token palet warna baru beserta rasio kontras WCAG AA terverifikasi.
+- **File Dibuat / Diubah:**
+  - `resources/js/Components/CleanWashLogo.tsx` — Komponen logo vektor monogram bespoke baru
+  - `resources/css/app.css` — Konfigurasi token `@theme` palet Atelier French Navy & Royal Cobalt
+  - Seluruh komponen UI & 15 halaman Inertia di `resources/js/**`
+  - `docs/design/DESIGN_SYSTEM.md` — Dokumentasi design system terkini
+  - `WRITE.md` — Penambahan entri kegiatan `#040`
+- **Verifikasi / Bukti Uji:**
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` (`exit code 0`)
+  - `npx tsc --noEmit` -> `0 errors` (`exit code 0`)
+  - `npm run build` -> `built in 3.32s` (`exit code 0`)
+  - `php artisan test` -> `115 passed (4221 assertions)` (`exit code 0`)
+  - `npx playwright test tests/e2e/landing-and-mobile.spec.ts` -> `4 passed (6.0s)` (`exit code 0`)
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Semua referensi teal generik lama terbukti 0 ripgrep occurrences di `resources/js/`.
+  - Zero regression: seluruh 115 test backend dan seluruh 4 browser E2E test Playwright lulus 100%.
+- **Next Exact Action:**
+  - Commit dan push ke repository GitHub `origin/main`.
+
+
 
 
 

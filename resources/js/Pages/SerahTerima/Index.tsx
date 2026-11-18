@@ -194,7 +194,7 @@ export default function SerahTerimaIndex({
                                 onClick={() => handleModeChange(tab.key)}
                                 className={`inline-flex min-h-[2.5rem] items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
                                     active
-                                        ? 'bg-[#0F766E] text-white shadow-xs'
+                                        ? 'bg-[#2563EB] text-white shadow-xs'
                                         : 'border border-[#7C8C9D] bg-white text-[#0F172A] hover:bg-[#F8FAFC]'
                                 }`}
                             >
@@ -203,7 +203,7 @@ export default function SerahTerimaIndex({
                                     <span
                                         className={`rounded-full px-2 py-0.5 font-mono text-[11px] tabular-nums ${
                                             active
-                                                ? 'bg-[#115E59] text-white'
+                                                ? 'bg-[#1D4ED8] text-white'
                                                 : 'bg-[#EEF2F5] text-[#0F172A]'
                                         }`}
                                     >
@@ -214,7 +214,7 @@ export default function SerahTerimaIndex({
                                     <span
                                         className={`rounded-full px-2 py-0.5 font-mono text-[11px] tabular-nums ${
                                             active
-                                                ? 'bg-[#115E59] text-white'
+                                                ? 'bg-[#1D4ED8] text-white'
                                                 : 'bg-[#FFFBEB] text-[#78350F]'
                                         }`}
                                     >
@@ -329,7 +329,7 @@ export default function SerahTerimaIndex({
                                                     >
                                                         <Link
                                                             href={`/transaksi/${item.nomor_nota}`}
-                                                            className="font-mono text-sm font-bold text-[#0F766E] hover:text-[#115E59] hover:underline"
+                                                            className="font-mono text-sm font-bold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
                                                         >
                                                             {item.nomor_nota}
                                                         </Link>
@@ -442,7 +442,7 @@ export default function SerahTerimaIndex({
                                                                     .pengantaran && (
                                                                     <Link
                                                                         href={`/pengantaran/${item.pengantaran_aktif.pengantaran.id_pengantaran}`}
-                                                                        className="text-[11px] font-semibold text-[#0F766E] hover:text-[#115E59] hover:underline"
+                                                                        className="text-[11px] font-semibold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
                                                                     >
                                                                         Sesi #
                                                                         {
@@ -476,7 +476,7 @@ export default function SerahTerimaIndex({
                                                         </p>
                                                         <p className="mt-0.5 text-[#5B697A]">
                                                             Dibayar:{' '}
-                                                            <span className="font-mono font-semibold tabular-nums text-[#0F766E]">
+                                                            <span className="font-mono font-semibold tabular-nums text-[#2563EB]">
                                                                 {formatRupiah(
                                                                     item.total_dibayar,
                                                                 )}
@@ -506,7 +506,7 @@ export default function SerahTerimaIndex({
                                                                             item,
                                                                         )
                                                                     }
-                                                                    className="inline-flex min-h-[2.375rem] items-center justify-center rounded-xl bg-[#0F766E] px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
+                                                                    className="inline-flex min-h-[2.375rem] items-center justify-center rounded-xl bg-[#2563EB] px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8]"
                                                                 >
                                                                     Catat
                                                                     Pelunasan
@@ -538,7 +538,7 @@ export default function SerahTerimaIndex({
 
                                                             <Link
                                                                 href={`/transaksi/${item.nomor_nota}`}
-                                                                className="inline-flex min-h-[1.75rem] items-center gap-1 text-xs font-semibold text-[#0F766E] hover:text-[#115E59] hover:underline"
+                                                                className="inline-flex min-h-[1.75rem] items-center gap-1 text-xs font-semibold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
                                                             >
                                                                 <span>
                                                                     Detail Nota

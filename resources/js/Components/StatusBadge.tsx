@@ -22,6 +22,7 @@ import type {
 export type BadgeTone =
     | 'slate'
     | 'teal'
+    | 'cobalt'
     | 'sky'
     | 'emerald'
     | 'amber'
@@ -30,25 +31,27 @@ export type BadgeTone =
     | 'violet';
 
 const TONE_CLASSES: Record<BadgeTone, string> = {
-    slate: 'bg-[#EEF2F5] text-[#334155] ring-[#D8E2E6]',
-    teal: 'bg-[#F0FDFA] text-[#115E59] ring-teal-200',
-    sky: 'bg-sky-50 text-sky-900 ring-sky-200',
-    emerald: 'bg-[#ECFDF5] text-[#065F46] ring-emerald-200',
-    amber: 'bg-[#FFFBEB] text-[#78350F] ring-amber-300/80',
-    rose: 'bg-[#FFF1F2] text-[#9F1239] ring-rose-200',
-    indigo: 'bg-[#EEF2FF] text-[#3730A3] ring-indigo-200',
-    violet: 'bg-violet-50 text-violet-900 ring-violet-200',
+    slate: 'bg-slate-100 text-slate-700 ring-slate-200',
+    teal: 'bg-blue-50 text-blue-800 ring-blue-200',
+    cobalt: 'bg-blue-50 text-blue-800 ring-blue-200',
+    sky: 'bg-sky-50 text-sky-800 ring-sky-200',
+    emerald: 'bg-emerald-50 text-emerald-800 ring-emerald-200',
+    amber: 'bg-amber-50 text-amber-900 ring-amber-200',
+    rose: 'bg-rose-50 text-rose-800 ring-rose-200',
+    indigo: 'bg-indigo-50 text-indigo-800 ring-indigo-200',
+    violet: 'bg-purple-50 text-purple-800 ring-purple-200',
 };
 
 const DOT_CLASSES: Record<BadgeTone, string> = {
-    slate: 'bg-[#475569]',
-    teal: 'bg-[#0F766E]',
-    sky: 'bg-sky-700',
-    emerald: 'bg-[#047857]',
-    amber: 'bg-[#B45309]',
-    rose: 'bg-[#BE123C]',
-    indigo: 'bg-[#4338CA]',
-    violet: 'bg-violet-700',
+    slate: 'bg-slate-500',
+    teal: 'bg-blue-600',
+    cobalt: 'bg-blue-600',
+    sky: 'bg-sky-600',
+    emerald: 'bg-emerald-600',
+    amber: 'bg-amber-600',
+    rose: 'bg-rose-600',
+    indigo: 'bg-indigo-600',
+    violet: 'bg-purple-600',
 };
 
 interface BadgeMeta {
@@ -57,7 +60,7 @@ interface BadgeMeta {
 }
 
 const ROLE_META: Record<UserRole, BadgeMeta> = {
-    PETUGAS: { label: 'Petugas / Kasir', tone: 'teal' },
+    PETUGAS: { label: 'Petugas / Kasir', tone: 'cobalt' },
     PEGAWAI: { label: 'Pegawai Produksi', tone: 'indigo' },
     PENGANTAR: { label: 'Kurir Pengantaran', tone: 'violet' },
 };

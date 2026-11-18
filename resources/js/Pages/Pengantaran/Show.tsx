@@ -272,7 +272,7 @@ export default function PengantaranShow({
                                 type="button"
                                 onClick={handleStartSession}
                                 disabled={startingSession}
-                                className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:opacity-50"
+                                className="inline-flex min-h-[2.75rem] items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8] disabled:opacity-50"
                             >
                                 <Truck
                                     className="h-4 w-4 shrink-0"
@@ -347,7 +347,7 @@ export default function PengantaranShow({
                             className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-[#EEF2F5]"
                         >
                             <div
-                                className="h-full rounded-full bg-[#0D9488] transition-all"
+                                className="h-full rounded-full bg-[#2563EB] transition-all"
                                 style={{ width: `${progressPct}%` }}
                             />
                         </div>
@@ -356,7 +356,7 @@ export default function PengantaranShow({
 
                 {isAssignedKurir &&
                     pengantaran.status_pengantaran === 'DIJADWALKAN' && (
-                        <div className="mt-4 flex flex-col justify-between gap-3 rounded-xl border border-teal-200 border-l-4 border-l-[#0F766E] bg-[#F0FDFA] px-4 py-3 text-xs text-[#115E59] sm:flex-row sm:items-center">
+                        <div className="mt-4 flex flex-col justify-between gap-3 rounded-xl border border-[#DBEAFE] border-l-4 border-l-[#2563EB] bg-[#EFF6FF] px-4 py-3 text-xs text-[#1D4ED8] sm:flex-row sm:items-center">
                             <p className="leading-relaxed">
                                 Sesi ini masih berstatus{' '}
                                 <strong>DIJADWALKAN</strong>. Klik{' '}
@@ -368,7 +368,7 @@ export default function PengantaranShow({
                                 type="button"
                                 onClick={handleStartSession}
                                 disabled={startingSession}
-                                className="inline-flex min-h-[2.75rem] w-full shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:opacity-50 sm:w-auto"
+                                className="inline-flex min-h-[2.75rem] w-full shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8] disabled:opacity-50 sm:w-auto"
                             >
                                 <Truck
                                     className="h-4 w-4 shrink-0"
@@ -431,7 +431,7 @@ export default function PengantaranShow({
                                         {isPetugas ? (
                                             <Link
                                                 href={`/transaksi/${item.nomor_nota}`}
-                                                className="font-mono text-base font-bold text-[#0F766E] hover:text-[#115E59] hover:underline"
+                                                className="font-mono text-base font-bold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
                                             >
                                                 {item.nomor_nota}
                                             </Link>
@@ -462,7 +462,7 @@ export default function PengantaranShow({
                                         </h3>
                                         <a
                                             href={`tel:${item.transaksi.pelanggan.no_telepon}`}
-                                            className="inline-flex min-h-[2.25rem] items-center gap-1.5 rounded-lg border border-teal-300 bg-teal-50 px-2.5 py-1 text-xs font-bold text-[#0F766E] shadow-2xs transition hover:bg-teal-100 active:scale-95"
+                                            className="inline-flex min-h-[2.25rem] items-center gap-1.5 rounded-lg border border-[#DBEAFE] bg-[#EFF6FF] px-2.5 py-1 text-xs font-bold text-[#2563EB] shadow-2xs transition hover:bg-[#DBEAFE] active:scale-95"
                                         >
                                             <Phone
                                                 className="h-3.5 w-3.5 shrink-0"
@@ -476,7 +476,7 @@ export default function PengantaranShow({
                                     <div className="mt-2.5 flex flex-col gap-2 rounded-xl border border-[#D8E2E6] bg-[#F8FAFC] p-3">
                                         <div className="flex items-start gap-2.5">
                                             <MapPin
-                                                className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]"
+                                                className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]"
                                                 aria-hidden="true"
                                             />
                                             <div className="min-w-0 flex-1">
@@ -493,7 +493,7 @@ export default function PengantaranShow({
                                                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.transaksi.pelanggan.alamat)}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="inline-flex min-h-[2.25rem] w-full items-center justify-center gap-1.5 rounded-lg bg-[#0F766E] px-3 py-1.5 text-xs font-semibold text-white shadow-2xs transition hover:bg-[#115E59] sm:w-auto"
+                                                className="inline-flex min-h-[2.25rem] w-full items-center justify-center gap-1.5 rounded-lg bg-[#2563EB] px-3 py-1.5 text-xs font-semibold text-white shadow-2xs transition hover:bg-[#1D4ED8] sm:w-auto"
                                             >
                                                 <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                                                 <span>Buka Rute di Google Maps</span>
@@ -575,7 +575,7 @@ export default function PengantaranShow({
                                             <dt className="text-[#5B697A]">
                                                 Sudah Dibayar
                                             </dt>
-                                            <dd className="font-mono font-semibold tabular-nums text-[#0F766E]">
+                                            <dd className="font-mono font-semibold tabular-nums text-[#2563EB]">
                                                 {formatRupiah(
                                                     item.transaksi
                                                         .total_dibayar,
@@ -729,7 +729,7 @@ export default function PengantaranShow({
                                                     ? blockedByKK06
                                                         ? 'bg-[#B45309] hover:bg-amber-800 text-white'
                                                         : 'bg-[#047857] hover:bg-emerald-800 text-white'
-                                                    : 'bg-[#0F766E] hover:bg-[#115E59] text-white';
+                                                    : 'bg-[#2563EB] hover:bg-[#1D4ED8] text-white';
 
                                                 return (
                                                     <button
@@ -815,7 +815,7 @@ export default function PengantaranShow({
                                 {isPetugas && (
                                     <Link
                                         href={`/transaksi/${item.nomor_nota}`}
-                                        className="inline-flex min-h-[2.5rem] items-center gap-1 text-xs font-semibold text-[#0F766E] hover:text-[#115E59] hover:underline"
+                                        className="inline-flex min-h-[2.5rem] items-center gap-1 text-xs font-semibold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
                                     >
                                         <span>Detail Nota &amp; Pembayaran</span>
                                         <ArrowRight
@@ -937,7 +937,7 @@ export default function PengantaranShow({
                                         ? `${failReasonHintId} ${failReasonErrorId}`
                                         : failReasonHintId
                                 }
-                                className="mt-1.5 block min-h-[5.5rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                className="mt-1.5 block min-h-[5.5rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder-[#5B697A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                             />
                             {activeFailError && (
                                 <p
@@ -985,7 +985,7 @@ export default function PengantaranShow({
                             disabled={
                                 rescheduleForm.processing || !rescheduleTarget
                             }
-                            className="inline-flex min-h-[2.5rem] items-center justify-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59] disabled:cursor-not-allowed disabled:opacity-50"
+                            className="inline-flex min-h-[2.5rem] items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             <CalendarClock
                                 className="h-4 w-4 shrink-0"
@@ -1078,7 +1078,7 @@ export default function PengantaranShow({
                                         ? rescheduleDateErrId
                                         : undefined
                                 }
-                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                             />
                             {rescheduleForm.errors.tanggal_pengantaran && (
                                 <p
@@ -1117,7 +1117,7 @@ export default function PengantaranShow({
                                             ? rescheduleKurirErrId
                                             : undefined
                                     }
-                                    className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                                    className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                                 >
                                     {activeKurirOptions.map((kurir) => (
                                         <option

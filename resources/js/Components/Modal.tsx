@@ -124,7 +124,7 @@ export default function Modal({
             }}
             onPointerDown={handlePointerDown}
             onPointerUp={handlePointerUp}
-            className={`m-auto max-h-[90vh] w-[calc(100%-2rem)] overflow-hidden rounded-2xl border border-[#D8E2E6] bg-white p-0 text-left shadow-2xl backdrop:bg-[#0F2933]/55 backdrop:backdrop-blur-[2px] ${MAX_WIDTH_CLASS[maxWidth]}`}
+            className={`m-auto max-h-[90vh] w-[calc(100%-2rem)] overflow-hidden rounded-2xl border border-[#D8E2E6] bg-white p-0 text-left shadow-2xl backdrop:bg-[#0B132B]/60 backdrop:backdrop-blur-[2px] ${MAX_WIDTH_CLASS[maxWidth]}`}
         >
             {open && (
                 <div className="flex max-h-[90vh] w-full flex-col overflow-hidden">

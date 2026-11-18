@@ -203,7 +203,7 @@ export default function KonfirmasiKompensasiModal({
                         </div>
                         <div>
                             <p className="text-[#5B697A]">Sudah Dibayar</p>
-                            <p className="mt-0.5 font-mono font-semibold tabular-nums text-[#0F766E]">
+                            <p className="mt-0.5 font-mono font-semibold tabular-nums text-[#2563EB]">
                                 {formatRupiah(target.total_dibayar)}
                             </p>
                         </div>
@@ -244,7 +244,7 @@ export default function KonfirmasiKompensasiModal({
                                     ? nilaiErrorId
                                     : undefined
                             }
-                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm font-semibold tabular-nums text-[#0F172A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                            className="mt-1.5 block min-h-[2.625rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 font-mono text-sm font-semibold tabular-nums text-[#0F172A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                         />
                         <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#5B697A]">
                             <span>
@@ -261,7 +261,7 @@ export default function KonfirmasiKompensasiModal({
                                         target.estimasi_kompensasi,
                                     )
                                 }
-                                className="min-h-[1.75rem] font-semibold text-[#0F766E] hover:text-[#115E59] hover:underline"
+                                className="min-h-[1.75rem] font-semibold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
                             >
                                 Gunakan Estimasi
                             </button>
@@ -348,7 +348,7 @@ export default function KonfirmasiKompensasiModal({
                                     ? catatanErrorId
                                     : undefined
                             }
-                            className="mt-1.5 block min-h-[4.25rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder-[#5B697A] focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
+                            className="mt-1.5 block min-h-[4.25rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder-[#5B697A] focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
                         />
                         {errors.keterangan_konfirmasi && (
                             <p

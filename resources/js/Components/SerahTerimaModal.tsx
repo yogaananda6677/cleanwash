@@ -229,7 +229,7 @@ export default function SerahTerimaModal({
                                 <dt className="text-[#5B697A]">
                                     Total Dibayar
                                 </dt>
-                                <dd className="font-mono font-semibold tabular-nums text-[#0F766E]">
+                                <dd className="font-mono font-semibold tabular-nums text-[#2563EB]">
                                     {formatRupiah(target.total_dibayar)}
                                 </dd>
                             </div>
@@ -387,9 +387,9 @@ export default function SerahTerimaModal({
                     )}
 
                     {hasWaitingCourierItem && !blockedByKurir && !notSelesai && (
-                        <div className="flex items-start gap-2.5 rounded-xl border border-teal-200 border-l-4 border-l-[#0F766E] bg-[#F0FDFA] px-4 py-3 text-xs text-[#115E59]">
+                        <div className="flex items-start gap-2.5 rounded-xl border border-blue-200 border-l-4 border-l-[#2563EB] bg-[#EFF6FF] px-4 py-3 text-xs text-[#1D4ED8]">
                             <Info
-                                className="mt-0.5 h-4 w-4 shrink-0 text-[#0F766E]"
+                                className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]"
                                 aria-hidden="true"
                             />
                             <div>
@@ -430,7 +430,7 @@ export default function SerahTerimaModal({
                             aria-describedby={
                                 errors.catatan ? catatanErrorId : undefined
                             }
-                            className="mt-1.5 block min-h-[4.25rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder-[#5B697A] transition focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 disabled:bg-[#EEF2F5] disabled:text-[#5B697A]"
+                            className="mt-1.5 block min-h-[4.25rem] w-full rounded-xl border border-[#7C8C9D] bg-white px-3.5 py-2 text-sm text-[#0F172A] placeholder-[#5B697A] transition focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 disabled:bg-[#EEF2F5] disabled:text-[#5B697A]"
                         />
                         {errors.catatan && (
                             <p

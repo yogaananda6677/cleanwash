@@ -98,7 +98,7 @@ export default function TransaksiIndex({
             headerActions={
                 <Link
                     href="/transaksi/create"
-                    className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#115E59]"
+                    className="inline-flex min-h-[2.5rem] items-center gap-1.5 rounded-xl bg-[#2563EB] px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-[#1D4ED8]"
                 >
                     <PlusCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
                     <span>
@@ -288,7 +288,7 @@ export default function TransaksiIndex({
                                                 >
                                                     <Link
                                                         href={`/transaksi/${item.nomor_nota}`}
-                                                        className="font-mono text-sm font-bold text-[#0F766E] hover:text-[#115E59] hover:underline"
+                                                        className="font-mono text-sm font-bold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
                                                     >
                                                         {item.nomor_nota}
                                                     </Link>
@@ -417,7 +417,7 @@ export default function TransaksiIndex({
                                                 </td>
 
                                                 <td className="whitespace-nowrap px-5 py-4 text-right font-mono text-xs tabular-nums">
-                                                    <p className="font-medium text-[#0F766E]">
+                                                    <p className="font-medium text-[#2563EB]">
                                                         Dibayar:{' '}
                                                         {formatRupiah(
                                                             item.total_dibayar,
@@ -501,7 +501,7 @@ export default function TransaksiIndex({
                                                         </Link>
                                                         <Link
                                                             href={`/transaksi/${item.nomor_nota}/nota`}
-                                                            className="inline-flex min-h-[2.25rem] items-center gap-1 rounded-xl border border-teal-200 bg-[#F0FDFA] px-3 py-1.5 text-xs font-semibold text-[#115E59] transition hover:bg-[#CCFBF1]"
+                                                            className="inline-flex min-h-[2.25rem] items-center gap-1 rounded-xl border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1.5 text-xs font-semibold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
                                                         >
                                                             <Printer
                                                                 className="h-3.5 w-3.5 shrink-0"
