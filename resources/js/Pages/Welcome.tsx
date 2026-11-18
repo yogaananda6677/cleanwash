@@ -807,53 +807,80 @@ export default function Welcome({
                                             </span>
                                             <div>
                                                 <p className="text-sm font-bold text-[#0F2933]">Layanan Bantuan Pelanggan</p>
-                                                <p className="text-xs text-slate-600">+62 812-3456-7890 &bull; info@cleanwash.test</p>
+                                                <p className="text-xs text-slate-600">+62 812-3456-7890 &bull; info@cleanwash.com</p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-                                    <h3 className="text-lg font-bold text-[#0F2933] mb-4">
-                                        Akses Portal Operasional Internal
-                                    </h3>
-                                    <p className="text-xs text-slate-600 leading-relaxed">
-                                        Sistem CleanWash dilengkapi konsol staf berbasis peran untuk Petugas Kasir, Pegawai Lantai Produksi, dan Petugas Pengantaran Rute.
-                                    </p>
-
-                                    <div className="mt-6 space-y-3">
-                                        <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5 text-xs flex items-center justify-between">
-                                            <div>
-                                                <span className="font-bold text-[#0F2933]">Petugas (Kasir)</span>
-                                                <p className="text-slate-500">Penerimaan, Cetak Nota, &amp; Kasir</p>
-                                            </div>
-                                            <span className="font-mono text-[0.6875rem] text-slate-600">petugas@cleanwash.test</span>
-                                        </div>
-
-                                        <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5 text-xs flex items-center justify-between">
-                                            <div>
-                                                <span className="font-bold text-[#0F2933]">Pegawai (Produksi)</span>
-                                                <p className="text-slate-500">Antrean Mesin, Timbang, &amp; Insiden</p>
-                                            </div>
-                                            <span className="font-mono text-[0.6875rem] text-slate-600">pegawai@cleanwash.test</span>
-                                        </div>
-
-                                        <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5 text-xs flex items-center justify-between">
-                                            <div>
-                                                <span className="font-bold text-[#0F2933]">Petugas Pengantaran (Kurir)</span>
-                                                <p className="text-slate-500">Rute Pengantaran &amp; Serah Terima</p>
-                                            </div>
-                                            <span className="font-mono text-[0.6875rem] text-slate-600">kurir@cleanwash.test</span>
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-[#0F766E]">
+                                            <Sparkles className="h-5 w-5" aria-hidden="true" />
+                                        </span>
+                                        <div>
+                                            <h3 className="text-lg font-bold text-[#0F2933]">
+                                                Standar Mutu &amp; Jaminan Layanan
+                                            </h3>
+                                            <p className="text-xs text-slate-500">
+                                                Komitmen kebersihan dan kepastian untuk setiap pelanggan
+                                            </p>
                                         </div>
                                     </div>
 
-                                    <Link
-                                        href="/login"
-                                        className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F766E] py-3 text-xs font-semibold text-white shadow-sm hover:bg-[#115E59] transition"
-                                    >
-                                        <span>Masuk ke Portal Operasional</span>
-                                        <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                                    </Link>
+                                    <div className="mt-6 space-y-3.5">
+                                        <div className="flex items-start gap-3.5 rounded-2xl border border-slate-100 bg-[#F8FAFC] p-4 transition hover:border-teal-200">
+                                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-800">
+                                                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                                            </span>
+                                            <div>
+                                                <p className="text-xs font-bold text-[#0F2933]">1 Mesin Cuci 1 Pelanggan</p>
+                                                <p className="mt-0.5 text-[0.6875rem] text-slate-600 leading-relaxed">
+                                                    Pakaian Anda tidak pernah dicampur dengan pakaian pelanggan lain untuk menjaga higienitas optimal dan mencegah pakaian tertukar.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-start gap-3.5 rounded-2xl border border-slate-100 bg-[#F8FAFC] p-4 transition hover:border-teal-200">
+                                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-100 text-[#0F766E]">
+                                                <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                                            </span>
+                                            <div>
+                                                <p className="text-xs font-bold text-[#0F2933]">Garansi Perlindungan Pakaian</p>
+                                                <p className="mt-0.5 text-[0.6875rem] text-slate-600 leading-relaxed">
+                                                    Setiap helai pakaian dicatat secara rinci di loket. Sistem CleanWash menjamin kompensasi resmi jika terjadi insiden kerusakan atau kehilangan.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-start gap-3.5 rounded-2xl border border-slate-100 bg-[#F8FAFC] p-4 transition hover:border-teal-200">
+                                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700">
+                                                <ReceiptText className="h-4 w-4" aria-hidden="true" />
+                                            </span>
+                                            <div>
+                                                <p className="text-xs font-bold text-[#0F2933]">Pelacakan &amp; Nota Digital Terbuka</p>
+                                                <p className="mt-0.5 text-[0.6875rem] text-slate-600 leading-relaxed">
+                                                    Pantau progres cucian dan cetak nota digital resmi kapan saja cukup dengan nomor nota tanpa perlu mendaftar akun.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-3">
+                                        <a
+                                            href="#lacak"
+                                            className="flex flex-1 w-full items-center justify-center gap-2 rounded-xl bg-[#0F766E] py-3 text-xs font-semibold text-white shadow-sm hover:bg-[#115E59] transition"
+                                        >
+                                            <Search className="h-4 w-4" aria-hidden="true" />
+                                            <span>Lacak Cucian Sekarang</span>
+                                        </a>
+                                        <a
+                                            href="#layanan"
+                                            className="flex flex-1 w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white py-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                                        >
+                                            <span>Lihat Tarif Layanan</span>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -886,6 +913,7 @@ export default function Welcome({
                                     <li><a href="#lacak" className="hover:text-white transition">Lacak Status Nota</a></li>
                                     <li><a href="#vouchers" className="hover:text-white transition">Voucher Promo</a></li>
                                     <li><a href="#tentang" className="hover:text-white transition">Tentang Kami</a></li>
+                                    <li className="pt-1"><Link href="/login" className="text-[#2DD4BF] hover:text-white transition font-medium">Portal Staf Operasional &rarr;</Link></li>
                                 </ul>
                             </div>
 

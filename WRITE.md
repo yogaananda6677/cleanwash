@@ -541,7 +541,38 @@
   - Semua kebutuhan user (default form kosong, cek nota pelanggan publik, mobile-friendly pegawai & kurir) tuntas terimplementasi dan terverifikasi penuh.
   - Zero regression: seluruh 115 test backend dan seluruh 4 E2E test browser live hijau 100%.
 - **Next Exact Action:**
+  - Commit dan push ke repository GitHub `origin/main` (Telah selesai di commit `dcc702f`).
+
+---
+
+### [#039] 2026-11-19 01:25 — Primary Agent — Removal of Demo Staff Accounts from Public Landing Page
+- **Status:** `DONE` (`ALL_TESTS_PASS`)
+- **Ringkasan Kegiatan:**
+  - Merespons instruksi user: *"hapus akun section. g bleh demo akun disini"*.
+  - Menghapus total kartu demo akun staf operasional internal (`petugas@cleanwash.test`, `pegawai@cleanwash.test`, `kurir@cleanwash.test`) dari landing page publik (`resources/js/Pages/Welcome.tsx`).
+  - Mengganti bagian kanan Section `#tentang` dengan kartu profesional berorientasi pelanggan: **"Standar Mutu & Jaminan Layanan"**:
+    - **1 Mesin Cuci 1 Pelanggan**: Komitmen higienitas tanpa pencampuran pakaian antar-pelanggan.
+    - **Garansi Perlindungan Pakaian**: Jaminan kompensasi resmi jika terjadi kerusakan atau kehilangan.
+    - **Pelacakan & Nota Digital Terbuka**: Akses pelacakan progres cucian dan cetak nota resmi digital langsung dengan nomor nota tanpa perlu mendaftar akun.
+    - Aksi cepat pelanggan: Tombol *"Lacak Cucian Sekarang"* dan *"Lihat Tarif Layanan"*.
+  - Memperbarui email bantuan di landing page menjadi domain profesional `info@cleanwash.com`.
+  - Menambahkan tautan elegan ke portal staf pada menu Navigasi footer (`Portal Staf Operasional →`), berdampingan dengan tombol utama *"Masuk Portal Staf"* di top header navbar.
+- **File Dibuat / Diubah:**
+  - `resources/js/Pages/Welcome.tsx` — Penghapusan kartu demo akun dan penggantian dengan kartu Standar Mutu Pelanggan
+  - `docs/qa/screenshots/29-landing-page-profile.png` — Bukti screenshot terbaru halaman web publik tanpa demo akun
+  - `WRITE.md` — Penambahan entri kegiatan `#039`
+- **Verifikasi / Bukti Uji:**
+  - `./vendor/bin/pint --test` -> `{"tool":"pint","result":"passed"}` (`exit code 0`)
+  - `npx tsc --noEmit` -> `0 errors` (`exit code 0`)
+  - `npm run build` -> `built in 3.35s` (`exit code 0`)
+  - `npx playwright test tests/e2e/landing-and-mobile.spec.ts` -> `4 passed (6.0s)` (`exit code 0`)
+  - `php artisan test` -> `115 passed (4221 assertions)` (`exit code 0`)
+  - `curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8000/` -> `200` (`exit code 0`)
+- **Keputusan / Blocker / Catatan Napkin:**
+  - Seluruh referensi demo akun pada UI publik telah bersih 100%. Tampilan landing page kini sepenuhnya berstandar komersial profesional.
+- **Next Exact Action:**
   - Commit dan push ke repository GitHub `origin/main`.
+
 
 
 
